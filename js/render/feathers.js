@@ -21,6 +21,27 @@
             return { x: 0, y: -196 };
         },
 
+        getHeadTopY: function() {
+            if (window.SignalState && window.SignalState.shapes && window.SignalState.shapes.length > 0) {
+                var shapes = window.SignalState.shapes;
+                var minY = null;
+                for (var i = 0; i < shapes.length; i++) {
+                    var s = shapes[i];
+                    var sx = s.x || 0, sw = s.width || (s.radius ? s.radius * 2 : 60);
+                    if (sx <= 20 && (sx + sw) >= -20) {
+                        var sy = s.y || 0;
+                        if (sy > -190) {
+                            if (minY === null || sy < minY) {
+                                minY = sy;
+                            }
+                        }
+                    }
+                }
+                if (minY !== null) return minY;
+            }
+            return -160;
+        },
+
         getOctagonVertices: function(cx, cy) {
             return [
                 { x: cx - 14.5, y: cy - 35.5 },
@@ -36,14 +57,16 @@
 
         renderTrunnionMount: function(hub) {
             var hx = hub.x;
-            var headTopY = -160;
+            var headTopY = this.getHeadTopY();
             var octBottomY = hub.y + 35.5;
+            var collarHeight = Math.max(1, headTopY - octBottomY);
+
             var svg = '<g class="feather-trunnion-group">';
-            svg += '<rect x="' + (hx - 16) + '" y="' + octBottomY + '" width="32" height="' + (headTopY - octBottomY) + '" class="feather-trunnion-collar" />';
-            svg += '<line x1="' + (hx - 18) + '" y1="' + headTopY + '" x2="' + (hx + 18) + '" y2="' + headTopY + '" class="feather-trunnion-flange" />';
-            svg += '<line x1="' + (hx - 16) + '" y1="' + octBottomY + '" x2="' + (hx + 16) + '" y2="' + octBottomY + '" class="feather-trunnion-flange" />';
-            svg += '<circle cx="' + (hx - 7) + '" cy="' + (octBottomY + 2.5) + '" r="1.3" class="feather-trunnion-bolt" />';
-            svg += '<circle cx="' + (hx + 7) + '" cy="' + (octBottomY + 2.5) + '" r="1.3" class="feather-trunnion-bolt" />';
+            svg += '<rect x="' + (hx - 16) + '" y="' + octBottomY.toFixed(1) + '" width="32" height="' + collarHeight.toFixed(1) + '" class="feather-trunnion-collar" />';
+            svg += '<line x1="' + (hx - 18) + '" y1="' + headTopY.toFixed(1) + '" x2="' + (hx + 18) + '" y2="' + headTopY.toFixed(1) + '" class="feather-trunnion-flange" />';
+            svg += '<line x1="' + (hx - 16) + '" y1="' + octBottomY.toFixed(1) + '" x2="' + (hx + 16) + '" y2="' + octBottomY.toFixed(1) + '" class="feather-trunnion-flange" />';
+            svg += '<circle cx="' + (hx - 7) + '" cy="' + (octBottomY + 2.5).toFixed(1) + '" r="1.3" class="feather-trunnion-bolt" />';
+            svg += '<circle cx="' + (hx + 7) + '" cy="' + (octBottomY + 2.5).toFixed(1) + '" r="1.3" class="feather-trunnion-bolt" />';
             svg += '</g>';
             return svg;
         },

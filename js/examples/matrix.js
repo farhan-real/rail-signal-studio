@@ -5,12 +5,12 @@
         name: 'Example: Feathers and Route Matrix',
         mast: { type: 'tubular', height: 420, x: 0, y: -30, platform: false, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -28, y: -150, width: 56, height: 140, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3547', strokeWidth: 2.5 }
+            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 145, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3547', strokeWidth: 2.5 }
         ],
         lamps: [
-            { id: 'RED', color: 'red', diameter: 34, x: 0, y: -120, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -80, hood: 'round', brightness: 1.0 },
-            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -40, hood: 'round', brightness: 1.0 }
+            { id: 'RED', color: 'red', diameter: 34, x: 0, y: -125, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -85, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 }
         ],
         feathers: [
             { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
@@ -77,4 +77,4 @@
     };
 
     window.ExampleMatrix = ExampleMatrix;
-})(window); 
+})(window);
