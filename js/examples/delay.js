@@ -1,8 +1,8 @@
 (function(window) {
     'use strict';
 
-    var ExampleJump = {
-        name: 'Example: Jumps and Variables',
+    var ExampleDelay = {
+        name: 'Example: Delay and Sequencing',
         mast: { type: 'tubular', height: 360, x: 0, y: -20, platform: true, ladder: true },
         shapes: [
             { type: 'rounded-rect', x: -26, y: -130, width: 52, height: 135, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 }
@@ -15,12 +15,10 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'EmergencySwitch', type: 'switch', label: 'E-Stop', defaultValue: 0, x: 20, y: 15 },
-            { id: 'SpeedKnob', type: 'knob', label: 'Speed Limit', states: ['20', '45', '80'], defaultValue: 1, x: 110, y: 15 }
+            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
+            { id: 'SeqLed', type: 'led', label: 'Timer Active', colorKey: 'yellow', x: 110, y: 15 }
         ],
         script: [
-            'int speed = 45;',
-            '',
             'aspect DANGER {',
             '    unset ALL;',
             '    set RED;',
@@ -37,30 +35,29 @@
             '}',
             '',
             'mainloop {',
-            '    if EmergencySwitch is 1 {',
-            '        jump TriggerStop;',
-            '    }',
-            '',
-            '    if SpeedKnob is 0, speed = 20;',
-            '    if SpeedKnob is 1, speed = 45;',
-            '    if SpeedKnob is 2, speed = 80;',
-            '',
-            '    if speed > 60 {',
-            '        aspect PROCEED;',
+            '    if MasterLever is 0 {',
+            '        aspect DANGER;',
+            '        unset SeqLed;',
             '        end;',
             '    }',
             '',
-            '    aspect CAUTION;',
-            '    if speed < 30 {',
-            '        blink YELLOW 350ms;',
+            '    if MasterLever is 1 {',
+            '        aspect CAUTION;',
+            '        unset SeqLed;',
+            '        end;',
             '    }',
-            '    end;',
             '',
-            '    label TriggerStop;',
-            '    aspect DANGER;',
+            '    if MasterLever is 2 {',
+            '        aspect CAUTION;',
+            '        set SeqLed;',
+            '        delay 2s;',
+            '        aspect PROCEED;',
+            '        unset SeqLed;',
+            '        end;',
+            '    }',
             '}'
         ].join('\n')
     };
 
-    window.ExampleJump = ExampleJump;
+    window.ExampleDelay = ExampleDelay;
 })(window);

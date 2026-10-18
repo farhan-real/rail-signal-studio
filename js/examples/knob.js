@@ -1,8 +1,8 @@
 (function(window) {
     'use strict';
 
-    var ExampleIf = {
-        name: 'Example: If and Conditions',
+    var ExampleKnob = {
+        name: 'Example: Knobs with Enum',
         mast: { type: 'tubular', height: 360, x: 0, y: -20, platform: true, ladder: true },
         shapes: [
             { type: 'rounded-rect', x: -26, y: -130, width: 52, height: 135, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 }
@@ -15,11 +15,12 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
-            { id: 'TrackSwitch', type: 'switch', label: 'Track Clear', defaultValue: 1, x: 110, y: 15 },
-            { id: 'GateSwitch', type: 'switch', label: 'Gate Closed', defaultValue: 1, x: 195, y: 15 }
+            { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 1, x: 20, y: 15 },
+            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'BRANCH', 'SIDING'], defaultValue: 0, x: 110, y: 15 }
         ],
         script: [
+            'enum Route { MAIN, BRANCH, SIDING };',
+            '',
             'aspect DANGER {',
             '    unset ALL;',
             '    set RED;',
@@ -36,23 +37,29 @@
             '}',
             '',
             'mainloop {',
-            '    if MasterLever is 0 OR NOT GateSwitch is 1 {',
+            '    if SignalLever is 0 {',
             '        aspect DANGER;',
             '        end;',
             '    }',
             '',
-            '    if MasterLever is 1 OR TrackSwitch is 0 {',
+            '    if RouteKnob is MAIN {',
+            '        aspect PROCEED;',
+            '        end;',
+            '    }',
+            '',
+            '    if RouteKnob is BRANCH {',
             '        aspect CAUTION;',
             '        end;',
             '    }',
             '',
-            '    if MasterLever is 2 AND (TrackSwitch is 1 AND GateSwitch is 1) {',
-            '        aspect PROCEED;',
+            '    if RouteKnob is SIDING {',
+            '        aspect CAUTION;',
+            '        blink YELLOW 450ms;',
             '        end;',
             '    }',
             '}'
         ].join('\n')
     };
 
-    window.ExampleIf = ExampleIf;
+    window.ExampleKnob = ExampleKnob;
 })(window);
