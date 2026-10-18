@@ -1,0 +1,74 @@
+.viewport-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: var(--bg-night);
+    overflow: hidden;
+}
+
+.viewport-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(18, 22, 32, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 6px;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+}
+
+.separator { width: 1px; height: 18px; background: var(--border-color); margin: 0 4px; }
+
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+}
+
+.canvas-container.grabbing { cursor: grabbing; }
+
+.signal-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#sceneRoot {
+    will-change: transform;
+    transform-origin: 0 0;
+}
+
+.target-plate {
+    fill: #0c0d11;
+    stroke: #2a2e3a;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+}
+
+.visor-hood { fill: #08090b; stroke: #1b1d24; stroke-width: 1.5; }
+.lamp-glass-off { fill: #16181e; stroke: #0a0b0e; stroke-width: 2; transition: opacity 0.04s ease-out; }
+.fresnel-ring { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; transition: opacity 0.04s ease-out; }
+
+.signal-lamp-unit { will-change: opacity; }
+.lamp-lit-layer { opacity: 0; pointer-events: none; transition: opacity 0.04s ease-out; }
+.signal-lamp-unit.lit .lamp-lit-layer { opacity: 1; }
+.signal-lamp-unit.lit .lamp-glass-off { opacity: 0.18; }
+.signal-lamp-unit.lit .fresnel-ring { opacity: 0.08; }
+
+.feather-arm { fill: #0d0f14; stroke: #252a38; stroke-width: 18; }
+.feather-unit { will-change: opacity; }
+.feather-lit-layer { opacity: 0; pointer-events: none; transition: opacity 0.04s ease-out; }
+.feather-unit.lit .feather-lit-layer { opacity: 1; }
+.feather-unit.lit .feather-off-layer { opacity: 0.2; }
+
+.theatre-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
+.theatre-pixel-off { fill: #151820; }
+.theatre-pixel-on { fill: #ffffff; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95)); }

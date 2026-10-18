@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rail Signal Studio</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/canvas.css">
+    <link rel="stylesheet" href="css/panels.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-title">Rail Signal Studio</span>
+                <span id="currentAspectBadge" class="aspect-badge">OFFLINE</span>
+            </div>
+            <div class="header-actions">
+                <select id="presetSelector" class="header-select" title="Load Preset">
+                    <option value="">Presets...</option>
+                    <optgroup label="Signals">
+                        <option value="indian">Indian MACLS + Feathers + Shunt</option>
+                        <option value="french">French SNCF Combined Panel</option>
+                        <option value="british">British 4-Aspect + Theatre Matrix</option>
+                        <option value="dwarf">Ground Dwarf Shunt</option>
+                    </optgroup>
+                    <optgroup label="Examples">
+                        <option value="examplesections">Example: Visual Code Sections</option>
+                        <option value="examplegroup">Example: Groups and Enum Variables</option>
+                        <option value="exampleif">Example: If and Conditions</option>
+                        <option value="exampleknob">Example: Knobs with Enum</option>
+                        <option value="examplebutton">Example: Buttons and Panel LEDs</option>
+                        <option value="examplematrix">Example: Feathers and Route Matrix</option>
+                        <option value="examplejump">Example: Jumps and Variables</option>
+                    </optgroup>
+                </select>
+                <button id="btnOpenLibrary" class="header-btn" title="Saved Signals">Library</button>
+                <button id="btnQuickSave" class="header-btn" title="Save Signal">Save</button>
+                <button id="btnExport" class="header-btn" title="Export JSON">Export</button>
+                <button id="btnTriggerImport" class="header-btn" title="Import JSON">Import</button>
+                <input type="file" id="fileImporter" accept=".json" style="display:none">
+                <button id="btnToggleInspector" class="header-btn" title="Component Inspector">
+                    <img src="icons/gear.svg" alt="Inspector" class="icon-svg">
+                </button>
+                <button id="btnToggleEditor" class="header-btn" title="Script Editor">
+                    <img src="icons/code.svg" alt="Editor" class="icon-svg">
+                </button>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section id="viewportArea" class="viewport-section">
+                <div class="viewport-toolbar">
+                    <button id="btnZoomIn" class="tool-btn" title="Zoom In">+</button>
+                    <button id="btnZoomOut" class="tool-btn" title="Zoom Out">-</button>
+                    <button id="btnZoomReset" class="tool-btn" title="Reset View">100%</button>
+                    <span class="separator"></span>
+                    <button id="btnRunScript" class="tool-btn" title="Run Timer">
+                        <img src="icons/play.svg" alt="Run" class="icon-svg">
+                    </button>
+                    <button id="btnPauseScript" class="tool-btn" title="Pause Timer">
+                        <img src="icons/pause.svg" alt="Pause" class="icon-svg">
+                    </button>
+                    <button id="btnStepScript" class="tool-btn" title="Step Next Aspect">
+                        <img src="icons/step.svg" alt="Step" class="icon-svg">
+                    </button>
+                </div>
+                <div id="canvasContainer" class="canvas-container">
+                    <svg id="signalSvg" class="signal-svg" xmlns="http://www.w3.org/2000/svg">
+                        <defs id="svgDefs"></defs>
+                        <g id="sceneRoot"></g>
+                    </svg>
+                </div>
+            </section>
+
+            <aside id="inspectorDrawer" class="drawer inspector-drawer">
+                <div class="drawer-header">
+                    <h3>Visual Builder</h3>
+                    <button id="btnCloseInspector" class="drawer-close">&times;</button>
+                </div>
+                <div id="inspectorContent" class="drawer-content"></div>
+            </aside>
+
+            <aside id="editorDrawer" class="drawer editor-drawer">
+                <div class="drawer-header">
+                    <h3>Aspect Logic</h3>
+                    <div class="editor-header-actions">
+                        <button id="btnAddSection" class="tool-btn">+ Section</button>
+                        <button id="btnCompileScript" class="btn-primary">Apply</button>
+                        <button id="btnCloseEditor" class="drawer-close">&times;</button>
+                    </div>
+                </div>
+                <div id="sectionsContainer" class="sections-scrollable"></div>
+                <div id="editorStatus" class="editor-status">Ready</div>
+            </aside>
+        </main>
+
+        <footer id="controlConsole" class="console-section">
+            <div class="console-header">
+                <div class="console-title">Interlocking Control Desk</div>
+                <div class="console-actions">
+                    <button id="btnAddLever" class="console-btn">+ Lever</button>
+                    <button id="btnAddKnob" class="console-btn">+ Rotary</button>
+                    <button id="btnAddButton" class="console-btn">+ Button</button>
+                    <button id="btnAddSwitch" class="console-btn">+ Switch</button>
+                    <button id="btnAddLed" class="console-btn">+ LED</button>
+                    <button id="btnAddText" class="console-btn">+ Text</button>
+                </div>
+            </div>
+            <div id="consoleDesk" class="console-desk"></div>
+        </footer>
+    </div>
+
+    <div id="libraryModal" class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Signal Library</h3>
+                <button id="btnCloseLibrary" class="drawer-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-save-as">
+                    <input type="text" id="signalNameInput" class="form-input" placeholder="Signal Name" />
+                    <button id="btnSaveAs" class="btn-primary">Save Current</button>
+                </div>
+                <div class="modal-section-title">Saved Signals</div>
+                <div id="savedSignalsList" class="saved-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/core/events.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/render/shapes.js"></script>
+    <script src="js/render/lamps.js"></script>
+    <script src="js/render/feathers.js"></script>
+    <script src="js/render/matrix.js"></script>
+    <script src="js/render/mast.js"></script>
+    <script src="js/parser/lexer.js"></script>
+    <script src="js/parser/parser.js"></script>
+    <script src="js/parser/runtime.js"></script>
+    <script src="js/controls/lever.js"></script>
+    <script src="js/controls/knob.js"></script>
+    <script src="js/controls/button.js"></script>
+    <script src="js/controls/led.js"></script>
+    <script src="js/ui/viewport.js"></script>
+    <script src="js/ui/inspector.js"></script>
+    <script src="js/ui/consoleview.js"></script>
+    <script src="js/ui/editorview.js"></script>
+    <script src="js/presets/indian.js"></script>
+    <script src="js/presets/french.js"></script>
+    <script src="js/presets/british.js"></script>
+    <script src="js/presets/dwarf.js"></script>
+    <script src="js/examples/examplesections.js"></script>
+    <script src="js/examples/examplegroup.js"></script>
+    <script src="js/examples/exampleif.js"></script>
+    <script src="js/examples/exampleknob.js"></script>
+    <script src="js/examples/examplebutton.js"></script>
+    <script src="js/examples/examplematrix.js"></script>
+    <script src="js/examples/examplejump.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
