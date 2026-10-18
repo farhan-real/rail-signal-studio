@@ -20,12 +20,6 @@
             document.getElementById('btnCompileScript').addEventListener('click', this.compile.bind(this));
             document.getElementById('btnAddSection').addEventListener('click', this.onAddSectionClick.bind(this));
 
-            document.getElementById('btnRunScript').addEventListener('click', function() { SignalRuntime.resume(); });
-            document.getElementById('btnPauseScript').addEventListener('click', function() { SignalRuntime.pause(); });
-            var btnPrev = document.getElementById('btnPrevScript');
-            if (btnPrev) btnPrev.addEventListener('click', function() { SignalRuntime.stepPrev(); });
-            document.getElementById('btnStepScript').addEventListener('click', function() { SignalRuntime.stepNext(); });
-
             SignalEvents.on('state:loaded', this.loadFromState.bind(this));
             SignalEvents.on('runtime:line', this.highlightLine.bind(this));
             SignalEvents.on('aspect:changed', this.updateBadge.bind(this));
@@ -220,12 +214,8 @@
         },
 
         updateRunStatus: function(status) {
-            var btnRun = document.getElementById('btnRunScript');
-            var btnPause = document.getElementById('btnPauseScript');
             var badge = document.getElementById('currentAspectBadge') || this.badge;
             if (status.running) {
-                if (btnRun) btnRun.style.borderColor = '#00ee44';
-                if (btnPause) btnPause.style.borderColor = '';
                 var cur = SignalState.currentAspect;
                 if (cur && cur !== 'UNSET') {
                     this.updateBadge(cur);
@@ -233,8 +223,6 @@
                     this.updateBadge(SignalRuntime.ast.aspectList[0]);
                 }
             } else {
-                if (btnRun) btnRun.style.borderColor = '';
-                if (btnPause) btnPause.style.borderColor = '#f59e0b';
                 if (badge) {
                     badge.textContent = 'PAUSED';
                     badge.classList.remove('active');

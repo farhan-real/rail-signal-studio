@@ -79,13 +79,8 @@
             '        unset AllFeathers;',
             '        set FEATHER_R1;',
             '        set matrix "2";',
-            '        if CautionLamps set, blink FEATHER_R1 450ms;',
             '        end;',
             '    }',
-            '}',
-            '',
-            'timer 6s {',
-            '    jump DANGER;',
             '}'
         ].join('\n')
     };
