@@ -175,6 +175,10 @@
             if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
+                if (!isLit && SignalState.matrix && SignalState.matrix.text) {
+                    SignalState.matrix.text = '';
+                    SignalEvents.emit('matrix:updated', '');
+                }
                 return;
             }
             if (tUpper === 'FEATHERS') {
@@ -358,6 +362,19 @@
                     }
                     idx++;
                 }
+            }
+
+            var hasRedLit = false;
+            for (var rIdx = 0; rIdx < SignalState.lamps.length; rIdx++) {
+                var rLamp = SignalState.lamps[rIdx];
+                if (rLamp.color && rLamp.color.toLowerCase() === 'red' && SignalState.getLamp(rLamp.id)) {
+                    hasRedLit = true;
+                    break;
+                }
+            }
+            if (hasRedLit && SignalState.matrix && SignalState.matrix.text) {
+                SignalState.matrix.text = '';
+                SignalEvents.emit('matrix:updated', '');
             }
 
             this.processLamps(now);

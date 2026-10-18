@@ -45,7 +45,7 @@
                 }
             }
 
-            var txt = (text !== undefined ? text : (matrixConf.text || 'M')).trim().toUpperCase();
+            var txt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
             var isMultiChar = txt.length > 1;
             var boxWidth = isMultiChar ? 62 : 44;
             var boxHeight = 52;

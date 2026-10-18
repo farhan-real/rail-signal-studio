@@ -109,6 +109,7 @@
                             if (window.PresetBritish) {
                                 data.shapes = window.PresetBritish.shapes;
                                 data.lamps = window.PresetBritish.lamps;
+                                data.matrix = window.PresetBritish.matrix;
                                 data.controls = window.PresetBritish.controls;
                                 data.script = window.PresetBritish.script;
                             }
@@ -136,6 +137,15 @@
                                 data.matrix = window.ExampleSections.matrix;
                                 data.controls = window.ExampleSections.controls;
                                 data.script = window.ExampleSections.script;
+                            }
+                        } else if (data.name && data.name.indexOf('Matrix') !== -1) {
+                            if (window.ExampleMatrix) {
+                                data.shapes = window.ExampleMatrix.shapes;
+                                data.lamps = window.ExampleMatrix.lamps;
+                                data.feathers = window.ExampleMatrix.feathers;
+                                data.matrix = window.ExampleMatrix.matrix;
+                                data.controls = window.ExampleMatrix.controls;
+                                data.script = window.ExampleMatrix.script;
                             }
                         }
                         return data;
