@@ -58,6 +58,7 @@
             '',
             '    label TriggerStop;',
             '    aspect DANGER;',
+            '    end;',
             '}'
         ].join('\n')
     };

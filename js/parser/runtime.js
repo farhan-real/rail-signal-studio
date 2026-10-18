@@ -267,15 +267,13 @@
                 if (act.op === 'if') {
                     if (this.evalExpr(act.expr)) {
                         var nestedOutcome = this.runActionList(act.actions, ruleKey + '_sub' + a, now);
-                        if (nestedOutcome === 'end') return 'end';
+                        if (nestedOutcome === 'end' || (nestedOutcome && nestedOutcome.op === 'jump')) return nestedOutcome;
                     }
                     continue;
                 }
+                if (act.op === 'jump' || act.op === 'goto') return { op: 'jump', target: act.target, line: act.line };
                 if (act.op === 'delay') {
-                    this.delayedQueues[ruleKey] = {
-                        nextTime: now + (act.duration || 1000),
-                        remaining: actions.slice(a + 1)
-                    };
+                    this.delayedQueues[ruleKey] = { nextTime: now + (act.duration || 1000), remaining: actions.slice(a + 1) };
                     return 'delay';
                 }
                 if (act.op === 'end') return 'end';
@@ -329,7 +327,12 @@
             for (var m = 0; m < this.ast.mainloops.length; m++) {
                 var stmts = this.ast.mainloops[m].statements;
                 var labelMap = {};
-                for (var s = 0; s < stmts.length; s++) { if (stmts[s].op === 'label') labelMap[stmts[s].name] = s; }
+                for (var s = 0; s < stmts.length; s++) {
+                    if (stmts[s].op === 'label' && stmts[s].name) {
+                        labelMap[stmts[s].name] = s;
+                        labelMap[String(stmts[s].name).toUpperCase()] = s;
+                    }
+                }
 
                 var idx = 0, safeGuard = 0;
                 while (idx < stmts.length && safeGuard < 120) {
@@ -339,24 +342,25 @@
 
                     if (stmt.op === 'label') { idx++; continue; }
                     if (stmt.op === 'end') { this.highlightLine(stmt.line); break; }
-                    if (stmt.op === 'jump' && labelMap[stmt.target] !== undefined) {
-                        this.highlightLine(stmt.line); idx = labelMap[stmt.target]; continue;
+                    if (stmt.op === 'jump' || stmt.op === 'goto') {
+                        var jIdx = (labelMap[stmt.target] !== undefined) ? labelMap[stmt.target] : labelMap[String(stmt.target).toUpperCase()];
+                        if (jIdx !== undefined) { this.highlightLine(stmt.line); idx = jIdx; continue; }
                     }
                     if (stmt.op === 'if') {
                         if (this.evalExpr(stmt.expr)) {
                             var outcome;
                             if (this.delayedQueues[ruleKey]) {
                                 var queue = this.delayedQueues[ruleKey];
-                                if (!queue.completed && now >= queue.nextTime) {
-                                    outcome = this.runActionList(queue.remaining, ruleKey, now);
-                                }
+                                if (!queue.completed && now >= queue.nextTime) outcome = this.runActionList(queue.remaining, ruleKey, now);
                             } else {
                                 outcome = this.runActionList(stmt.actions, ruleKey, now);
                             }
                             if (outcome === 'end') break;
-                        } else {
-                            if (this.delayedQueues[ruleKey]) delete this.delayedQueues[ruleKey];
-                        }
+                            if (outcome && outcome.op === 'jump') {
+                                var tIdx = (labelMap[outcome.target] !== undefined) ? labelMap[outcome.target] : labelMap[String(outcome.target).toUpperCase()];
+                                if (tIdx !== undefined) { this.highlightLine(outcome.line || stmt.line); idx = tIdx; continue; }
+                            }
+                        } else if (this.delayedQueues[ruleKey]) delete this.delayedQueues[ruleKey];
                     } else {
                         this.executeAction(stmt);
                     }

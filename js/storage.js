@@ -147,6 +147,13 @@
                                 data.controls = window.ExampleMatrix.controls;
                                 data.script = window.ExampleMatrix.script;
                             }
+                        } else if (data.name && data.name.indexOf('Jump') !== -1) {
+                            if (window.ExampleJump) {
+                                data.shapes = window.ExampleJump.shapes;
+                                data.lamps = window.ExampleJump.lamps;
+                                data.controls = window.ExampleJump.controls;
+                                data.script = window.ExampleJump.script;
+                            }
                         }
                         return data;
                     }
