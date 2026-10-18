@@ -119,6 +119,24 @@
                                 data.controls = window.PresetFrench.controls;
                                 data.script = window.PresetFrench.script;
                             }
+                        } else if (data.name && data.name.indexOf('Group') !== -1) {
+                            if (window.ExampleGroup) {
+                                data.shapes = window.ExampleGroup.shapes;
+                                data.lamps = window.ExampleGroup.lamps;
+                                data.feathers = window.ExampleGroup.feathers;
+                                data.matrix = window.ExampleGroup.matrix;
+                                data.controls = window.ExampleGroup.controls;
+                                data.script = window.ExampleGroup.script;
+                            }
+                        } else if (data.name && data.name.indexOf('Section') !== -1) {
+                            if (window.ExampleSections) {
+                                data.shapes = window.ExampleSections.shapes;
+                                data.lamps = window.ExampleSections.lamps;
+                                data.feathers = window.ExampleSections.feathers;
+                                data.matrix = window.ExampleSections.matrix;
+                                data.controls = window.ExampleSections.controls;
+                                data.script = window.ExampleSections.script;
+                            }
                         }
                         return data;
                     }
