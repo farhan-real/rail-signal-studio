@@ -127,17 +127,22 @@
             var out = '';
             if (SignalState.mast) out += MastRenderer.render(SignalState.mast);
             for (var i = 0; i < SignalState.shapes.length; i++) out += ShapeRenderer.render(SignalState.shapes[i]);
-            for (var f = 0; f < SignalState.feathers.length; f++) {
-                var fth = SignalState.feathers[f];
-                out += FeatherRenderer.render(fth, SignalState.getLamp(fth.id));
+
+            if (SignalState.feathers && SignalState.feathers.length > 0) {
+                out += FeatherRenderer.renderAll(SignalState.feathers, function(id) {
+                    return SignalState.getLamp(id);
+                });
             }
+
             for (var j = 0; j < SignalState.lamps.length; j++) {
                 var l = SignalState.lamps[j];
                 out += LampRenderer.render(l, SignalState.getLamp(l.id));
             }
+
             if (SignalState.matrix && SignalState.matrix.enabled) {
                 out += MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
             }
+
             this.sceneRoot.innerHTML = out;
             this.applyTransform();
         },
@@ -149,6 +154,9 @@
                 var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
                 if (litLayer) litLayer.style.display = payload.lit ? 'inline' : 'none';
             }
+            if (window.FeatherRenderer && window.FeatherRenderer.updateCommonLamp) {
+                window.FeatherRenderer.updateCommonLamp(this.sceneRoot);
+            }
         },
 
         updateBlinkFast: function(payload) {
@@ -157,6 +165,9 @@
                 el.classList.toggle('lit', !!payload.visible);
                 var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
                 if (litLayer) litLayer.style.display = payload.visible ? 'inline' : 'none';
+            }
+            if (window.FeatherRenderer && window.FeatherRenderer.updateCommonLamp) {
+                window.FeatherRenderer.updateCommonLamp(this.sceneRoot);
             }
         },
 

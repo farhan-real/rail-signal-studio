@@ -32,10 +32,14 @@
 
             if (mast.platform) {
                 var py = (mast.y || 0) + 60;
-                svg += '<rect x="' + (cx - 55) + '" y="' + py + '" width="110" height="8" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" />';
-                svg += '<line x1="' + (cx - 55) + '" y1="' + (py - 22) + '" x2="' + (cx + 55) + '" y2="' + (py - 22) + '" stroke="#2a3040" stroke-width="2.5" />';
-                svg += '<line x1="' + (cx - 55) + '" y1="' + (py - 22) + '" x2="' + (cx - 55) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
-                svg += '<line x1="' + (cx + 55) + '" y1="' + (py - 22) + '" x2="' + (cx + 55) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
+                if (type === 'tubular') {
+                    svg += '<rect x="' + (cx - 24) + '" y="' + py + '" width="48" height="6" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" />';
+                } else {
+                    svg += '<rect x="' + (cx - 55) + '" y="' + py + '" width="110" height="8" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" />';
+                    svg += '<line x1="' + (cx - 55) + '" y1="' + (py - 22) + '" x2="' + (cx + 55) + '" y2="' + (py - 22) + '" stroke="#2a3040" stroke-width="2.5" />';
+                    svg += '<line x1="' + (cx - 55) + '" y1="' + (py - 22) + '" x2="' + (cx - 55) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
+                    svg += '<line x1="' + (cx + 55) + '" y1="' + (py - 22) + '" x2="' + (cx + 55) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
+                }
             }
 
             if (mast.ladder) {

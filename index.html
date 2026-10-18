@@ -79,6 +79,13 @@
                                     <feMergeNode in="SourceGraphic"></feMergeNode>
                                 </feMerge>
                             </filter>
+                            <filter id="featherGlow" x="-30%" y="-30%" width="160%" height="160%">
+                                <feGaussianBlur stdDeviation="2.2" result="blur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="blur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
                         </defs>
                         <g id="sceneRoot"></g>
                     </svg>

@@ -3,25 +3,27 @@
 
     var PresetIndian = {
         name: 'Indian Railways 4-Aspect MACLS',
-        mast: { type: 'tubular', height: 420, x: 0, y: -40, platform: true, ladder: true },
+        mast: { type: 'tubular', height: 440, x: 0, y: -40, platform: false, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 180, corners: [28, 28, 28, 28], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 },
-            { type: 'rounded-rect', x: -20, y: 55, width: 40, height: 40, corners: [6, 6, 6, 6], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2 }
+            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 180, corners: [28, 28, 4, 4], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 },
+            { type: 'rounded-rect', x: -16, y: 20, width: 32, height: 10, corners: [2, 2, 2, 2], fill: '#121622', stroke: '#262d3e', strokeWidth: 1.8 },
+            { type: 'rounded-rect', x: -18, y: 52, width: 36, height: 28, corners: [2, 2, 2, 2], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 1.8, text: 'PWS\nS-8', fontSize: 9, textColor: '#ffffff' },
+            { type: 'rounded-rect', x: -22, y: 96, width: 44, height: 42, corners: [6, 6, 6, 6], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2 }
         ],
         lamps: [
             { id: 'RED', color: 'red', diameter: 34, x: 0, y: -125, hood: 'round', brightness: 1.0 },
             { id: 'YELLOW1', color: 'yellow', diameter: 34, x: 0, y: -85, hood: 'round', brightness: 1.0 },
             { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 },
             { id: 'YELLOW2', color: 'yellow', diameter: 34, x: 0, y: -5, hood: 'round', brightness: 1.0 },
-            { id: 'SHUNT_WHITE1', color: 'white', diameter: 14, x: -10, y: 75, hood: 'none', brightness: 0.9 },
-            { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 10, y: 75, hood: 'none', brightness: 0.9 }
+            { id: 'SHUNT_WHITE1', color: 'white', diameter: 14, x: -11, y: 117, hood: 'round', brightness: 0.95 },
+            { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 11, y: 117, hood: 'round', brightness: 0.95 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', x: -22, y: -160, lamps: 5 },
-            { id: 'FEATHER_L2', position: 'left2', x: -28, y: -150, lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', x: 22, y: -160, lamps: 5 }
+            { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
+            { id: 'FEATHER_L2', position: 'left2', lamps: 5 },
+            { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -215, text: 'M' },
+        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: -202, text: '' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], defaultValue: 0, x: 110, y: 15 },
@@ -64,19 +66,15 @@
             '    }',
             '    if RouteSelector is Main {',
             '        unset FEATHERS;',
-            '        set matrix "M";',
             '    }',
             '    if RouteSelector is "Left 1" {',
             '        set FEATHER_L1;',
-            '        set matrix "1";',
             '    }',
             '    if RouteSelector is "Left 2" {',
             '        set FEATHER_L2;',
-            '        set matrix "2";',
             '    }',
             '    if RouteSelector is Right {',
             '        set FEATHER_R1;',
-            '        set matrix "3";',
             '    }',
             '    if ShuntSwitch is 1 {',
             '        set SHUNT_WHITE1;',

@@ -88,6 +88,15 @@
                 if (raw) {
                     var data = JSON.parse(raw);
                     if (data && data.script && typeof data.script === 'string' && data.script.indexOf('aspect') !== -1) {
+                        if (data.name && data.name.indexOf('Indian') !== -1) {
+                            if (window.PresetIndian) {
+                                data.shapes = window.PresetIndian.shapes;
+                                data.lamps = window.PresetIndian.lamps;
+                                data.feathers = window.PresetIndian.feathers;
+                                data.matrix = window.PresetIndian.matrix;
+                                data.controls = window.PresetIndian.controls;
+                            }
+                        }
                         return data;
                     }
                 }

@@ -2,55 +2,233 @@
     'use strict';
 
     var FeatherRenderer = {
-        angles: {
-            left1: -135,
-            left2: -160,
-            left3: -180,
-            right1: -45,
-            right2: -20,
-            right3: 0
+        positions: {
+            left1: { angle: -135, facetIndex: 7 },
+            left2: { angle: -180, facetIndex: 6 },
+            left3: { angle: 135, facetIndex: 5 },
+            right1: { angle: -45, facetIndex: 1 },
+            right2: { angle: 0, facetIndex: 2 },
+            right3: { angle: 45, facetIndex: 3 },
+            pos1: { angle: -135, facetIndex: 7 },
+            pos2: { angle: -180, facetIndex: 6 },
+            pos3: { angle: 135, facetIndex: 5 },
+            pos4: { angle: -45, facetIndex: 1 },
+            pos5: { angle: 0, facetIndex: 2 },
+            pos6: { angle: 45, facetIndex: 3 }
+        },
+
+        getHubCenter: function() {
+            return { x: 0, y: -196 };
+        },
+
+        getOctagonVertices: function(cx, cy) {
+            return [
+                { x: cx - 14.5, y: cy - 35.5 },
+                { x: cx + 14.5, y: cy - 35.5 },
+                { x: cx + 35.5, y: cy - 14.5 },
+                { x: cx + 35.5, y: cy + 14.5 },
+                { x: cx + 14.5, y: cy + 35.5 },
+                { x: cx - 14.5, y: cy + 35.5 },
+                { x: cx - 35.5, y: cy + 14.5 },
+                { x: cx - 35.5, y: cy - 14.5 }
+            ];
+        },
+
+        renderTrunnionMount: function(hub) {
+            var hx = hub.x;
+            var headTopY = -160;
+            var octBottomY = hub.y + 35.5;
+            var svg = '<g class="feather-trunnion-group">';
+            svg += '<rect x="' + (hx - 16) + '" y="' + octBottomY + '" width="32" height="' + (headTopY - octBottomY) + '" class="feather-trunnion-collar" />';
+            svg += '<line x1="' + (hx - 18) + '" y1="' + headTopY + '" x2="' + (hx + 18) + '" y2="' + headTopY + '" class="feather-trunnion-flange" />';
+            svg += '<line x1="' + (hx - 16) + '" y1="' + octBottomY + '" x2="' + (hx + 16) + '" y2="' + octBottomY + '" class="feather-trunnion-flange" />';
+            svg += '<circle cx="' + (hx - 7) + '" cy="' + (octBottomY + 2.5) + '" r="1.3" class="feather-trunnion-bolt" />';
+            svg += '<circle cx="' + (hx + 7) + '" cy="' + (octBottomY + 2.5) + '" r="1.3" class="feather-trunnion-bolt" />';
+            svg += '</g>';
+            return svg;
+        },
+
+        buildUnifiedHousing: function(hub, feathers) {
+            var verts = this.getOctagonVertices(hub.x, hub.y);
+            var attached = {};
+
+            for (var i = 0; i < feathers.length; i++) {
+                var pKey = (feathers[i].position || 'left1').toLowerCase();
+                var conf = this.positions[pKey];
+                if (conf) attached[conf.facetIndex] = conf;
+            }
+
+            var path = 'M ' + verts[0].x.toFixed(1) + ' ' + verts[0].y.toFixed(1);
+            var hw = 14.0;
+            var hwBottom = 10.5;
+            var tDist = 9.0;
+            var straightLen = 98.0;
+
+            for (var f = 0; f < 8; f++) {
+                var vStart = verts[f];
+                var vEnd = verts[(f + 1) % 8];
+                var arm = attached[f];
+
+                if (!arm) {
+                    path += ' L ' + vEnd.x.toFixed(1) + ' ' + vEnd.y.toFixed(1);
+                } else {
+                    var rad = arm.angle * Math.PI / 180;
+                    var ux = Math.cos(rad), uy = Math.sin(rad);
+                    var tx = -uy, ty = ux;
+
+                    var mx = (vStart.x + vEnd.x) / 2;
+                    var my = (vStart.y + vEnd.y) / 2;
+
+                    var bLeftX = (mx - tx * hwBottom).toFixed(1), bLeftY = (my - ty * hwBottom).toFixed(1);
+                    var bRightX = (mx + tx * hwBottom).toFixed(1), bRightY = (my + ty * hwBottom).toFixed(1);
+
+                    var transLeftX = (mx + ux * tDist - tx * hw).toFixed(1);
+                    var transLeftY = (my + uy * tDist - ty * hw).toFixed(1);
+                    var transRightX = (mx + ux * tDist + tx * hw).toFixed(1);
+                    var transRightY = (my + uy * tDist + ty * hw).toFixed(1);
+
+                    var tCenterX = hub.x + ux * straightLen;
+                    var tCenterY = hub.y + uy * straightLen;
+
+                    var tLeftX = (tCenterX - tx * hw).toFixed(1), tLeftY = (tCenterY - ty * hw).toFixed(1);
+                    var tRightX = (tCenterX + tx * hw).toFixed(1), tRightY = (tCenterY + ty * hw).toFixed(1);
+
+                    path += ' L ' + bLeftX + ' ' + bLeftY;
+                    path += ' L ' + transLeftX + ' ' + transLeftY;
+                    path += ' L ' + tLeftX + ' ' + tLeftY;
+                    path += ' A ' + hw + ' ' + hw + ' 0 0 1 ' + tRightX + ' ' + tRightY;
+                    path += ' L ' + transRightX + ' ' + transRightY;
+                    path += ' L ' + bRightX + ' ' + bRightY;
+                    path += ' L ' + vEnd.x.toFixed(1) + ' ' + vEnd.y.toFixed(1);
+                }
+            }
+            path += ' Z';
+            return '<path d="' + path + '" class="feather-unified-housing" />';
+        },
+
+        renderVisor: function(lx, ly, vr) {
+            var vx1 = (parseFloat(lx) - vr).toFixed(1), vy1 = (parseFloat(ly) + 0.4).toFixed(1);
+            var vx2 = (parseFloat(lx) + vr).toFixed(1), vy2 = (parseFloat(ly) + 0.4).toFixed(1);
+            var vPath = 'M ' + vx1 + ' ' + vy1 + ' A ' + vr + ' ' + (vr * 0.9).toFixed(1) + ' 0 0 1 ' + vx2 + ' ' + vy2 +
+                ' L ' + (parseFloat(lx) + vr - 1.1).toFixed(1) + ' ' + (parseFloat(ly) - 0.9).toFixed(1) +
+                ' A ' + (vr - 1.1).toFixed(1) + ' ' + (vr * 0.72).toFixed(1) + ' 0 0 0 ' + (parseFloat(lx) - vr + 1.1).toFixed(1) + ' ' + (parseFloat(ly) - 0.9).toFixed(1) + ' Z';
+            return '<path d="' + vPath + '" class="feather-visor" />';
+        },
+
+        renderLampOptic: function(lx, ly, lr) {
+            var off = '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr + 1.8).toFixed(1) + '" class="feather-lamp-bezel" />';
+            off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" class="lamp-glass-off" />';
+            off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.7).toFixed(1) + '" class="fresnel-ring" />';
+            off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.35).toFixed(1) + '" class="fresnel-ring" />';
+
+            var lit = '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr + 1.8).toFixed(1) + '" fill="rgba(255, 252, 238, 0.45)" filter="url(#featherGlow)" />';
+            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" fill="#fbfcf5" stroke="#ffffff" stroke-width="0.75" />';
+            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.42).toFixed(1) + '" fill="#ffffff" opacity="0.95" />';
+            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.7).toFixed(1) + '" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5" />';
+
+            var visor = this.renderVisor(lx, ly, lr + 1.4);
+            return { off: off, lit: lit, visor: visor };
+        },
+
+        renderArmLamps: function(feather, isLit, hub) {
+            var pKey = (feather.position || 'left1').toLowerCase();
+            var conf = this.positions[pKey] || this.positions.left1;
+
+            var rad = conf.angle * Math.PI / 180;
+            var ux = Math.cos(rad), uy = Math.sin(rad);
+
+            var offGroup = '<g class="feather-off-layer">';
+            var litGroup = '<g class="feather-lit-layer" style="' + (isLit ? 'display: inline;' : 'display: none;') + '">';
+            var visorGroup = '<g class="feather-visors-layer">';
+
+            var dists = [24.5, 49.0, 73.5, 98.0];
+            for (var d = 0; d < dists.length; d++) {
+                var lx = (hub.x + ux * dists[d]).toFixed(1);
+                var ly = (hub.y + uy * dists[d]).toFixed(1);
+                var optic = this.renderLampOptic(lx, ly, 7.4);
+                offGroup += optic.off;
+                litGroup += optic.lit;
+                visorGroup += optic.visor;
+            }
+
+            offGroup += '</g>';
+            litGroup += '</g>';
+            visorGroup += '</g>';
+
+            return '<g class="feather-unit ' + (isLit ? 'lit' : '') + '" data-feather-id="' + feather.id + '">' +
+                offGroup + litGroup + visorGroup + '</g>';
+        },
+
+        renderCommonLamp: function(hub, isAnyLit) {
+            var hx = hub.x, hy = hub.y;
+            var optic = this.renderLampOptic(hx, hy, 7.4);
+
+            var svg = '<g class="feather-common-lamp-group">';
+            svg += optic.off;
+
+            var litStyle = isAnyLit ? 'display: inline;' : 'display: none;';
+            svg += '<g class="feather-common-lit-layer" style="' + litStyle + '">';
+            svg += optic.lit;
+            svg += '</g>';
+
+            svg += optic.visor;
+            svg += '</g>';
+            return svg;
+        },
+
+        renderAll: function(feathers, getLampFn) {
+            if (!feathers || feathers.length === 0) return '';
+            var hub = this.getHubCenter();
+
+            var isAnyLit = false;
+            for (var k = 0; k < feathers.length; k++) {
+                if (getLampFn && getLampFn(feathers[k].id)) {
+                    isAnyLit = true;
+                    break;
+                }
+            }
+
+            var svg = '<g class="feather-assembly">';
+            svg += this.renderTrunnionMount(hub);
+            svg += this.buildUnifiedHousing(hub, feathers);
+
+            for (var i = 0; i < feathers.length; i++) {
+                var fth = feathers[i];
+                var isLit = getLampFn ? !!getLampFn(fth.id) : false;
+                svg += this.renderArmLamps(fth, isLit, hub);
+            }
+
+            svg += this.renderCommonLamp(hub, isAnyLit);
+            svg += '</g>';
+            return svg;
         },
 
         render: function(feather, isLit) {
-            var originX = feather.x !== undefined ? feather.x : 0;
-            var originY = feather.y !== undefined ? feather.y : -160;
-            var deg = this.angles[feather.position || 'left1'];
-            if (deg === undefined) deg = -135;
-
-            var lampCount = feather.lamps || 5;
-            var spacing = 20;
-            var rad = deg * Math.PI / 180;
-            var displayStyle = isLit ? 'display: inline;' : 'display: none;';
-
-            var armLength = lampCount * spacing + 14;
-            var endX = originX + armLength * Math.cos(rad);
-            var endY = originY + armLength * Math.sin(rad);
-
-            var svg = '<g class="feather-unit ' + (isLit ? 'lit' : '') + '" data-feather-id="' + feather.id + '">';
-
-            svg += '<line x1="' + originX + '" y1="' + originY + '" x2="' + endX + '" y2="' + endY + '" stroke="#0a0c10" stroke-width="28" stroke-linecap="round" class="feather-arm" />';
-            svg += '<line x1="' + originX + '" y1="' + originY + '" x2="' + endX + '" y2="' + endY + '" stroke="#2a3244" stroke-width="2" stroke-linecap="round" fill="none" />';
-
-            var offLamps = '<g class="feather-off-layer">';
-            var litLamps = '<g class="feather-lit-layer" style="' + displayStyle + '">';
-
-            for (var i = 1; i <= lampCount; i++) {
-                var dist = i * spacing + 4;
-                var lx = originX + dist * Math.cos(rad);
-                var ly = originY + dist * Math.sin(rad);
-                var lr = 6.5;
-
-                offLamps += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr + 2) + '" fill="#08090d" stroke="#1d2330" stroke-width="1.5" />';
-                offLamps += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" fill="#181c24" stroke="#0a0d12" stroke-width="1.2" />';
-
-                litLamps += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 2.3) + '" fill="rgba(235, 245, 255, 0.75)" filter="url(#glowFilter)" />';
-                litLamps += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" fill="#ffffff" stroke="#e0f0ff" stroke-width="1.2" />';
-            }
-
-            offLamps += '</g>';
-            litLamps += '</g>';
-            svg += offLamps + litLamps + '</g>';
+            var hub = this.getHubCenter();
+            var svg = '<g class="feather-assembly">';
+            svg += this.renderTrunnionMount(hub);
+            svg += this.buildUnifiedHousing(hub, [feather]);
+            svg += this.renderArmLamps(feather, isLit, hub);
+            svg += this.renderCommonLamp(hub, !!isLit);
+            svg += '</g>';
             return svg;
+        },
+
+        updateCommonLamp: function(container) {
+            if (!container) return;
+            var commonLitLayer = container.querySelector('.feather-common-lit-layer');
+            if (!commonLitLayer) return;
+
+            var anyLit = false;
+            if (window.SignalState && window.SignalState.feathers) {
+                for (var i = 0; i < window.SignalState.feathers.length; i++) {
+                    if (window.SignalState.getLamp(window.SignalState.feathers[i].id)) {
+                        anyLit = true;
+                        break;
+                    }
+                }
+            }
+            commonLitLayer.style.display = anyLit ? 'inline' : 'none';
         }
     };
 

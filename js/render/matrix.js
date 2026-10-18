@@ -31,21 +31,28 @@
     var MatrixRenderer = {
         render: function(matrixConf, text) {
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
-            var cy = matrixConf.y !== undefined ? matrixConf.y : -215;
-            var txt = (text !== undefined ? text : (matrixConf.text || 'M')).trim().toUpperCase();
+            var cy = matrixConf.y !== undefined ? matrixConf.y : -202;
 
+            var hasFeathers = SignalState.feathers && SignalState.feathers.length > 0;
+            if (hasFeathers) {
+                cy = -202;
+            } else if (cy < -220 || cy > -170) {
+                cy = -192;
+            }
+
+            var txt = (text !== undefined ? text : (matrixConf.text || 'M')).trim().toUpperCase();
             var isMultiChar = txt.length > 1;
-            var boxWidth = isMultiChar ? 88 : 64;
-            var boxHeight = 78;
+            var boxWidth = isMultiChar ? 62 : 44;
+            var boxHeight = 52;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
 
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
-            svg += '<rect x="' + (cx - 7) + '" y="' + (by + boxHeight) + '" width="14" height="22" fill="#151922" stroke="#252b3a" stroke-width="1.5" />';
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="5" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.5" />';
-            svg += '<rect x="' + (bx - 2) + '" y="' + (by - 3) + '" width="' + (boxWidth + 4) + '" height="5" rx="1.5" fill="#050608" stroke="#1d222e" stroke-width="1" />';
+            svg += '<rect x="' + (cx - 8) + '" y="' + (by + boxHeight) + '" width="16" height="4" rx="1" fill="#121620" stroke="#283042" stroke-width="1.2" />';
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
+            svg += '<rect x="' + (bx - 1) + '" y="' + (by - 2) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 
-            var spacing = 7.5;
+            var spacing = 5.4;
 
             if (!isMultiChar) {
                 var charKey = txt.length > 0 ? txt.charAt(0) : ' ';
@@ -61,10 +68,10 @@
                         var py = startY + r * spacing;
 
                         if (bit === 1) {
-                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.7" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
-                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.3" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.8" />';
+                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.9" fill="#ffffff" filter="url(#featherGlow)" class="theatre-pixel-on" />';
+                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.6" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" />';
                         } else {
-                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.2" fill="#11131a" stroke="#08090d" stroke-width="0.5" class="theatre-pixel-off" />';
+                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                         }
                     }
                 }
@@ -72,22 +79,22 @@
                 for (var ch = 0; ch < 2; ch++) {
                     var chKey = txt.charAt(ch) || ' ';
                     var ptn = MatrixFont5x7[chKey] || MatrixFont5x7[' '];
-                    var chCenterX = cx + (ch === 0 ? -20 : 20);
-                    var sX = chCenterX - (2 * (spacing * 0.85));
+                    var chCenterX = cx + (ch === 0 ? -14 : 14);
+                    var sX = chCenterX - (2 * (spacing * 0.8));
                     var sY = cy - (3 * (spacing * 0.95));
 
                     for (var r2 = 0; r2 < 7; r2++) {
                         var msk = ptn[r2] || 0;
                         for (var c2 = 0; c2 < 5; c2++) {
                             var b2 = (msk >> (4 - c2)) & 1;
-                            var pX = sX + c2 * (spacing * 0.85);
+                            var pX = sX + c2 * (spacing * 0.8);
                             var pY = sY + r2 * (spacing * 0.95);
 
                             if (b2 === 1) {
-                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="2.4" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
-                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="2.0" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.6" />';
+                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.7" fill="#ffffff" filter="url(#featherGlow)" class="theatre-pixel-on" />';
+                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.4" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" />';
                             } else {
-                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="1.9" fill="#11131a" stroke="#08090d" stroke-width="0.5" class="theatre-pixel-off" />';
+                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                             }
                         }
                     }

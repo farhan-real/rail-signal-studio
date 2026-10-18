@@ -42,8 +42,8 @@
 }
 
 .target-plate {
-    fill: #0c0d11;
-    stroke: #2a2e3a;
+    fill: #0a0d16;
+    stroke: #262d3e;
     stroke-width: 2.5;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
 }
@@ -54,8 +54,18 @@
 
 .signal-lamp-unit { pointer-events: none; }
 .lamp-lit-layer { pointer-events: none; }
-.feather-arm { fill: #0d0f14; stroke: #252a38; stroke-width: 18; }
+
+.feather-assembly { pointer-events: none; }
+.feather-trunnion-collar { fill: #11141c; stroke: #2a3245; stroke-width: 1.8; }
+.feather-trunnion-flange { stroke: #384256; stroke-width: 2; stroke-linecap: square; }
+.feather-trunnion-bolt { fill: #3a455a; }
+
+.feather-unified-housing { fill: #0a0d16; stroke: #262d3e; stroke-width: 2.2; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7)); }
+.feather-lamp-bezel { fill: #08090d; stroke: #1a1f2b; stroke-width: 1.1; }
+.feather-visor { fill: #07080b; stroke: #181c25; stroke-width: 0.9; }
 .feather-unit { pointer-events: none; }
+.feather-common-lit-layer { pointer-events: none; }
+
 .theatre-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
 .theatre-pixel-off { fill: #151820; }
 .theatre-pixel-on { fill: #ffffff; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95)); }
