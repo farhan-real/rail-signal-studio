@@ -69,8 +69,10 @@
         },
 
         setLamp: function(lampId, isLit) {
-            this.lampStates[lampId] = !!isLit;
-            SignalEvents.emit('lamp:updated', { id: lampId, lit: isLit });
+            var boolVal = !!isLit;
+            if (this.lampStates[lampId] === boolVal) return;
+            this.lampStates[lampId] = boolVal;
+            SignalEvents.emit('lamp:updated', { id: lampId, lit: boolVal });
         },
 
         getLamp: function(lampId) {

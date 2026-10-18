@@ -63,10 +63,6 @@
             '    if RouteThumb is 2 {',
             '        set matrix "S";',
             '    }',
-            '}',
-            '',
-            'timer 3500ms {',
-            '    next;',
             '}'
         ].join('\n')
     };

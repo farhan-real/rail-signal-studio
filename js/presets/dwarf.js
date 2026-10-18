@@ -37,10 +37,6 @@
             '    if ShuntLever is 1 {',
             '        aspect PROCEED;',
             '    }',
-            '}',
-            '',
-            'timer 3s {',
-            '    next;',
             '}'
         ].join('\n')
     };

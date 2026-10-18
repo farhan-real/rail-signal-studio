@@ -46,7 +46,9 @@
             if (ast && ast.aspectList && ast.aspectList.length > 0) {
                 this.setAspect(ast.aspectList[0]);
             }
-            this.resume();
+            this.startMainClock();
+            this.onTick();
+            SignalEvents.emit('runtime:status', { running: true, aspect: SignalState.currentAspect });
         },
 
         pause: function() {
@@ -59,9 +61,6 @@
         resume: function() {
             this.isPaused = false;
             this.startMainClock();
-            if (this.ast && this.ast.timers && this.ast.timers.length > 0) {
-                this.startTimer();
-            }
             this.onTick();
             SignalEvents.emit('runtime:status', { running: true, aspect: SignalState.currentAspect });
         },
@@ -234,7 +233,7 @@
                 if (act.op === 'end') return 'end';
                 this.executeAction(act);
             }
-            delete this.delayedQueues[ruleKey];
+            this.delayedQueues[ruleKey] = { completed: true };
             return 'done';
         },
 
@@ -300,7 +299,9 @@
                             var outcome;
                             if (this.delayedQueues[ruleKey]) {
                                 var queue = this.delayedQueues[ruleKey];
-                                if (now >= queue.nextTime) outcome = this.runActionList(queue.remaining, ruleKey, now);
+                                if (!queue.completed && now >= queue.nextTime) {
+                                    outcome = this.runActionList(queue.remaining, ruleKey, now);
+                                }
                             } else {
                                 outcome = this.runActionList(stmt.actions, ruleKey, now);
                             }

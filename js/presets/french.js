@@ -56,10 +56,6 @@
             '    if JAUNE set {',
             '        blink JAUNE 700ms;',
             '    }',
-            '}',
-            '',
-            'timer 5s {',
-            '    next;',
             '}'
         ].join('\n')
     };

@@ -81,10 +81,6 @@
             '        unset SHUNT_WHITE1;',
             '        unset SHUNT_WHITE2;',
             '    }',
-            '}',
-            '',
-            'timer 4s {',
-            '    next;',
             '}'
         ].join('\n')
     };
