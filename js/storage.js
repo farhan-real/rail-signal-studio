@@ -85,7 +85,12 @@
         loadDraft: function() {
             try {
                 var raw = localStorage.getItem(this.DRAFT_KEY);
-                if (raw) return JSON.parse(raw);
+                if (raw) {
+                    var data = JSON.parse(raw);
+                    if (data && data.script && typeof data.script === 'string' && data.script.indexOf('aspect') !== -1) {
+                        return data;
+                    }
+                }
             } catch (e) {}
             return null;
         },

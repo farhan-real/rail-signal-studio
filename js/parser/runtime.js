@@ -12,6 +12,8 @@
         holdUntil: 0,
         holdOnNext: false,
         holdBlinks: {},
+        delayedQueues: {},
+        isPaused: false,
         TICK_MS: 50,
 
         init: function() {
@@ -21,7 +23,7 @@
                     self.holdOnNext = false;
                     self.holdBlinks = {};
                 }
-                self.onTick();
+                if (!self.isPaused) self.onTick();
             });
         },
 
@@ -32,13 +34,34 @@
             this.holdUntil = 0;
             this.holdOnNext = false;
             this.holdBlinks = {};
+            this.delayedQueues = {};
+            this.isPaused = false;
             SignalState.groups = ast.groups || {};
             SignalState.enums = ast.enums || {};
             SignalState.variables = {};
             for (var k in ast.variables) SignalState.variables[k] = ast.variables[k];
-            if (ast.aspectList.length > 0) this.setAspect(ast.aspectList[0]);
+
+            if (ast.aspectList.length > 0) {
+                this.setAspect(ast.aspectList[0]);
+            }
+            this.resume();
+        },
+
+        pause: function() {
+            this.isPaused = true;
+            this.stopMainClock();
+            this.stopTimer();
+            SignalEvents.emit('runtime:status', { running: false, aspect: SignalState.currentAspect });
+        },
+
+        resume: function() {
+            this.isPaused = false;
             this.startMainClock();
+            if (this.ast && this.ast.timers && this.ast.timers.length > 0) {
+                this.startTimer();
+            }
             this.onTick();
+            SignalEvents.emit('runtime:status', { running: true, aspect: SignalState.currentAspect });
         },
 
         startMainClock: function() {
@@ -75,7 +98,8 @@
         checkIs: function(leftId, rightVal) {
             var ctrl = SignalState.controls.filter(function(c) { return c.id === leftId; })[0];
             if (ctrl) {
-                var curIdx = SignalState.getControlValue(ctrl.id) || 0;
+                var curIdx = SignalState.getControlValue(ctrl.id);
+                if (curIdx === undefined) curIdx = 0;
                 if (String(curIdx) === String(rightVal)) return true;
                 var states = (ctrl.enumType && SignalState.enums[ctrl.enumType]) || ctrl.states;
                 if (states && states[curIdx] && String(states[curIdx]).toUpperCase() === String(rightVal).toUpperCase()) return true;
@@ -190,6 +214,22 @@
             SignalState.setVar(target, this.resolveValue(value));
         },
 
+        runActionList: function(actions, ruleKey, now) {
+            for (var a = 0; a < actions.length; a++) {
+                var act = actions[a];
+                if (act.op === 'delay') {
+                    this.delayedQueues[ruleKey] = {
+                        nextTime: now + (act.duration || 1000),
+                        remaining: actions.slice(a + 1)
+                    };
+                    return;
+                }
+                if (act.op === 'end') break;
+                this.executeAction(act);
+            }
+            delete this.delayedQueues[ruleKey];
+        },
+
         processLamps: function(now) {
             var allUnits = this.getAllUnits();
             for (var i = 0; i < allUnits.length; i++) {
@@ -202,15 +242,17 @@
                         this.blinkState[lampId] = vis;
                         SignalEvents.emit('lamp:blink', { id: lampId, visible: vis });
                     }
-                } else if (this.blinkState[lampId] === false) {
-                    this.blinkState[lampId] = true;
-                    SignalEvents.emit('lamp:blink', { id: lampId, visible: true });
+                } else {
+                    if (this.blinkState[lampId] !== isLit) {
+                        this.blinkState[lampId] = isLit;
+                        SignalEvents.emit('lamp:blink', { id: lampId, visible: isLit });
+                    }
                 }
             }
         },
 
         onTick: function() {
-            if (!this.ast) return;
+            if (!this.ast || this.isPaused) return;
             var now = Date.now();
 
             if (this.holdUntil) {
@@ -219,8 +261,7 @@
                     this.processLamps(now);
                     return;
                 }
-                this.holdUntil = 0;
-                this.holdBlinks = {};
+                this.holdUntil = 0; this.holdBlinks = {};
             }
 
             if (this.holdOnNext) {
@@ -239,23 +280,24 @@
                 while (idx < stmts.length && safeGuard < 120) {
                     safeGuard++;
                     var stmt = stmts[idx];
+                    var ruleKey = 'm' + m + '_s' + idx;
+
                     if (stmt.op === 'label') { idx++; continue; }
                     if (stmt.op === 'end') { this.highlightLine(stmt.line); break; }
                     if (stmt.op === 'jump' && labelMap[stmt.target] !== undefined) {
                         this.highlightLine(stmt.line); idx = labelMap[stmt.target]; continue;
                     }
-                    if (stmt.op === 'if' && this.evalExpr(stmt.expr)) {
-                        var jumped = false, ended = false;
-                        for (var a = 0; a < stmt.actions.length; a++) {
-                            var act = stmt.actions[a];
-                            if (act.op === 'end') { ended = true; this.highlightLine(stmt.line); break; }
-                            if (act.op === 'jump' && labelMap[act.target] !== undefined) {
-                                this.highlightLine(stmt.line); idx = labelMap[act.target]; jumped = true; break;
+                    if (stmt.op === 'if') {
+                        if (this.evalExpr(stmt.expr)) {
+                            if (this.delayedQueues[ruleKey]) {
+                                var queue = this.delayedQueues[ruleKey];
+                                if (now >= queue.nextTime) this.runActionList(queue.remaining, ruleKey, now);
+                            } else {
+                                this.runActionList(stmt.actions, ruleKey, now);
                             }
-                            this.executeAction(act);
+                        } else {
+                            if (this.delayedQueues[ruleKey]) delete this.delayedQueues[ruleKey];
                         }
-                        if (ended) break;
-                        if (jumped) continue;
                     } else if (stmt.op === 'assign' || stmt.op === 'resume_after' || stmt.op === 'resume_onnextaction') {
                         this.executeAction(stmt);
                     }
@@ -282,29 +324,31 @@
 
         stepNext: function() {
             if (!this.ast || this.ast.aspectList.length === 0) return;
-            this.setAspect(this.ast.aspectList[(this.activeAspectIndex + 1) % this.ast.aspectList.length]);
+            var nextIdx = (this.activeAspectIndex + 1) % this.ast.aspectList.length;
+            this.setAspect(this.ast.aspectList[nextIdx]);
         },
 
         stepPrev: function() {
             if (!this.ast || this.ast.aspectList.length === 0) return;
-            this.setAspect(this.ast.aspectList[(this.activeAspectIndex - 1 + this.ast.aspectList.length) % this.ast.aspectList.length]);
+            var prevIdx = (this.activeAspectIndex - 1 + this.ast.aspectList.length) % this.ast.aspectList.length;
+            this.setAspect(this.ast.aspectList[prevIdx]);
         },
 
         startTimer: function() {
             this.stopTimer();
-            if (!this.ast || this.ast.timers.length === 0) return;
+            if (!this.ast || !this.ast.timers || this.ast.timers.length === 0) return;
             var timer = this.ast.timers[0], self = this;
             this.stepTimerId = setInterval(function() {
+                if (self.isPaused) return;
                 self.highlightLine(timer.line);
                 if (timer.action === 'next') self.stepNext();
                 else if (timer.action === 'prev') self.stepPrev();
                 else self.setAspect(timer.action);
             }, timer.duration);
-            SignalEvents.emit('runtime:timer', true);
         },
 
         stopTimer: function() {
-            if (this.stepTimerId) { clearInterval(this.stepTimerId); this.stepTimerId = null; SignalEvents.emit('runtime:timer', false); }
+            if (this.stepTimerId) { clearInterval(this.stepTimerId); this.stepTimerId = null; }
         },
 
         highlightLine: function(lineNum) {
@@ -313,7 +357,8 @@
 
         stop: function() {
             this.stopTimer(); this.stopMainClock(); this.activeBlinks = {}; this.blinkState = {};
-            this.holdUntil = 0; this.holdOnNext = false; this.holdBlinks = {};
+            this.holdUntil = 0; this.holdOnNext = false; this.holdBlinks = {}; this.delayedQueues = {};
+            this.isPaused = false;
         }
     };
 

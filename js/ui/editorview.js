@@ -20,14 +20,14 @@
             document.getElementById('btnCompileScript').addEventListener('click', this.compile.bind(this));
             document.getElementById('btnAddSection').addEventListener('click', this.onAddSectionClick.bind(this));
 
-            document.getElementById('btnRunScript').addEventListener('click', function() { SignalRuntime.startTimer(); });
-            document.getElementById('btnPauseScript').addEventListener('click', function() { SignalRuntime.stopTimer(); });
+            document.getElementById('btnRunScript').addEventListener('click', function() { SignalRuntime.resume(); });
+            document.getElementById('btnPauseScript').addEventListener('click', function() { SignalRuntime.pause(); });
             document.getElementById('btnStepScript').addEventListener('click', function() { SignalRuntime.stepNext(); });
 
             SignalEvents.on('state:loaded', this.loadFromState.bind(this));
             SignalEvents.on('runtime:line', this.highlightLine.bind(this));
             SignalEvents.on('aspect:changed', this.updateBadge.bind(this));
-            SignalEvents.on('runtime:timer', this.updateTimerStatus.bind(this));
+            SignalEvents.on('runtime:status', this.updateRunStatus.bind(this));
         },
 
         toggle: function() { this.drawer.classList.toggle('open'); },
@@ -50,7 +50,10 @@
                 var m = lines[i].match(/^\s*section\s+(?:"([^"]*)"|([A-Za-z0-9_]+))\s*;?/i);
                 if (m) {
                     if (curLines.length > 0 || this.sections.length > 0) {
-                        this.sections.push({ id: this.nextSectionId++, title: curTitle, code: curLines.join('\n').trim() });
+                        var codeStr = curLines.join('\n').trim();
+                        if (codeStr || this.sections.length > 0) {
+                            this.sections.push({ id: this.nextSectionId++, title: curTitle, code: codeStr });
+                        }
                         curLines = [];
                     }
                     curTitle = m[1] || m[2] || 'Section';
@@ -58,7 +61,10 @@
                     curLines.push(lines[i]);
                 }
             }
-            this.sections.push({ id: this.nextSectionId++, title: curTitle, code: curLines.join('\n').trim() });
+            var lastCode = curLines.join('\n').trim();
+            if (lastCode || this.sections.length === 0) {
+                this.sections.push({ id: this.nextSectionId++, title: curTitle, code: lastCode });
+            }
             this.renderSections();
             this.compile();
         },
@@ -157,7 +163,12 @@
         getCombinedScript: function() {
             var parts = [];
             for (var i = 0; i < this.sections.length; i++) {
-                parts.push('section "' + this.sections[i].title + '";\n' + this.sections[i].code);
+                var sec = this.sections[i];
+                if (this.sections.length === 1 && sec.title === 'Main') {
+                    parts.push(sec.code);
+                } else {
+                    parts.push('section "' + sec.title + '";\n' + sec.code);
+                }
             }
             return parts.join('\n\n');
         },
@@ -199,13 +210,27 @@
         },
 
         updateBadge: function(aspectName) {
-            this.badge.textContent = aspectName;
-            this.badge.classList.add('active');
+            if (this.badge && aspectName && aspectName !== 'UNSET') {
+                this.badge.textContent = aspectName;
+                this.badge.classList.add('active');
+            }
         },
 
-        updateTimerStatus: function(isRunning) {
-            var runBtn = document.getElementById('btnRunScript');
-            if (runBtn) runBtn.style.borderColor = isRunning ? '#00ee44' : '';
+        updateRunStatus: function(status) {
+            var btnRun = document.getElementById('btnRunScript');
+            var btnPause = document.getElementById('btnPauseScript');
+            if (status.running) {
+                if (btnRun) btnRun.style.borderColor = '#00ee44';
+                if (btnPause) btnPause.style.borderColor = '';
+                this.updateBadge(status.aspect || SignalState.currentAspect);
+            } else {
+                if (btnRun) btnRun.style.borderColor = '';
+                if (btnPause) btnPause.style.borderColor = '#f59e0b';
+                if (this.badge) {
+                    this.badge.textContent = 'PAUSED';
+                    this.badge.classList.remove('active');
+                }
+            }
         }
     };
 

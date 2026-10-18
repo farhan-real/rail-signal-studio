@@ -4,12 +4,21 @@
     var SignalLexer = {
         tokenize: function(source) {
             var tokens = [];
-            var lines = source.split(/\r?\n/);
+            if (!source) {
+                tokens.push({ type: 'EOF', value: '', line: 1 });
+                return tokens;
+            }
+
+            var cleanSource = source.replace(/\/\*[\s\S]*?\*\//g, function(match) {
+                return match.replace(/[^\r\n]/g, ' ');
+            });
+
+            var lines = cleanSource.split(/\r?\n/);
 
             for (var lineIdx = 0; lineIdx < lines.length; lineIdx++) {
                 var lineNum = lineIdx + 1;
                 var rawLine = lines[lineIdx];
-                var cleanLine = rawLine.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim();
+                var cleanLine = rawLine.replace(/\/\/.*/g, '').trim();
                 if (!cleanLine) continue;
 
                 var regex = /"([^"]*)"|([A-Za-z0-9_]+)|([{};=(),><+\-])|([^\s]+)/g;
@@ -52,7 +61,7 @@
                 }
             }
 
-            tokens.push({ type: 'EOF', value: '', line: lines.length });
+            tokens.push({ type: 'EOF', value: '', line: Math.max(1, lines.length) });
             return tokens;
         }
     };

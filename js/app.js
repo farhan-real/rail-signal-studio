@@ -143,6 +143,9 @@
             } else {
                 SignalState.load(PresetIndian);
             }
+            if (SignalRuntime.ast && SignalRuntime.ast.aspectList && SignalRuntime.ast.aspectList.length > 0) {
+                SignalRuntime.setAspect(SignalRuntime.ast.aspectList[0]);
+            }
         }
     };
 
