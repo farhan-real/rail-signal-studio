@@ -17,11 +17,11 @@
             { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 10, y: 75, hood: 'none', brightness: 0.9 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', x: -18, y: -160, lamps: 5 },
-            { id: 'FEATHER_L2', position: 'left2', x: -26, y: -150, lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', x: 18, y: -160, lamps: 5 }
+            { id: 'FEATHER_L1', position: 'left1', x: -22, y: -160, lamps: 5 },
+            { id: 'FEATHER_L2', position: 'left2', x: -28, y: -150, lamps: 5 },
+            { id: 'FEATHER_R1', position: 'right1', x: 22, y: -160, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -205, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -225, text: '' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Loop1', 'Loop2'], defaultValue: 0, x: 110, y: 15 },

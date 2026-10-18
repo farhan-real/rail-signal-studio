@@ -20,16 +20,16 @@
 
             var svg = '<g class="signal-lamp-unit ' + (isLit ? 'lit' : '') + '" data-lamp-id="' + lamp.id + '">';
 
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 1.5) + '" fill="#090a0d" stroke="#1c212c" stroke-width="1.5" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2) + '" fill="#090a0d" stroke="#1d222e" stroke-width="1.5" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#0a0b0e" stroke-width="1.5" class="lamp-glass-off" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.72) + '" class="fresnel-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44) + '" class="fresnel-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.22) + '" class="fresnel-ring" />';
 
             svg += '<g class="lamp-lit-layer" style="' + displayStyle + '">';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 1.8) + '" fill="' + palette.glow + '" opacity="' + (brightness * 0.45) + '" filter="url(#glowFilter)" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 1.85) + '" fill="' + palette.glow + '" opacity="' + (brightness * 0.45) + '" filter="url(#glowFilter)" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.lit + '" opacity="' + brightness + '" stroke="#ffffff" stroke-width="1.2" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42) + '" fill="#ffffff" opacity="' + (brightness * 0.9) + '" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.48) + '" fill="#ffffff" opacity="' + (brightness * 0.95) + '" />';
             svg += '</g>';
 
             svg += this.renderVisor(cx, cy, r, hoodType);
@@ -43,33 +43,30 @@
             if (type === 'square') {
                 var w = (r * 2) + 6;
                 var left = cx - r - 3;
-                var top = cy - r - 4;
+                var top = cy - r - 3;
                 var d = [
-                    'M', left, cy + 2,
+                    'M', left, cy + 1,
                     'V', top,
                     'H', left + w,
-                    'V', cy + 2,
-                    'H', left + w - 2.5,
-                    'V', top + 2.5,
-                    'H', left + 2.5,
-                    'V', cy + 2,
+                    'V', cy + 1,
+                    'H', left + w - 3,
+                    'V', top + 3,
+                    'H', left + 3,
+                    'V', cy + 1,
                     'Z'
                 ].join(' ');
-                var shadowSq = '<path d="M ' + (cx - r) + ' ' + (cy - r) + ' H ' + (cx + r) + ' V ' + (cy - r * 0.2) + ' H ' + (cx - r) + ' Z" fill="rgba(0,0,0,0.4)" pointer-events="none" />';
-                return '<path d="' + d + '" class="visor-hood" fill="#080a0e" stroke="#1d232f" stroke-width="1.2" />' + shadowSq;
+                return '<path d="' + d + '" class="visor-hood" fill="#080a0e" stroke="#1d232f" stroke-width="1.2" />';
             }
 
             var cowlPath = [
-                'M', cx - r - 3, cy,
-                'A', r + 3, r + 4, 0, 0, 1, cx + r + 3, cy,
-                'L', cx + r + 1, cy - 1,
-                'A', r + 1, r + 2, 0, 0, 0, cx - r - 1, cy - 1,
+                'M', cx - r - 3, cy + 1,
+                'A', r + 3, r + 4, 0, 0, 1, cx + r + 3, cy + 1,
+                'L', cx + r + 1, cy,
+                'A', r + 1, r + 2, 0, 0, 0, cx - r - 1, cy,
                 'Z'
             ].join(' ');
 
-            var innerShadow = '<path d="M ' + (cx - r) + ' ' + cy + ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy + ' A ' + r + ' ' + (r * 0.45) + ' 0 0 1 ' + (cx - r) + ' ' + cy + ' Z" fill="rgba(0,0,0,0.42)" pointer-events="none" />';
-
-            return '<path d="' + cowlPath + '" class="visor-hood" fill="#080a0e" stroke="#1d232f" stroke-width="1.2" />' + innerShadow;
+            return '<path d="' + cowlPath + '" class="visor-hood" fill="#080a0e" stroke="#1d232f" stroke-width="1.2" />';
         }
     };
 

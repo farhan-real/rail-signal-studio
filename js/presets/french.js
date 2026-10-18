@@ -5,8 +5,7 @@
         name: 'French SNCF Combined Target Panel',
         mast: { type: 'lattice', height: 400, x: 0, y: -30, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -44, y: -160, width: 88, height: 175, corners: [24, 24, 24, 24], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 3 },
-            { type: 'triangle', points: [[44, -115], [70, -90], [44, -65]], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 2 }
+            { type: 'rounded-rect', x: -44, y: -160, width: 88, height: 175, corners: [24, 24, 24, 24], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 3 }
         ],
         lamps: [
             { id: 'CARRE_RED1', color: 'red', diameter: 30, x: -20, y: -125, hood: 'square', brightness: 1.0 },
