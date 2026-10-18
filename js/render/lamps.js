@@ -147,11 +147,14 @@
         renderVisor: function(cx, cy, r, type) {
             if (type === 'none') return '';
 
+            var innerR = r + 4.0;
+            var outerR = r + 6.2;
+
             var cowlPath = [
-                'M', cx - r - 3, cy + 1,
-                'A', r + 3, r + 4, 0, 0, 1, cx + r + 3, cy + 1,
-                'L', cx + r + 1, cy,
-                'A', r + 1, r + 2, 0, 0, 0, cx - r - 1, cy,
+                'M', (cx - outerR).toFixed(1), (cy + 1).toFixed(1),
+                'A', outerR.toFixed(1), (outerR + 1.2).toFixed(1), 0, 0, 1, (cx + outerR).toFixed(1), (cy + 1).toFixed(1),
+                'L', (cx + innerR).toFixed(1), cy.toFixed(1),
+                'A', innerR.toFixed(1), (innerR + 1.2).toFixed(1), 0, 0, 0, (cx - innerR).toFixed(1), cy.toFixed(1),
                 'Z'
             ].join(' ');
 
