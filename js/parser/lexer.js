@@ -41,7 +41,7 @@
                             'LOOP', 'IF', 'IS', 'BLINK', 'TIMER', 'NEXT',
                             'PREV', 'JUMP', 'GOTO', 'LABEL', 'INT', 'ENUM',
                             'GROUP', 'END', 'SECTION', 'RESUME', 'AFTER',
-                            'ONNEXTACTION', 'AND', 'OR', 'NOT'
+                            'ONNEXTACTION', 'DELAY', 'AND', 'OR', 'NOT'
                         ];
                         if (keywords.indexOf(upper) !== -1) {
                             type = upper;

@@ -1,0 +1,67 @@
+(function(window) {
+    'use strict';
+
+    var ExampleDelay = {
+        name: 'Example: Delay and Sequencing',
+        mast: { type: 'tubular', height: 360, x: 0, y: -20, platform: true, ladder: true },
+        shapes: [
+            { type: 'rounded-rect', x: -26, y: -130, width: 52, height: 135, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 }
+        ],
+        lamps: [
+            { id: 'RED', color: 'red', diameter: 34, x: 0, y: -105, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -65, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -25, hood: 'round', brightness: 1.0 }
+        ],
+        feathers: [],
+        matrix: { enabled: false },
+        controls: [
+            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
+            { id: 'SeqLed', type: 'led', label: 'Timer Active', colorKey: 'yellow', x: 110, y: 15 }
+        ],
+        script: [
+            'aspect DANGER {',
+            '    unset ALL;',
+            '    set RED;',
+            '}',
+            '',
+            'aspect CAUTION {',
+            '    unset ALL;',
+            '    set YELLOW;',
+            '}',
+            '',
+            'aspect PROCEED {',
+            '    unset ALL;',
+            '    set GREEN;',
+            '}',
+            '',
+            'mainloop {',
+            '    /* 1. Stop position */',
+            '    if MasterLever is 0 {',
+            '        aspect DANGER;',
+            '        unset SeqLed;',
+            '        end;',
+            '    }',
+            '',
+            '    /* 2. Direct caution position */',
+            '    if MasterLever is 1 {',
+            '        aspect CAUTION;',
+            '        unset SeqLed;',
+            '        end;',
+            '    }',
+            '',
+            '    /* 3. Automatic 2-second caution sequence before clear:',
+            '       Shows yellow and indicator LED, waits 2 seconds, then clears to green */',
+            '    if MasterLever is 2 {',
+            '        aspect CAUTION;',
+            '        set SeqLed;',
+            '        delay 2s;',
+            '        aspect PROCEED;',
+            '        unset SeqLed;',
+            '        end;',
+            '    }',
+            '}'
+        ].join('\n')
+    };
+
+    window.ExampleDelay = ExampleDelay;
+})(window);

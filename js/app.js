@@ -24,6 +24,7 @@
                 else if (val === 'dwarf') SignalState.load(PresetDwarf);
                 else if (val === 'examplesections') SignalState.load(ExampleSections);
                 else if (val === 'examplegroup') SignalState.load(ExampleGroup);
+                else if (val === 'exampledelay') SignalState.load(ExampleDelay);
                 else if (val === 'exampleif') SignalState.load(ExampleIf);
                 else if (val === 'exampleknob') SignalState.load(ExampleKnob);
                 else if (val === 'examplebutton') SignalState.load(ExampleButton);
