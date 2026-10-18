@@ -2,11 +2,60 @@
     'use strict';
 
     var LampColors = {
-        red: { off: '#240808', lit: '#ff1e10', core: '#ff3020' },
-        yellow: { off: '#261b05', lit: '#ff9e00', core: '#ffb31a' },
-        green: { off: '#05220f', lit: '#00e844', core: '#1afe56' },
-        white: { off: '#1a1f26', lit: '#eef5fc', core: '#f8fbff' },
-        violet: { off: '#200826', lit: '#cc22ff', core: '#d944ff' }
+        red: {
+            off: '#220707',
+            lit: '#ee1212',
+            stops: [
+                { offset: '0%', color: '#ff6659' },
+                { offset: '42%', color: '#ee1212' },
+                { offset: '100%', color: '#b50000' }
+            ]
+        },
+        yellow: {
+            off: '#261a04',
+            lit: '#ffba00',
+            stops: [
+                { offset: '0%', color: '#fff176' },
+                { offset: '38%', color: '#ffba00' },
+                { offset: '100%', color: '#db8200' }
+            ]
+        },
+        green: {
+            off: '#032113',
+            lit: '#00cc66',
+            stops: [
+                { offset: '0%', color: '#6effb8' },
+                { offset: '40%', color: '#00cc66' },
+                { offset: '100%', color: '#008a3d' }
+            ]
+        },
+        white: {
+            off: '#151a22',
+            lit: '#f0f6ff',
+            stops: [
+                { offset: '0%', color: '#ffffff' },
+                { offset: '45%', color: '#f0f6ff' },
+                { offset: '100%', color: '#c5d8ed' }
+            ]
+        },
+        violet: {
+            off: '#1e0824',
+            lit: '#9c27b0',
+            stops: [
+                { offset: '0%', color: '#da70ff' },
+                { offset: '42%', color: '#9c27b0' },
+                { offset: '100%', color: '#650080' }
+            ]
+        },
+        blue: {
+            off: '#06152a',
+            lit: '#1976d2',
+            stops: [
+                { offset: '0%', color: '#64b5f6' },
+                { offset: '42%', color: '#1976d2' },
+                { offset: '100%', color: '#0d47a1' }
+            ]
+        }
     };
 
     var LampRenderer = {
@@ -63,8 +112,22 @@
             var hoodType = lamp.hood || 'round';
             var displayStyle = isLit ? 'display: inline;' : 'display: none;';
             var box = this.getBoxColor(lamp);
+            var colorR = (r * 0.78).toFixed(1);
+            var gradId = 'lampGrad_' + (lamp.id || 'L').replace(/[^a-zA-Z0-9_]/g, '_');
+            var stops = palette.stops || [
+                { offset: '0%', color: palette.lit },
+                { offset: '100%', color: palette.lit }
+            ];
 
             var svg = '<g class="signal-lamp-unit ' + (isLit ? 'lit' : '') + '" data-lamp-id="' + lamp.id + '">';
+
+            svg += '<defs>';
+            svg += '<radialGradient id="' + gradId + '" cx="50%" cy="50%" r="50%">';
+            for (var s = 0; s < stops.length; s++) {
+                svg += '<stop offset="' + stops[s].offset + '" stop-color="' + stops[s].color + '" />';
+            }
+            svg += '</radialGradient>';
+            svg += '</defs>';
 
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2.5) + '" fill="' + box.fill + '" stroke="' + box.stroke + '" stroke-width="1.5" class="lamp-outer-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#141926" stroke-width="2" class="lamp-glass-off" />';
@@ -72,9 +135,8 @@
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" class="fresnel-ring" />';
 
             svg += '<g class="lamp-lit-layer" style="' + displayStyle + '">';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + box.fill + '" stroke="' + box.stroke + '" stroke-width="1.8" class="lamp-lit-outer-ring" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.74).toFixed(1) + '" fill="' + palette.lit + '" opacity="' + brightness + '" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" fill="' + palette.core + '" opacity="' + brightness + '" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + box.fill + '" stroke="none" class="lamp-lit-outer-ring" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + colorR + '" fill="url(#' + gradId + ')" opacity="' + brightness + '" class="lamp-lit-lens" />';
             svg += '</g>';
 
             svg += this.renderVisor(cx, cy, r, hoodType);
