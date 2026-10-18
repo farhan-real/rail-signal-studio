@@ -21,7 +21,7 @@
             { id: 'FEATHER_L2', position: 'left2', x: -28, y: -150, lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', x: 22, y: -160, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -225, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -215, text: 'M' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Loop1', 'Loop2'], defaultValue: 0, x: 110, y: 15 },
@@ -62,6 +62,9 @@
             '    if Lever1 is 2 {',
             '        aspect PROCEED;',
             '    }',
+            '    if RouteSelector is 0 {',
+            '        set matrix "M";',
+            '    }',
             '    if RouteSelector is 1 {',
             '        set FEATHER_L1;',
             '        set matrix "1";',
@@ -69,9 +72,6 @@
             '    if RouteSelector is 2 {',
             '        set FEATHER_L2;',
             '        set matrix "2";',
-            '    }',
-            '    if RouteSelector is 0 {',
-            '        unset matrix;',
             '    }',
             '    if ShuntSwitch is 1 {',
             '        set SHUNT_WHITE1;',

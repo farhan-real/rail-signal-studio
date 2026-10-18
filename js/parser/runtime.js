@@ -151,7 +151,6 @@
             if (String(target).toUpperCase() === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
-                if (!isLit && SignalState.matrix) { SignalState.matrix.text = ''; SignalEvents.emit('matrix:updated', ''); }
                 return;
             }
             var group = SignalState.groups[target];

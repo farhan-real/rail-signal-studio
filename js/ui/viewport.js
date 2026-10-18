@@ -162,8 +162,13 @@
 
         updateMatrixFast: function() {
             var mContainer = this.sceneRoot.querySelector('.theatre-matrix-unit');
-            if (mContainer && SignalState.matrix && SignalState.matrix.enabled) {
-                mContainer.outerHTML = MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
+            if (SignalState.matrix && SignalState.matrix.enabled) {
+                var temp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                temp.innerHTML = MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
+                var newEl = temp.firstElementChild;
+                if (mContainer && newEl && mContainer.parentNode) {
+                    mContainer.parentNode.replaceChild(newEl, mContainer);
+                }
             }
         }
     };

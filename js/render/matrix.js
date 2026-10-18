@@ -1,17 +1,18 @@
 (function(window) {
     'use strict';
 
-    var MatrixFont = {
-        '': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    var MatrixFont5x7 = {
         ' ': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-        '1': [0x04, 0x0C, 0x14, 0x04, 0x04, 0x04, 0x0E],
+        '1': [0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E],
         '2': [0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F],
         '3': [0x1E, 0x01, 0x01, 0x0E, 0x01, 0x01, 0x1E],
         '4': [0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02],
-        '5': [0x1F, 0x10, 0x10, 0x1E, 0x01, 0x01, 0x1E],
-        'M': [0x11, 0x1B, 0x15, 0x11, 0x11, 0x11, 0x11],
-        'L': [0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F],
-        'S': [0x0F, 0x10, 0x10, 0x0E, 0x01, 0x01, 0x1E],
+        '5': [0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E],
+        '6': [0x0E, 0x10, 0x10, 0x1E, 0x11, 0x11, 0x0E],
+        '7': [0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08],
+        '8': [0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E],
+        '9': [0x0E, 0x11, 0x11, 0x0F, 0x01, 0x01, 0x0E],
+        '0': [0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E],
         'A': [0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11],
         'B': [0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E],
         'C': [0x0E, 0x11, 0x10, 0x10, 0x10, 0x11, 0x0E],
@@ -20,42 +21,75 @@
         'F': [0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10],
         'G': [0x0E, 0x11, 0x10, 0x17, 0x11, 0x11, 0x0E],
         'H': [0x11, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11],
+        'L': [0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F],
+        'M': [0x11, 0x1B, 0x15, 0x11, 0x11, 0x11, 0x11],
         'P': [0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10],
-        'R': [0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11]
+        'R': [0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11],
+        'S': [0x0F, 0x10, 0x10, 0x0E, 0x01, 0x01, 0x1E]
     };
 
     var MatrixRenderer = {
         render: function(matrixConf, text) {
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
-            var cy = matrixConf.y !== undefined ? matrixConf.y : -220;
-            var txt = (text || matrixConf.text || '').toUpperCase();
-            var boxWidth = 58, boxHeight = 72;
+            var cy = matrixConf.y !== undefined ? matrixConf.y : -215;
+            var txt = (text !== undefined ? text : (matrixConf.text || 'M')).trim().toUpperCase();
+
+            var isMultiChar = txt.length > 1;
+            var boxWidth = isMultiChar ? 86 : 60;
+            var boxHeight = 76;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
 
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
-            svg += '<rect x="' + (cx - 7) + '" y="' + (by + boxHeight) + '" width="14" height="20" fill="#181c26" stroke="#2a3040" stroke-width="1.5" />';
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="5" class="theatre-box" fill="#090b0e" stroke="#2e3547" stroke-width="2.5" />';
-            svg += '<rect x="' + (bx - 2) + '" y="' + (by - 3) + '" width="' + (boxWidth + 4) + '" height="5" rx="1.5" fill="#060709" stroke="#1d222e" stroke-width="1" />';
+            svg += '<rect x="' + (cx - 7) + '" y="' + (by + boxHeight) + '" width="14" height="22" fill="#151922" stroke="#252b3a" stroke-width="1.5" />';
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="5" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.5" />';
+            svg += '<rect x="' + (bx - 2) + '" y="' + (by - 3) + '" width="' + (boxWidth + 4) + '" height="5" rx="1.5" fill="#050608" stroke="#1d222e" stroke-width="1" />';
 
-            var charKey = txt.length > 0 ? txt.charAt(0) : '';
-            var pattern = MatrixFont[charKey] || MatrixFont[' '];
-            var spacing = 8.5;
-            var startX = cx - 17;
-            var startY = cy - 25.5;
+            var spacing = 7.2;
 
-            for (var row = 0; row < 7; row++) {
-                var rowMask = pattern[row] || 0;
-                for (var col = 0; col < 5; col++) {
-                    var bit = (rowMask >> (4 - col)) & 1;
-                    var px = startX + col * spacing;
-                    var py = startY + row * spacing;
+            if (!isMultiChar) {
+                var charKey = txt.length > 0 ? txt.charAt(0) : ' ';
+                var pattern = MatrixFont5x7[charKey] || MatrixFont5x7[' '];
+                var startX = cx - (2 * spacing);
+                var startY = cy - (3 * spacing);
 
-                    if (bit === 1) {
-                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.8" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
-                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.4" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.8" />';
-                    } else {
-                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.3" fill="#131620" stroke="#090b0f" stroke-width="0.6" class="theatre-pixel-off" />';
+                for (var r = 0; r < 7; r++) {
+                    var mask = pattern[r] || 0;
+                    for (var c = 0; c < 5; c++) {
+                        var bit = (mask >> (4 - c)) & 1;
+                        var px = startX + c * spacing;
+                        var py = startY + r * spacing;
+
+                        if (bit === 1) {
+                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.6" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
+                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.2" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.8" />';
+                        } else {
+                            svg += '<circle cx="' + px + '" cy="' + py + '" r="2.1" fill="#11131a" stroke="#08090d" stroke-width="0.5" class="theatre-pixel-off" />';
+                        }
+                    }
+                }
+            } else {
+                for (var ch = 0; ch < 2; ch++) {
+                    var chKey = txt.charAt(ch) || ' ';
+                    var ptn = MatrixFont5x7[chKey] || MatrixFont5x7[' '];
+                    var chCenterX = cx + (ch === 0 ? -19 : 19);
+                    var sX = chCenterX - (2 * (spacing * 0.85));
+                    var sY = cy - (3 * (spacing * 0.95));
+
+                    for (var r2 = 0; r2 < 7; r2++) {
+                        var msk = ptn[r2] || 0;
+                        for (var c2 = 0; c2 < 5; c2++) {
+                            var b2 = (msk >> (4 - c2)) & 1;
+                            var pX = sX + c2 * (spacing * 0.85);
+                            var pY = sY + r2 * (spacing * 0.95);
+
+                            if (b2 === 1) {
+                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="2.3" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
+                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="1.9" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.6" />';
+                            } else {
+                                svg += '<circle cx="' + pX + '" cy="' + pY + '" r="1.8" fill="#11131a" stroke="#08090d" stroke-width="0.5" class="theatre-pixel-off" />';
+                            }
+                        }
                     }
                 }
             }

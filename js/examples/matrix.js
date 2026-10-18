@@ -13,10 +13,10 @@
             { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -40, hood: 'round', brightness: 1.0 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', x: -28, y: -130, lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', x: 28, y: -130, lamps: 5 }
+            { id: 'FEATHER_L1', position: 'left1', x: -22, y: -150, lamps: 5 },
+            { id: 'FEATHER_R1', position: 'right1', x: 22, y: -150, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -195, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -205, text: 'M' },
         controls: [
             { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 15 },
             { id: 'TrackSelector', type: 'knob', label: 'Platform', states: ['MAIN', 'PLATFORM_1', 'PLATFORM_2'], defaultValue: 0, x: 110, y: 15 }

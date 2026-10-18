@@ -14,7 +14,7 @@
             { id: 'RED', color: 'red', diameter: 34, x: 0, y: -15, hood: 'round', brightness: 1.0 }
         ],
         feathers: [],
-        matrix: { enabled: true, id: 'THEATRE_BOX', x: 0, y: -210, text: 'M' },
+        matrix: { enabled: true, id: 'THEATRE_BOX', x: 0, y: -215, text: 'M' },
         controls: [
             { id: 'SignalLever', type: 'lever', label: 'Main Signal', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteThumb', type: 'knob', label: 'Route', states: ['Main', 'Loop', 'Siding'], defaultValue: 0, x: 110, y: 15 }
