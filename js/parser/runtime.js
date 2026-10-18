@@ -103,11 +103,17 @@
                 if (curIdx === undefined) curIdx = 0;
                 if (String(curIdx) === String(rightVal)) return true;
                 var states = (ctrl.enumType && SignalState.enums[ctrl.enumType]) || ctrl.states;
-                if (states && states[curIdx] && String(states[curIdx]).toUpperCase() === String(rightVal).toUpperCase()) return true;
+                if (states && states[curIdx]) {
+                    var sClean = String(states[curIdx]).replace(/\s+/g, '').toUpperCase();
+                    var rClean = String(rightVal).replace(/\s+/g, '').toUpperCase();
+                    if (sClean === rClean) return true;
+                }
                 for (var en in SignalState.enums) {
                     var list = SignalState.enums[en];
                     for (var m = 0; m < list.length; m++) {
-                        if (String(list[m]).toUpperCase() === String(rightVal).toUpperCase() && curIdx === m) return true;
+                        var eClean = String(list[m]).replace(/\s+/g, '').toUpperCase();
+                        var rClean2 = String(rightVal).replace(/\s+/g, '').toUpperCase();
+                        if (eClean === rClean2 && curIdx === m) return true;
                     }
                 }
                 return false;
@@ -138,6 +144,12 @@
                 for (var a = 0; a < all.length; a++) { if (!SignalState.getLamp(all[a].id)) return false; }
                 return true;
             }
+            if (String(name).toUpperCase() === 'FEATHERS') {
+                for (var f = 0; f < SignalState.feathers.length; f++) {
+                    if (SignalState.getLamp(SignalState.feathers[f].id)) return true;
+                }
+                return false;
+            }
             var group = SignalState.groups[name];
             if (group && group.length > 0) {
                 for (var i = 0; i < group.length; i++) { if (!SignalState.getLamp(group[i])) return false; }
@@ -148,10 +160,25 @@
 
         applySetAction: function(target, isLit) {
             if (!target) return;
-            if (String(target).toUpperCase() === 'ALL') {
+            var tUpper = String(target).toUpperCase();
+            if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
                 return;
+            }
+            if (tUpper === 'FEATHERS') {
+                for (var k = 0; k < SignalState.feathers.length; k++) {
+                    SignalState.setLamp(SignalState.feathers[k].id, isLit);
+                }
+                return;
+            }
+            var isTargetFeather = SignalState.feathers.some(function(f) { return f.id === target; });
+            if (isTargetFeather && isLit) {
+                for (var f = 0; f < SignalState.feathers.length; f++) {
+                    if (SignalState.feathers[f].id !== target) {
+                        SignalState.setLamp(SignalState.feathers[f].id, false);
+                    }
+                }
             }
             var group = SignalState.groups[target];
             if (group) {
