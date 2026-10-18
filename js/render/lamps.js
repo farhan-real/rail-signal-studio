@@ -7,7 +7,7 @@
             lit: '#ee1212',
             stops: [
                 { offset: '0%', color: '#ff6659' },
-                { offset: '42%', color: '#ee1212' },
+                { offset: '45%', color: '#ee1212' },
                 { offset: '100%', color: '#b50000' }
             ]
         },
@@ -16,7 +16,7 @@
             lit: '#ffba00',
             stops: [
                 { offset: '0%', color: '#fff176' },
-                { offset: '38%', color: '#ffba00' },
+                { offset: '42%', color: '#ffba00' },
                 { offset: '100%', color: '#db8200' }
             ]
         },
@@ -25,7 +25,7 @@
             lit: '#00cc66',
             stops: [
                 { offset: '0%', color: '#6effb8' },
-                { offset: '40%', color: '#00cc66' },
+                { offset: '44%', color: '#00cc66' },
                 { offset: '100%', color: '#008a3d' }
             ]
         },
@@ -34,7 +34,7 @@
             lit: '#f0f6ff',
             stops: [
                 { offset: '0%', color: '#ffffff' },
-                { offset: '45%', color: '#f0f6ff' },
+                { offset: '48%', color: '#f0f6ff' },
                 { offset: '100%', color: '#c5d8ed' }
             ]
         },
@@ -43,7 +43,7 @@
             lit: '#9c27b0',
             stops: [
                 { offset: '0%', color: '#da70ff' },
-                { offset: '42%', color: '#9c27b0' },
+                { offset: '45%', color: '#9c27b0' },
                 { offset: '100%', color: '#650080' }
             ]
         },
@@ -52,7 +52,7 @@
             lit: '#1976d2',
             stops: [
                 { offset: '0%', color: '#64b5f6' },
-                { offset: '42%', color: '#1976d2' },
+                { offset: '45%', color: '#1976d2' },
                 { offset: '100%', color: '#0d47a1' }
             ]
         }
@@ -146,24 +146,6 @@
 
         renderVisor: function(cx, cy, r, type) {
             if (type === 'none') return '';
-
-            if (type === 'square') {
-                var w = (r * 2) + 6;
-                var left = cx - r - 3;
-                var top = cy - r - 3;
-                var d = [
-                    'M', left, cy + 1,
-                    'V', top,
-                    'H', left + w,
-                    'V', cy + 1,
-                    'H', left + w - 3,
-                    'V', top + 3,
-                    'H', left + 3,
-                    'V', cy + 1,
-                    'Z'
-                ].join(' ');
-                return '<path d="' + d + '" class="visor-hood" fill="#080a0e" stroke="#1d232f" stroke-width="1.2" />';
-            }
 
             var cowlPath = [
                 'M', cx - r - 3, cy + 1,

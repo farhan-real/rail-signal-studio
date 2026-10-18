@@ -105,6 +105,13 @@
                                 data.controls = window.PresetDwarf.controls;
                                 data.script = window.PresetDwarf.script;
                             }
+                        } else if (data.name && data.name.indexOf('French') !== -1) {
+                            if (window.PresetFrench) {
+                                data.shapes = window.PresetFrench.shapes;
+                                data.lamps = window.PresetFrench.lamps;
+                                data.controls = window.PresetFrench.controls;
+                                data.script = window.PresetFrench.script;
+                            }
                         }
                         return data;
                     }
