@@ -10,6 +10,51 @@
     };
 
     var LampRenderer = {
+        getBoxColor: function(lamp) {
+            if (lamp && lamp.boxColor) {
+                return {
+                    fill: lamp.boxColor,
+                    stroke: lamp.boxStroke || '#262d3e'
+                };
+            }
+            var cx = (lamp && lamp.x !== undefined) ? lamp.x : 0;
+            var cy = (lamp && lamp.y !== undefined) ? lamp.y : 0;
+
+            if (window.SignalState && window.SignalState.shapes && window.SignalState.shapes.length > 0) {
+                var shapes = window.SignalState.shapes;
+                for (var i = shapes.length - 1; i >= 0; i--) {
+                    var s = shapes[i];
+                    if (s.type === 'rounded-rect') {
+                        var sx = s.x || 0, sy = s.y || 0, sw = s.width || 60, sh = s.height || 100;
+                        if (cx >= sx - 6 && cx <= sx + sw + 6 && cy >= sy - 6 && cy <= sy + sh + 6) {
+                            return {
+                                fill: s.fill || '#0a0d16',
+                                stroke: s.stroke || '#262d3e'
+                            };
+                        }
+                    } else if (s.type === 'circle-sector') {
+                        var scx = s.x || 0, scy = s.y || 0, srad = s.radius || 30;
+                        if (Math.hypot(cx - scx, cy - scy) <= srad + 6) {
+                            return {
+                                fill: s.fill || '#0a0d16',
+                                stroke: s.stroke || '#262d3e'
+                            };
+                        }
+                    } else if (s.type === 'triangle') {
+                        return {
+                            fill: s.fill || '#0a0d16',
+                            stroke: s.stroke || '#262d3e'
+                        };
+                    }
+                }
+                return {
+                    fill: shapes[0].fill || '#0a0d16',
+                    stroke: shapes[0].stroke || '#262d3e'
+                };
+            }
+            return { fill: '#0a0d16', stroke: '#262d3e' };
+        },
+
         render: function(lamp, isLit) {
             var cx = lamp.x || 0, cy = lamp.y || 0, r = (lamp.diameter || 36) / 2;
             var colorType = (lamp.color || 'red').toLowerCase();
@@ -17,16 +62,17 @@
             var brightness = Math.max(0.2, Math.min(1.0, lamp.brightness !== undefined ? lamp.brightness : 1.0));
             var hoodType = lamp.hood || 'round';
             var displayStyle = isLit ? 'display: inline;' : 'display: none;';
+            var box = this.getBoxColor(lamp);
 
             var svg = '<g class="signal-lamp-unit ' + (isLit ? 'lit' : '') + '" data-lamp-id="' + lamp.id + '">';
 
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2.5) + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.5" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2.5) + '" fill="' + box.fill + '" stroke="' + box.stroke + '" stroke-width="1.5" class="lamp-outer-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#141926" stroke-width="2" class="lamp-glass-off" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.72).toFixed(1) + '" class="fresnel-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" class="fresnel-ring" />';
 
             svg += '<g class="lamp-lit-layer" style="' + displayStyle + '">';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.8" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + box.fill + '" stroke="' + box.stroke + '" stroke-width="1.8" class="lamp-lit-outer-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.74).toFixed(1) + '" fill="' + palette.lit + '" opacity="' + brightness + '" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" fill="' + palette.core + '" opacity="' + brightness + '" />';
             svg += '</g>';

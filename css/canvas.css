@@ -53,7 +53,9 @@
 .fresnel-ring { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; }
 
 .signal-lamp-unit { pointer-events: none; }
+.lamp-outer-ring { pointer-events: none; }
 .lamp-lit-layer { pointer-events: none; }
+.lamp-lit-outer-ring { pointer-events: none; }
 
 .feather-assembly { pointer-events: none; }
 .feather-trunnion-collar { fill: #11141c; stroke: #2a3245; stroke-width: 1.8; }
