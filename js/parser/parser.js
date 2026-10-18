@@ -99,7 +99,7 @@
                     next(); var vName = next(); match('EQUALS'); ast.variables[vName.value] = (next() || {}).value; match('SEMI');
                 } else if (tok.type === 'ASPECT') {
                     next(); var aspName = (next() || {}).value || 'UNNAMED';
-                    var aspectDef = { name: aspName, line: tok.line, sets: [], unsets: [], matrix: '' };
+                    var aspectDef = { name: aspName, line: tok.line, sets: [], unsets: [], matrix: undefined };
                     match('LBRACE');
                     while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
                         var bTok = next();

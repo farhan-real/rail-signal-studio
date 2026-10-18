@@ -326,8 +326,12 @@
             this.highlightLine(aspect.line);
             for (var i = 0; i < aspect.unsets.length; i++) this.applySetAction(aspect.unsets[i], false);
             for (var j = 0; j < aspect.sets.length; j++) this.applySetAction(aspect.sets[j], true);
+
             if (aspect.matrix !== undefined && SignalState.matrix) {
-                SignalState.matrix.text = aspect.matrix; SignalEvents.emit('matrix:updated', aspect.matrix);
+                if (SignalState.matrix.text !== aspect.matrix) {
+                    SignalState.matrix.text = aspect.matrix;
+                    SignalEvents.emit('matrix:updated', aspect.matrix);
+                }
             }
             SignalEvents.emit('aspect:changed', aspectName);
         },

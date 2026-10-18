@@ -163,12 +163,17 @@
         updateMatrixFast: function() {
             var mContainer = this.sceneRoot.querySelector('.theatre-matrix-unit');
             if (SignalState.matrix && SignalState.matrix.enabled) {
-                var temp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                temp.innerHTML = MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
-                var newEl = temp.firstElementChild;
-                if (mContainer && newEl && mContainer.parentNode) {
-                    mContainer.parentNode.replaceChild(newEl, mContainer);
-                }
+                var svgStr = MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
+                try {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + svgStr + '</svg>', 'image/svg+xml');
+                    var newEl = doc.documentElement.firstElementChild;
+                    if (mContainer && newEl && mContainer.parentNode) {
+                        mContainer.parentNode.replaceChild(document.importNode(newEl, true), mContainer);
+                        return;
+                    }
+                } catch (e) {}
+                this.renderAll();
             }
         }
     };
