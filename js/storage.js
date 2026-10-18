@@ -95,6 +95,15 @@
                                 data.feathers = window.PresetIndian.feathers;
                                 data.matrix = window.PresetIndian.matrix;
                                 data.controls = window.PresetIndian.controls;
+                                data.script = window.PresetIndian.script;
+                            }
+                        } else if (data.name && (data.name.indexOf('Dwarf') !== -1 || data.name.indexOf('Shunt') !== -1)) {
+                            if (window.PresetDwarf) {
+                                data.mast = window.PresetDwarf.mast;
+                                data.shapes = window.PresetDwarf.shapes;
+                                data.lamps = window.PresetDwarf.lamps;
+                                data.controls = window.PresetDwarf.controls;
+                                data.script = window.PresetDwarf.script;
                             }
                         }
                         return data;

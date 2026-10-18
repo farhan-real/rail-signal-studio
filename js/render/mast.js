@@ -8,8 +8,18 @@
             var svg = '<g class="mast-structure" data-type="' + type + '">';
 
             if (type === 'dwarf') {
-                svg += '<rect x="' + (cx - 24) + '" y="' + (baseCy - 30) + '" width="48" height="30" rx="3" fill="#141720" stroke="#32384a" stroke-width="2" />';
-                svg += '<line x1="' + (cx - 32) + '" y1="' + baseCy + '" x2="' + (cx + 32) + '" y2="' + baseCy + '" stroke="#050608" stroke-width="6" />';
+                var dwarfTopY = (mast.y !== undefined) ? mast.y : -14;
+                var baseBoxH = 26;
+                var boxTopY = baseCy - baseBoxH;
+                var neckH = Math.max(4, boxTopY - dwarfTopY);
+
+                svg += '<rect x="' + (cx - 12) + '" y="' + dwarfTopY + '" width="24" height="' + neckH + '" rx="1" fill="#181c26" stroke="#2c3345" stroke-width="1.8" />';
+                svg += '<line x1="' + (cx - 16) + '" y1="' + dwarfTopY + '" x2="' + (cx + 16) + '" y2="' + dwarfTopY + '" stroke="#384256" stroke-width="2.2" />';
+
+                svg += '<rect x="' + (cx - 26) + '" y="' + boxTopY + '" width="52" height="' + baseBoxH + '" rx="3" fill="#141720" stroke="#32384a" stroke-width="2" />';
+                svg += '<rect x="' + (cx - 20) + '" y="' + (boxTopY + 4) + '" width="40" height="' + (baseBoxH - 8) + '" rx="1" fill="#0f1118" stroke="#252a38" stroke-width="1" />';
+
+                svg += '<line x1="' + (cx - 34) + '" y1="' + baseCy + '" x2="' + (cx + 34) + '" y2="' + baseCy + '" stroke="#050608" stroke-width="6" stroke-linecap="round" />';
                 svg += '</g>';
                 return svg;
             }
