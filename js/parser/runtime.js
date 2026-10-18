@@ -36,12 +36,14 @@
             this.holdBlinks = {};
             this.delayedQueues = {};
             this.isPaused = false;
-            SignalState.groups = ast.groups || {};
-            SignalState.enums = ast.enums || {};
+            SignalState.groups = (ast && ast.groups) || {};
+            SignalState.enums = (ast && ast.enums) || {};
             SignalState.variables = {};
-            for (var k in ast.variables) SignalState.variables[k] = ast.variables[k];
+            if (ast && ast.variables) {
+                for (var k in ast.variables) SignalState.variables[k] = ast.variables[k];
+            }
 
-            if (ast.aspectList.length > 0) {
+            if (ast && ast.aspectList && ast.aspectList.length > 0) {
                 this.setAspect(ast.aspectList[0]);
             }
             this.resume();
@@ -131,7 +133,8 @@
         },
 
         isItemOrGroupSet: function(name) {
-            if (name.toUpperCase() === 'ALL') {
+            if (!name) return false;
+            if (String(name).toUpperCase() === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) { if (!SignalState.getLamp(all[a].id)) return false; }
                 return true;
@@ -145,7 +148,8 @@
         },
 
         applySetAction: function(target, isLit) {
-            if (target.toUpperCase() === 'ALL') {
+            if (!target) return;
+            if (String(target).toUpperCase() === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
                 if (!isLit && SignalState.matrix) { SignalState.matrix.text = ''; SignalEvents.emit('matrix:updated', ''); }
@@ -160,7 +164,8 @@
         },
 
         applyBlinkAction: function(target, rate) {
-            if (target.toUpperCase() === 'ALL') {
+            if (!target) return;
+            if (String(target).toUpperCase() === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) this.activeBlinks[all[a].id] = rate;
                 return;
@@ -174,6 +179,7 @@
         },
 
         executeAction: function(act) {
+            if (!act) return;
             if (act.op === 'aspect') {
                 if (SignalState.currentAspect !== act.target) this.setAspect(act.target);
             } else if (act.op === 'set') {
@@ -215,6 +221,7 @@
         },
 
         runActionList: function(actions, ruleKey, now) {
+            if (!actions) return null;
             for (var a = 0; a < actions.length; a++) {
                 var act = actions[a];
                 if (act.op === 'delay') {
@@ -222,12 +229,13 @@
                         nextTime: now + (act.duration || 1000),
                         remaining: actions.slice(a + 1)
                     };
-                    return;
+                    return 'delay';
                 }
-                if (act.op === 'end') break;
+                if (act.op === 'end') return 'end';
                 this.executeAction(act);
             }
             delete this.delayedQueues[ruleKey];
+            return 'done';
         },
 
         processLamps: function(now) {
@@ -289,16 +297,18 @@
                     }
                     if (stmt.op === 'if') {
                         if (this.evalExpr(stmt.expr)) {
+                            var outcome;
                             if (this.delayedQueues[ruleKey]) {
                                 var queue = this.delayedQueues[ruleKey];
-                                if (now >= queue.nextTime) this.runActionList(queue.remaining, ruleKey, now);
+                                if (now >= queue.nextTime) outcome = this.runActionList(queue.remaining, ruleKey, now);
                             } else {
-                                this.runActionList(stmt.actions, ruleKey, now);
+                                outcome = this.runActionList(stmt.actions, ruleKey, now);
                             }
+                            if (outcome === 'end') break;
                         } else {
                             if (this.delayedQueues[ruleKey]) delete this.delayedQueues[ruleKey];
                         }
-                    } else if (stmt.op === 'assign' || stmt.op === 'resume_after' || stmt.op === 'resume_onnextaction') {
+                    } else {
                         this.executeAction(stmt);
                     }
                     idx++;

@@ -143,15 +143,21 @@
             } else {
                 SignalState.load(PresetIndian);
             }
+            if (EditorUI && EditorUI.compile) {
+                EditorUI.compile();
+            }
             if (SignalRuntime.ast && SignalRuntime.ast.aspectList && SignalRuntime.ast.aspectList.length > 0) {
                 SignalRuntime.setAspect(SignalRuntime.ast.aspectList[0]);
             }
+            SignalRuntime.resume();
         }
     };
 
-    window.addEventListener('DOMContentLoaded', function() {
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', function() { App.init(); });
+    } else {
         App.init();
-    });
+    }
 
     window.App = App;
 })(window);

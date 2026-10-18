@@ -21,9 +21,11 @@
             this.defs = document.getElementById('svgDefs');
             var container = document.getElementById('canvasContainer');
 
-            this.setupDefs();
             this.centerView();
             this.bindEvents(container);
+
+            var self = this;
+            window.addEventListener('resize', function() { self.centerView(); });
 
             SignalEvents.on('state:changed', this.renderAll.bind(this));
             SignalEvents.on('state:loaded', this.renderAll.bind(this));
@@ -32,31 +34,27 @@
             SignalEvents.on('matrix:updated', this.updateMatrixFast.bind(this));
         },
 
-        setupDefs: function() {
-            this.defs.innerHTML = [
-                '<filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">',
-                '  <feGaussianBlur stdDeviation="7" result="blur" />',
-                '  <feMerge>',
-                '    <feMergeNode in="blur" />',
-                '    <feMergeNode in="SourceGraphic" />',
-                '  </feMerge>',
-                '</filter>'
-            ].join('');
-        },
-
         centerView: function() {
             var container = document.getElementById('canvasContainer');
-            this.panX = container.clientWidth / 2;
-            this.panY = container.clientHeight / 2 + 50;
+            var w = (container && container.clientWidth) ? container.clientWidth : (window.innerWidth / 2);
+            var h = (container && container.clientHeight) ? container.clientHeight : (window.innerHeight / 2);
+            this.panX = Math.max(100, w / 2);
+            this.panY = Math.max(100, h / 2 + 30);
             this.scale = 1.0;
-            this.scheduleTransform();
+            this.applyTransform();
+        },
+
+        applyTransform: function() {
+            if (this.sceneRoot) {
+                this.sceneRoot.setAttribute('transform', 'translate(' + this.panX + ',' + this.panY + ') scale(' + this.scale + ')');
+            }
         },
 
         scheduleTransform: function() {
             if (this.rafId) return;
             var self = this;
             this.rafId = requestAnimationFrame(function() {
-                self.sceneRoot.style.transform = 'translate3d(' + self.panX + 'px, ' + self.panY + 'px, 0) scale(' + self.scale + ')';
+                self.applyTransform();
                 self.rafId = null;
             });
         },
@@ -138,16 +136,25 @@
                 out += MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
             }
             this.sceneRoot.innerHTML = out;
+            this.applyTransform();
         },
 
         updateLampFast: function(payload) {
             var el = this.sceneRoot.querySelector('[data-lamp-id="' + payload.id + '"], [data-feather-id="' + payload.id + '"]');
-            if (el) el.classList.toggle('lit', !!payload.lit);
+            if (el) {
+                el.classList.toggle('lit', !!payload.lit);
+                var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
+                if (litLayer) litLayer.style.display = payload.lit ? 'inline' : 'none';
+            }
         },
 
         updateBlinkFast: function(payload) {
             var el = this.sceneRoot.querySelector('[data-lamp-id="' + payload.id + '"], [data-feather-id="' + payload.id + '"]');
-            if (el) el.classList.toggle('lit', !!payload.visible);
+            if (el) {
+                el.classList.toggle('lit', !!payload.visible);
+                var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
+                if (litLayer) litLayer.style.display = payload.visible ? 'inline' : 'none';
+            }
         },
 
         updateMatrixFast: function() {

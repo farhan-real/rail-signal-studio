@@ -212,25 +212,32 @@
         },
 
         updateBadge: function(aspectName) {
-            if (this.badge && aspectName && aspectName !== 'UNSET') {
-                this.badge.textContent = aspectName;
-                this.badge.classList.add('active');
+            var badge = document.getElementById('currentAspectBadge') || this.badge;
+            if (badge && aspectName && aspectName !== 'UNSET') {
+                badge.textContent = aspectName;
+                badge.classList.add('active');
             }
         },
 
         updateRunStatus: function(status) {
             var btnRun = document.getElementById('btnRunScript');
             var btnPause = document.getElementById('btnPauseScript');
+            var badge = document.getElementById('currentAspectBadge') || this.badge;
             if (status.running) {
                 if (btnRun) btnRun.style.borderColor = '#00ee44';
                 if (btnPause) btnPause.style.borderColor = '';
-                this.updateBadge(status.aspect || SignalState.currentAspect);
+                var cur = SignalState.currentAspect;
+                if (cur && cur !== 'UNSET') {
+                    this.updateBadge(cur);
+                } else if (SignalRuntime.ast && SignalRuntime.ast.aspectList.length > 0) {
+                    this.updateBadge(SignalRuntime.ast.aspectList[0]);
+                }
             } else {
                 if (btnRun) btnRun.style.borderColor = '';
                 if (btnPause) btnPause.style.borderColor = '#f59e0b';
-                if (this.badge) {
-                    this.badge.textContent = 'PAUSED';
-                    this.badge.classList.remove('active');
+                if (badge) {
+                    badge.textContent = 'PAUSED';
+                    badge.classList.remove('active');
                 }
             }
         }

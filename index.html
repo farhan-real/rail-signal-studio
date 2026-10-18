@@ -70,7 +70,15 @@
                 </div>
                 <div id="canvasContainer" class="canvas-container">
                     <svg id="signalSvg" class="signal-svg" xmlns="http://www.w3.org/2000/svg">
-                        <defs id="svgDefs"></defs>
+                        <defs id="svgDefs">
+                            <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="7" result="blur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="blur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+                        </defs>
                         <g id="sceneRoot"></g>
                     </svg>
                 </div>
@@ -102,7 +110,7 @@
             <div class="console-header">
                 <div class="console-title-group">
                     <span class="console-title">Interlocking Control Desk</span>
-                    <span id="currentAspectBadge" class="aspect-badge">READY</span>
+                    <span id="currentAspectBadge" class="aspect-badge active">READY</span>
                 </div>
                 <div class="console-actions">
                     <button id="btnAddLever" class="console-btn">+ Lever</button>

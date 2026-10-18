@@ -41,11 +41,6 @@
     display: block;
 }
 
-#sceneRoot {
-    will-change: transform;
-    transform-origin: 0 0;
-}
-
 .target-plate {
     fill: #0c0d11;
     stroke: #2a2e3a;
@@ -54,21 +49,13 @@
 }
 
 .visor-hood { fill: #08090b; stroke: #1b1d24; stroke-width: 1.5; }
-.lamp-glass-off { fill: #16181e; stroke: #0a0b0e; stroke-width: 2; transition: opacity 0.04s ease-out; }
-.fresnel-ring { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; transition: opacity 0.04s ease-out; }
+.lamp-glass-off { fill: #16181e; stroke: #0a0b0e; stroke-width: 2; }
+.fresnel-ring { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; }
 
-.signal-lamp-unit { will-change: opacity; }
-.lamp-lit-layer { opacity: 0; pointer-events: none; transition: opacity 0.04s ease-out; }
-.signal-lamp-unit.lit .lamp-lit-layer { opacity: 1; }
-.signal-lamp-unit.lit .lamp-glass-off { opacity: 0.18; }
-.signal-lamp-unit.lit .fresnel-ring { opacity: 0.08; }
-
+.signal-lamp-unit { pointer-events: none; }
+.lamp-lit-layer { pointer-events: none; }
 .feather-arm { fill: #0d0f14; stroke: #252a38; stroke-width: 18; }
-.feather-unit { will-change: opacity; }
-.feather-lit-layer { opacity: 0; pointer-events: none; transition: opacity 0.04s ease-out; }
-.feather-unit.lit .feather-lit-layer { opacity: 1; }
-.feather-unit.lit .feather-off-layer { opacity: 0.2; }
-
+.feather-unit { pointer-events: none; }
 .theatre-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
 .theatre-pixel-off { fill: #151820; }
 .theatre-pixel-on { fill: #ffffff; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95)); }

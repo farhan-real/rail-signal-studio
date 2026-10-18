@@ -10,17 +10,17 @@
             var lampCount = feather.lamps || 5;
             var spacing = 18;
             var rad = deg * Math.PI / 180;
-            var litClass = isLit ? 'lit' : '';
+            var displayStyle = isLit ? 'display: inline;' : 'display: none;';
 
             var armLength = lampCount * spacing + 14;
             var endX = originX + armLength * Math.cos(rad);
             var endY = originY + armLength * Math.sin(rad);
 
-            var svg = '<g class="feather-unit ' + litClass + '" data-feather-id="' + feather.id + '">';
+            var svg = '<g class="feather-unit ' + (isLit ? 'lit' : '') + '" data-feather-id="' + feather.id + '">';
             svg += '<line x1="' + originX + '" y1="' + originY + '" x2="' + endX + '" y2="' + endY + '" stroke="#0a0c10" stroke-width="18" stroke-linecap="round" class="feather-arm" />';
 
             var offLamps = '<g class="feather-off-layer">';
-            var litLamps = '<g class="feather-lit-layer">';
+            var litLamps = '<g class="feather-lit-layer" style="' + displayStyle + '">';
 
             for (var i = 1; i <= lampCount; i++) {
                 var dist = i * spacing;

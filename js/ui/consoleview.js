@@ -189,9 +189,20 @@
                     if (vEl) {
                         if (c.type === 'lever') {
                             vEl.textContent = 'POS ' + curVal;
+                            var handle = el.querySelector('.lever-handle');
+                            if (handle) {
+                                var angle = curVal === 0 ? -25 : ((c.positions || 2) === 3 && curVal === 1 ? 0 : 25);
+                                handle.style.transform = 'rotate(' + angle + 'deg)';
+                            }
                         } else if (c.type === 'knob') {
                             var states = KnobControl.getStates(c);
                             vEl.textContent = states[curVal] !== undefined ? states[curVal] : curVal;
+                            var indicator = el.querySelector('.knob-indicator-dot');
+                            if (indicator) {
+                                var stepAngle = 270 / Math.max(1, states.length - 1);
+                                var kAngle = -135 + curVal * stepAngle;
+                                indicator.style.transform = 'rotate(' + kAngle + 'deg)';
+                            }
                         } else if (c.type === 'switch') {
                             vEl.textContent = curVal === 1 ? 'ON' : 'OFF';
                         }

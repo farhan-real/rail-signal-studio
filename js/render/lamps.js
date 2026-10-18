@@ -16,16 +16,16 @@
             var palette = LampColors[colorType] || LampColors.red;
             var brightness = Math.max(0.2, Math.min(1.0, lamp.brightness !== undefined ? lamp.brightness : 1.0));
             var hoodType = lamp.hood || 'round';
-            var litClass = isLit ? 'lit' : '';
+            var displayStyle = isLit ? 'display: inline;' : 'display: none;';
 
-            var svg = '<g class="signal-lamp-unit ' + litClass + '" data-lamp-id="' + lamp.id + '">';
+            var svg = '<g class="signal-lamp-unit ' + (isLit ? 'lit' : '') + '" data-lamp-id="' + lamp.id + '">';
             svg += this.renderVisor(cx, cy, r, hoodType);
 
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#0a0b0e" stroke-width="2" class="lamp-glass-off" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.7) + '" class="fresnel-ring" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.4) + '" class="fresnel-ring" />';
 
-            svg += '<g class="lamp-lit-layer">';
+            svg += '<g class="lamp-lit-layer" style="' + displayStyle + '">';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 1.8) + '" fill="' + palette.glow + '" opacity="' + (brightness * 0.45) + '" filter="url(#glowFilter)" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.lit + '" opacity="' + brightness + '" stroke="#ffffff" stroke-width="1.2" />';
             svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.4) + '" fill="#ffffff" opacity="' + (brightness * 0.85) + '" />';
