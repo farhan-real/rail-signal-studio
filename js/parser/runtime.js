@@ -137,20 +137,31 @@
             return all;
         },
 
+        getGroup: function(name) {
+            if (!name || !SignalState.groups) return null;
+            if (SignalState.groups[name]) return SignalState.groups[name];
+            var uName = String(name).toUpperCase();
+            for (var g in SignalState.groups) {
+                if (g.toUpperCase() === uName) return SignalState.groups[g];
+            }
+            return null;
+        },
+
         isItemOrGroupSet: function(name) {
             if (!name) return false;
-            if (String(name).toUpperCase() === 'ALL') {
+            var uName = String(name).toUpperCase();
+            if (uName === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) { if (!SignalState.getLamp(all[a].id)) return false; }
                 return true;
             }
-            if (String(name).toUpperCase() === 'FEATHERS') {
+            if (uName === 'FEATHERS') {
                 for (var f = 0; f < SignalState.feathers.length; f++) {
                     if (SignalState.getLamp(SignalState.feathers[f].id)) return true;
                 }
                 return false;
             }
-            var group = SignalState.groups[name];
+            var group = this.getGroup(name);
             if (group && group.length > 0) {
                 for (var i = 0; i < group.length; i++) { if (!SignalState.getLamp(group[i])) return false; }
                 return true;
@@ -180,7 +191,7 @@
                     }
                 }
             }
-            var group = SignalState.groups[target];
+            var group = this.getGroup(target);
             if (group) {
                 for (var i = 0; i < group.length; i++) SignalState.setLamp(group[i], isLit);
             } else {
@@ -195,7 +206,7 @@
                 for (var a = 0; a < all.length; a++) this.activeBlinks[all[a].id] = rate;
                 return;
             }
-            var group = SignalState.groups[target];
+            var group = this.getGroup(target);
             if (group) {
                 for (var i = 0; i < group.length; i++) this.activeBlinks[group[i]] = rate;
             } else {
@@ -249,6 +260,13 @@
             if (!actions) return null;
             for (var a = 0; a < actions.length; a++) {
                 var act = actions[a];
+                if (act.op === 'if') {
+                    if (this.evalExpr(act.expr)) {
+                        var nestedOutcome = this.runActionList(act.actions, ruleKey + '_sub' + a, now);
+                        if (nestedOutcome === 'end') return 'end';
+                    }
+                    continue;
+                }
                 if (act.op === 'delay') {
                     this.delayedQueues[ruleKey] = {
                         nextTime: now + (act.duration || 1000),

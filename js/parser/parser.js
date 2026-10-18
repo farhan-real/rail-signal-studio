@@ -37,49 +37,104 @@
                 return left;
             }
 
-            function parseAction() {
-                var actTok = next();
-                if (!actTok) return null;
-                if (actTok.type === 'END') return { op: 'end' };
-                if (actTok.type === 'DELAY') {
-                    var dTok = next();
-                    var dur = dTok ? (dTok.value.indexOf('s') !== -1 ? parseFloat(dTok.value) * 1000 : parseInt(dTok.value, 10)) : 1000;
-                    return { op: 'delay', duration: dur };
+            function parseStatement() {
+                var tok = peek();
+                if (!tok || tok.type === 'EOF' || tok.type === 'RBRACE') return null;
+
+                if (tok.type === 'LABEL') {
+                    next(); var lName = (next() || {}).value; match('SEMI');
+                    return { op: 'label', name: lName, line: tok.line };
                 }
-                if (actTok.type === 'RESUME') {
+                if (tok.type === 'END') {
+                    next(); match('SEMI');
+                    return { op: 'end', line: tok.line };
+                }
+                if (tok.type === 'IF') {
+                    var ifTok = next(), expr = parseOr(), actions = [];
+                    if (peek().type === 'COMMA') {
+                        next(); var sAct = parseStatement();
+                        if (sAct) actions.push(sAct);
+                    } else if (peek().type === 'LBRACE') {
+                        match('LBRACE');
+                        while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
+                            if (peek().type === 'SEMI') { next(); continue; }
+                            var bAct = parseStatement();
+                            if (bAct) actions.push(bAct);
+                        }
+                        match('RBRACE');
+                    }
+                    match('SEMI');
+                    return { op: 'if', expr: expr, actions: actions, line: ifTok.line };
+                }
+                if (tok.type === 'DELAY') {
+                    next(); var dTok = next();
+                    var dur = dTok ? (dTok.value.indexOf('s') !== -1 ? parseFloat(dTok.value) * 1000 : parseInt(dTok.value, 10)) : 1000;
+                    match('SEMI');
+                    return { op: 'delay', duration: dur, line: tok.line };
+                }
+                if (tok.type === 'RESUME') {
+                    next();
                     if (peek().type === 'AFTER') {
                         next(); var rTok = next();
                         var rDur = rTok ? (rTok.value.indexOf('s') !== -1 ? parseFloat(rTok.value) * 1000 : parseInt(rTok.value, 10)) : 1000;
-                        return { op: 'resume_after', duration: rDur };
+                        match('SEMI');
+                        return { op: 'resume_after', duration: rDur, line: tok.line };
                     }
-                    if (peek().type === 'ONNEXTACTION') { next(); return { op: 'resume_onnextaction' }; }
+                    if (peek().type === 'ONNEXTACTION') {
+                        next(); match('SEMI');
+                        return { op: 'resume_onnextaction', line: tok.line };
+                    }
+                    match('SEMI');
+                    return null;
                 }
-                if (actTok.type === 'ASPECT') return { op: 'aspect', target: (next() || {}).value || '' };
-                if (actTok.type === 'SET') {
-                    var sLamp = next();
-                    if (sLamp && sLamp.type === 'MATRIX') { match('EQUALS'); return { op: 'matrix', text: (next() || {}).value || '' }; }
-                    return { op: 'set', target: (sLamp || {}).value || '' };
+                if (tok.type === 'ASPECT') {
+                    next(); var asp = (next() || {}).value || ''; match('SEMI');
+                    return { op: 'aspect', target: asp, line: tok.line };
                 }
-                if (actTok.type === 'UNSET') {
-                    var uLamp = next();
-                    if (uLamp && uLamp.type === 'MATRIX') return { op: 'matrix', text: '' };
-                    return { op: 'unset', target: (uLamp || {}).value || '' };
+                if (tok.type === 'SET') {
+                    next(); var sLamp = next();
+                    if (sLamp && sLamp.type === 'MATRIX') {
+                        match('EQUALS'); var mText = (next() || {}).value || ''; match('SEMI');
+                        return { op: 'matrix', text: mText, line: tok.line };
+                    }
+                    match('SEMI');
+                    return { op: 'set', target: (sLamp || {}).value || '', line: tok.line };
                 }
-                if (actTok.type === 'MATRIX') { match('EQUALS'); return { op: 'matrix', text: (next() || {}).value || '' }; }
-                if (actTok.type === 'BLINK') {
-                    var bLamp = next(), bRate = next();
-                    return { op: 'blink', target: (bLamp || {}).value || '', rate: parseInt((bRate || {}).value, 10) || 500 };
+                if (tok.type === 'UNSET') {
+                    next(); var uLamp = next();
+                    if (uLamp && uLamp.type === 'MATRIX') {
+                        match('SEMI');
+                        return { op: 'matrix', text: '', line: tok.line };
+                    }
+                    match('SEMI');
+                    return { op: 'unset', target: (uLamp || {}).value || '', line: tok.line };
                 }
-                if (actTok.type === 'JUMP' || actTok.type === 'GOTO') return { op: 'jump', target: (next() || {}).value || '' };
-                if (actTok.type === 'IDENT' && peek().type === 'EQUALS') {
-                    next(); return { op: 'assign', target: actTok.value, value: (next() || {}).value || '0' };
+                if (tok.type === 'MATRIX') {
+                    next(); match('EQUALS'); var matText = (next() || {}).value || ''; match('SEMI');
+                    return { op: 'matrix', text: matText, line: tok.line };
                 }
+                if (tok.type === 'BLINK') {
+                    next(); var bLamp = next(), bRate = next(); match('SEMI');
+                    return { op: 'blink', target: (bLamp || {}).value || '', rate: parseInt((bRate || {}).value, 10) || 500, line: tok.line };
+                }
+                if (tok.type === 'JUMP' || tok.type === 'GOTO') {
+                    next(); var jTarget = (next() || {}).value || ''; match('SEMI');
+                    return { op: 'jump', target: jTarget, line: tok.line };
+                }
+                if (tok.type === 'IDENT' && tokens[pos + 1] && tokens[pos + 1].type === 'EQUALS') {
+                    var varId = next().value; next();
+                    var varVal = (next() || {}).value || '0'; match('SEMI');
+                    return { op: 'assign', target: varId, value: varVal, line: tok.line };
+                }
+                next(); match('SEMI');
                 return null;
             }
 
             while (pos < tokens.length && peek().type !== 'EOF') {
                 var tok = peek();
-                if (tok.type === 'SECTION') {
+                if (tok.type === 'SEMI') {
+                    next();
+                } else if (tok.type === 'SECTION') {
                     next(); if (peek().type === 'STRING' || peek().type === 'IDENT') next(); match('SEMI');
                 } else if (tok.type === 'INT') {
                     next(); var iName = next(); match('EQUALS'); ast.variables[iName.value] = parseInt((next() || {}).value, 10) || 0; match('SEMI');
@@ -118,32 +173,9 @@
                 } else if (tok.type === 'MAINLOOP' || tok.type === 'LOOP') {
                     next(); var loopBlock = { line: tok.line, statements: [] }; match('LBRACE');
                     while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
-                        if (peek().type === 'LABEL') {
-                            next(); loopBlock.statements.push({ op: 'label', name: (next() || {}).value, line: tok.line }); match('SEMI');
-                        } else if (peek().type === 'END') {
-                            next(); loopBlock.statements.push({ op: 'end', line: tok.line }); match('SEMI');
-                        } else if (peek().type === 'DELAY') {
-                            var dAct = parseAction(); if (dAct) loopBlock.statements.push(dAct); match('SEMI');
-                        } else if (peek().type === 'RESUME') {
-                            var rAct = parseAction(); if (rAct) loopBlock.statements.push(rAct); match('SEMI');
-                        } else if (peek().type === 'JUMP' || peek().type === 'GOTO') {
-                            var jAct = parseAction(); if (jAct) loopBlock.statements.push(jAct); match('SEMI');
-                        } else if (peek().type === 'IF') {
-                            var ifTok = next(), expr = parseOr(), actions = [];
-                            if (peek().type === 'COMMA') {
-                                next(); var sAct = parseAction(); if (sAct) actions.push(sAct); match('SEMI');
-                            } else {
-                                match('LBRACE');
-                                while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
-                                    var act = parseAction(); if (act) actions.push(act); match('SEMI');
-                                }
-                                match('RBRACE');
-                            }
-                            loopBlock.statements.push({ op: 'if', expr: expr, actions: actions, line: ifTok.line });
-                        } else if (peek().type === 'IDENT' && tokens[pos + 1] && tokens[pos + 1].type === 'EQUALS') {
-                            var asg = parseAction(); if (asg) loopBlock.statements.push(asg); match('SEMI');
-                        } else next();
-                        match('SEMI');
+                        if (peek().type === 'SEMI') { next(); continue; }
+                        var stmt = parseStatement();
+                        if (stmt) loopBlock.statements.push(stmt);
                     }
                     match('RBRACE'); ast.mainloops.push(loopBlock);
                 } else if (tok.type === 'TIMER') {
