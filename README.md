@@ -2,6 +2,8 @@
 
 A standalone, offline 2D railway signal creator and interlocking simulator. Design complex modern railway signals, wire up custom physical control desks, and write signal logic using an intuitive, dedicated railway scripting language running at a fixed 20 TPS.
 
+**Live Demo:** [https://farhan-real.github.io/rail-signal-studio/](https://farhan-real.github.io/rail-signal-studio/)
+
 ---
 
 ## Key Features
@@ -31,21 +33,25 @@ A standalone, offline 2D railway signal creator and interlocking simulator. Desi
 - **Time Controls:** `delay 2s;` sequential stepping, `resume after 3s;` timed holds, and `resume onnextaction;` operator latches.
 - **Deterministic Blinking:** Millisecond-accurate pulsing that never stutters or resets phase across ticks.
 
-### 4. 100% Standalone and Offline
+### 4. Standalone and Cross-Platform
 - Zero dependencies, zero build steps, and zero external CDNs.
-- Runs directly by double-clicking `index.html` via the `file://` protocol.
-- Optimized for mobile and desktop in both portrait and landscape modes with touch gestures.
+- Runs directly online via GitHub Pages or offline by opening `index.html` via `file://`.
+- Fully responsive on mobile and desktop in both portrait and landscape modes with touch gestures.
 
 ---
 
-## Quick Start
+## Running the Simulator
 
+### Option 1: Live Web App
+Open the simulator directly in your browser:
+[https://farhan-real.github.io/rail-signal-studio/](https://farhan-real.github.io/rail-signal-studio/)
+
+### Option 2: Run Locally
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/your-username/rail-signal-studio.git
+   git clone https://github.com/farhan-real/rail-signal-studio.git
    ```
-2. Double-click `index.html` in your web browser.
-3. Select a preset from the **Presets...** dropdown in the top bar to inspect pre-configured signals and scripts.
+2. Open `index.html` in any modern desktop or mobile browser.
 
 ---
 
