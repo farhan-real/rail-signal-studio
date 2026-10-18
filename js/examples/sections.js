@@ -16,7 +16,7 @@
         feathers: [
             { id: 'FEATHER_L1', position: 'left1', x: -28, y: -140, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -210, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'LOOP'], defaultValue: 0, x: 110, y: 15 },

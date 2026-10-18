@@ -17,7 +17,7 @@
             { id: 'FEATHER_L1', position: 'left1', x: -28, y: -140, lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', x: 28, y: -140, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -210, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
             { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 15 },
             { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'DIVERGE_LEFT', 'DIVERGE_RIGHT'], defaultValue: 0, x: 110, y: 15 }

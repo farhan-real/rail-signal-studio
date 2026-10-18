@@ -16,7 +16,7 @@
             { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -202, text: 'M' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: 'M' },
         controls: [
             { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 15 },
             { id: 'TrackSelector', type: 'knob', label: 'Platform', states: ['MAIN', 'PLATFORM_1', 'PLATFORM_2'], defaultValue: 0, x: 110, y: 15 }

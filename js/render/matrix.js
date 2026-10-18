@@ -31,13 +31,18 @@
     var MatrixRenderer = {
         render: function(matrixConf, text) {
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
-            var cy = matrixConf.y !== undefined ? matrixConf.y : -202;
+            var hasFeathers = window.SignalState && window.SignalState.feathers && window.SignalState.feathers.length > 0;
 
-            var hasFeathers = SignalState.feathers && SignalState.feathers.length > 0;
+            var cy = matrixConf.y !== undefined ? matrixConf.y : (hasFeathers ? -258 : -192);
+
             if (hasFeathers) {
-                cy = -202;
-            } else if (cy < -220 || cy > -170) {
-                cy = -192;
+                if (cy > -240 || cy === -202 || cy === -210) {
+                    cy = -258;
+                }
+            } else {
+                if (cy < -205 || cy === -215 || cy === -202) {
+                    cy = -192;
+                }
             }
 
             var txt = (text !== undefined ? text : (matrixConf.text || 'M')).trim().toUpperCase();
@@ -45,12 +50,18 @@
             var boxWidth = isMultiChar ? 62 : 44;
             var boxHeight = 52;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
+            var boxBottomY = by + boxHeight;
+
+            var mountTargetY = hasFeathers ? -231.5 : -160;
+            var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
 
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
-            svg += '<rect x="' + (cx - 8) + '" y="' + (by + boxHeight) + '" width="16" height="4" rx="1" fill="#121620" stroke="#283042" stroke-width="1.2" />';
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
-            svg += '<rect x="' + (bx - 1) + '" y="' + (by - 2) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
+            svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';
+            svg += '<line x1="' + (cx - 13) + '" y1="' + (boxBottomY + bracketHeight).toFixed(1) + '" x2="' + (cx + 13) + '" y2="' + (boxBottomY + bracketHeight).toFixed(1) + '" stroke="#384256" stroke-width="2" />';
+
+            svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
+            svg += '<rect x="' + (bx - 1).toFixed(1) + '" y="' + (by - 2).toFixed(1) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 
             var spacing = 5.4;
 

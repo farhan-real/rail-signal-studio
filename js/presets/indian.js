@@ -23,7 +23,7 @@
             { id: 'FEATHER_L2', position: 'left2', lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
-        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: -202, text: '' },
+        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], defaultValue: 0, x: 110, y: 15 },
