@@ -6,23 +6,22 @@
         mast: { type: 'tubular', height: 420, x: 0, y: -40, platform: true, ladder: true },
         shapes: [
             { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 180, corners: [28, 28, 28, 28], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 },
-            { type: 'circle-sector', x: 0, y: -160, radius: 28, percent: 50, startAngle: 270, fill: '#0c0d12', stroke: '#2e3444' },
-            { type: 'rounded-rect', x: -22, y: 50, width: 44, height: 44, corners: [6, 6, 6, 6], fill: '#0c0d12', stroke: '#2e3444' }
+            { type: 'rounded-rect', x: -20, y: 55, width: 40, height: 40, corners: [6, 6, 6, 6], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2 }
         ],
         lamps: [
-            { id: 'RED', color: 'red', diameter: 36, x: 0, y: -130, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW1', color: 'yellow', diameter: 36, x: 0, y: -90, hood: 'round', brightness: 1.0 },
-            { id: 'GREEN', color: 'green', diameter: 36, x: 0, y: -50, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW2', color: 'yellow', diameter: 36, x: 0, y: -10, hood: 'round', brightness: 1.0 },
-            { id: 'SHUNT_WHITE1', color: 'white', diameter: 14, x: -10, y: 72, hood: 'none', brightness: 0.9 },
-            { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 10, y: 72, hood: 'none', brightness: 0.9 }
+            { id: 'RED', color: 'red', diameter: 34, x: 0, y: -125, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW1', color: 'yellow', diameter: 34, x: 0, y: -85, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW2', color: 'yellow', diameter: 34, x: 0, y: -5, hood: 'round', brightness: 1.0 },
+            { id: 'SHUNT_WHITE1', color: 'white', diameter: 14, x: -10, y: 75, hood: 'none', brightness: 0.9 },
+            { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 10, y: 75, hood: 'none', brightness: 0.9 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', x: -28, y: -140, lamps: 5 },
-            { id: 'FEATHER_L2', position: 'left2', x: -28, y: -150, lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', x: 28, y: -140, lamps: 5 }
+            { id: 'FEATHER_L1', position: 'left1', x: -18, y: -160, lamps: 5 },
+            { id: 'FEATHER_L2', position: 'left2', x: -26, y: -150, lamps: 5 },
+            { id: 'FEATHER_R1', position: 'right1', x: 18, y: -160, lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -210, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -205, text: '' },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Loop1', 'Loop2'], defaultValue: 0, x: 110, y: 15 },

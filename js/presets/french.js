@@ -5,15 +5,15 @@
         name: 'French SNCF Combined Target Panel',
         mast: { type: 'lattice', height: 400, x: 0, y: -30, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -45, y: -160, width: 90, height: 180, corners: [30, 30, 30, 30], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 3 },
-            { type: 'triangle', points: [[45, -120], [75, -90], [45, -60]], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 2 }
+            { type: 'rounded-rect', x: -44, y: -160, width: 88, height: 175, corners: [24, 24, 24, 24], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 3 },
+            { type: 'triangle', points: [[44, -115], [70, -90], [44, -65]], fill: '#0a0c10', stroke: '#e8edf5', strokeWidth: 2 }
         ],
         lamps: [
-            { id: 'CARRE_RED1', color: 'red', diameter: 32, x: -20, y: -125, hood: 'square', brightness: 1.0 },
-            { id: 'CARRE_RED2', color: 'red', diameter: 32, x: 20, y: -125, hood: 'square', brightness: 1.0 },
-            { id: 'VERT', color: 'green', diameter: 32, x: 0, y: -80, hood: 'square', brightness: 1.0 },
-            { id: 'JAUNE', color: 'yellow', diameter: 32, x: -20, y: -35, hood: 'square', brightness: 1.0 },
-            { id: 'BLANC', color: 'white', diameter: 24, x: 20, y: -35, hood: 'square', brightness: 0.9 }
+            { id: 'CARRE_RED1', color: 'red', diameter: 30, x: -20, y: -125, hood: 'square', brightness: 1.0 },
+            { id: 'CARRE_RED2', color: 'red', diameter: 30, x: 20, y: -125, hood: 'square', brightness: 1.0 },
+            { id: 'VERT', color: 'green', diameter: 30, x: 0, y: -80, hood: 'square', brightness: 1.0 },
+            { id: 'JAUNE', color: 'yellow', diameter: 30, x: -20, y: -35, hood: 'square', brightness: 1.0 },
+            { id: 'BLANC', color: 'white', diameter: 22, x: 20, y: -35, hood: 'square', brightness: 0.95 }
         ],
         feathers: [],
         matrix: { enabled: false },

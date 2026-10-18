@@ -25,29 +25,36 @@
 
     var MatrixRenderer = {
         render: function(matrixConf, text) {
-            var cx = matrixConf.x || 0, cy = matrixConf.y || 0;
+            var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
+            var cy = matrixConf.y !== undefined ? matrixConf.y : -205;
             var txt = (text || matrixConf.text || '').toUpperCase();
-            var boxWidth = 54, boxHeight = 70;
+            var boxWidth = 58, boxHeight = 72;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
 
-            var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + matrixConf.id + '">';
-            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" />';
+            var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
+
+            svg += '<rect x="' + (cx - 7) + '" y="' + (by + boxHeight) + '" width="14" height="24" fill="#181c26" stroke="#2a3040" stroke-width="1.5" />';
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="5" class="theatre-box" fill="#090b0e" stroke="#2e3547" stroke-width="2.5" />';
+            svg += '<rect x="' + (bx - 2) + '" y="' + (by - 3) + '" width="' + (boxWidth + 4) + '" height="5" rx="1.5" fill="#060709" stroke="#1d222e" stroke-width="1" />';
 
             var charKey = txt.length > 0 ? txt.charAt(0) : '';
             var pattern = MatrixFont[charKey] || [];
-            var startX = bx + 9, startY = by + 9, spacing = 7.2;
+            var spacing = 8.5;
+            var startX = cx - 17;
+            var startY = cy - 25.5;
 
             for (var row = 0; row < 7; row++) {
                 var rowMask = pattern[row] || 0;
                 for (var col = 0; col < 5; col++) {
-                    var bit = (rowMask >> (5 - col)) & 1;
+                    var bit = (rowMask >> (4 - col)) & 1;
                     var px = startX + col * spacing;
                     var py = startY + row * spacing;
 
                     if (bit === 1) {
-                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.8" class="theatre-pixel-on" />';
+                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.8" fill="#ffffff" filter="url(#glowFilter)" class="theatre-pixel-on" />';
+                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.4" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.8" />';
                     } else {
-                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.2" class="theatre-pixel-off" />';
+                        svg += '<circle cx="' + px + '" cy="' + py + '" r="2.3" fill="#131620" stroke="#090b0f" stroke-width="0.6" class="theatre-pixel-off" />';
                     }
                 }
             }
