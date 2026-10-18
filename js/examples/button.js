@@ -3,16 +3,16 @@
 
     var ExampleButton = {
         name: 'Example: Buttons and Panel LEDs',
-        mast: { type: 'tubular', height: 380, x: 0, y: -20, platform: true, ladder: true },
+        mast: { type: 'tubular', height: 400, x: 0, y: -20, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -26, y: -140, width: 52, height: 135, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 },
-            { type: 'rounded-rect', x: -20, y: 10, width: 40, height: 40, corners: [6, 6, 6, 6], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2 }
+            { type: 'rounded-rect', x: -26, y: -150, width: 52, height: 158, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 },
+            { type: 'rounded-rect', x: -20, y: 16, width: 40, height: 40, corners: [6, 6, 6, 6], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2 }
         ],
         lamps: [
             { id: 'RED', color: 'red', diameter: 34, x: 0, y: -115, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -75, hood: 'round', brightness: 1.0 },
-            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -35, hood: 'round', brightness: 1.0 },
-            { id: 'WHITE', color: 'white', diameter: 20, x: 0, y: 30, hood: 'round', brightness: 0.95 }
+            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -67, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -19, hood: 'round', brightness: 1.0 },
+            { id: 'WHITE', color: 'white', diameter: 20, x: 0, y: 36, hood: 'round', brightness: 0.95 }
         ],
         feathers: [],
         matrix: { enabled: false },

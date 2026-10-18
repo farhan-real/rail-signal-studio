@@ -169,7 +169,7 @@
                         color: 'red',
                         diameter: 36,
                         x: 0,
-                        y: -80 + (SignalState.lamps.length * 40),
+                        y: -80 + (SignalState.lamps.length * 48),
                         hood: 'round',
                         brightness: 1.0
                     });

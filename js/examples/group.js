@@ -3,15 +3,15 @@
 
     var ExampleGroup = {
         name: 'Example: Groups and Enum Variables',
-        mast: { type: 'tubular', height: 400, x: 0, y: -30, platform: true, ladder: true },
+        mast: { type: 'tubular', height: 450, x: 0, y: -30, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 180, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3444', strokeWidth: 2.5 }
+            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 212, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3444', strokeWidth: 2.5 }
         ],
         lamps: [
-            { id: 'RED', color: 'red', diameter: 36, x: 0, y: -130, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW1', color: 'yellow', diameter: 36, x: 0, y: -90, hood: 'round', brightness: 1.0 },
-            { id: 'GREEN', color: 'green', diameter: 36, x: 0, y: -50, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW2', color: 'yellow', diameter: 36, x: 0, y: -10, hood: 'round', brightness: 1.0 }
+            { id: 'RED', color: 'red', diameter: 36, x: 0, y: -125, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW1', color: 'yellow', diameter: 36, x: 0, y: -75, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 36, x: 0, y: -25, hood: 'round', brightness: 1.0 },
+            { id: 'YELLOW2', color: 'yellow', diameter: 36, x: 0, y: 25, hood: 'round', brightness: 1.0 }
         ],
         feathers: [
             { id: 'FEATHER_L1', position: 'left1', x: -28, y: -140, lamps: 5 },

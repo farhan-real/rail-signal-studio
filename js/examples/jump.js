@@ -3,14 +3,14 @@
 
     var ExampleJump = {
         name: 'Example: Jumps and Variables',
-        mast: { type: 'tubular', height: 360, x: 0, y: -20, platform: true, ladder: true },
+        mast: { type: 'tubular', height: 380, x: 0, y: -20, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -26, y: -130, width: 52, height: 135, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 }
+            { type: 'rounded-rect', x: -26, y: -140, width: 52, height: 158, corners: [26, 26, 26, 26], fill: '#0c0d12', stroke: '#2e3444', strokeWidth: 2.5 }
         ],
         lamps: [
             { id: 'RED', color: 'red', diameter: 34, x: 0, y: -105, hood: 'round', brightness: 1.0 },
-            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -65, hood: 'round', brightness: 1.0 },
-            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -25, hood: 'round', brightness: 1.0 }
+            { id: 'YELLOW', color: 'yellow', diameter: 34, x: 0, y: -57, hood: 'round', brightness: 1.0 },
+            { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -9, hood: 'round', brightness: 1.0 }
         ],
         feathers: [],
         matrix: { enabled: false },

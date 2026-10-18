@@ -8,9 +8,9 @@
             { type: 'circle-sector', x: 0, y: -49, radius: 36, percent: 100, fill: '#0a0c10', stroke: '#2e3547', strokeWidth: 2.5 }
         ],
         lamps: [
-            { id: 'STOP_WHITE', color: 'white', diameter: 16, x: -13, y: -37, hood: 'round', brightness: 1.0 },
-            { id: 'STOP_RED', color: 'red', diameter: 16, x: 13, y: -37, hood: 'round', brightness: 1.0 },
-            { id: 'PROCEED_WHITE', color: 'white', diameter: 16, x: 13, y: -63, hood: 'round', brightness: 1.0 }
+            { id: 'STOP_WHITE', color: 'white', diameter: 16, x: -14, y: -36, hood: 'round', brightness: 1.0 },
+            { id: 'STOP_RED', color: 'red', diameter: 16, x: 14, y: -36, hood: 'round', brightness: 1.0 },
+            { id: 'PROCEED_WHITE', color: 'white', diameter: 16, x: 14, y: -64, hood: 'round', brightness: 1.0 }
         ],
         feathers: [],
         matrix: { enabled: false },
