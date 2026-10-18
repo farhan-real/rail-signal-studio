@@ -13,7 +13,6 @@
         <header class="app-header">
             <div class="brand">
                 <span class="brand-title">Rail Signal Studio</span>
-                <span id="currentAspectBadge" class="aspect-badge">READY</span>
             </div>
             <div class="header-actions">
                 <select id="presetSelector" class="header-select" title="Load Preset">
@@ -101,7 +100,10 @@
 
         <footer id="controlConsole" class="console-section">
             <div class="console-header">
-                <div class="console-title">Interlocking Control Desk</div>
+                <div class="console-title-group">
+                    <span class="console-title">Interlocking Control Desk</span>
+                    <span id="currentAspectBadge" class="aspect-badge">READY</span>
+                </div>
                 <div class="console-actions">
                     <button id="btnAddLever" class="console-btn">+ Lever</button>
                     <button id="btnAddKnob" class="console-btn">+ Rotary</button>
