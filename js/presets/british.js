@@ -16,7 +16,7 @@
         feathers: [],
         matrix: { enabled: true, id: 'THEATRE_BOX', x: 0, y: -192, text: 'M' },
         controls: [
-            { id: 'SignalLever', type: 'lever', label: 'Main Signal', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
+            { id: 'SignalLever', type: 'lever', label: 'Main Signal', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 15 },
             { id: 'RouteThumb', type: 'knob', label: 'Route', states: ['Main', 'Loop', 'Siding'], defaultValue: 0, x: 110, y: 15 }
         ],
         script: [
@@ -45,13 +45,13 @@
             '    if SignalLever is 0 {',
             '        aspect DANGER;',
             '    }',
-            '    if SignalLever is 1 AND RouteThumb is 0 {',
+            '    if SignalLever is 1 {',
             '        aspect CAUTION;',
             '    }',
-            '    if SignalLever is 1 AND RouteThumb is 1 {',
+            '    if SignalLever is 2 {',
             '        aspect PRELIMINARY_CAUTION;',
             '    }',
-            '    if SignalLever is 2 {',
+            '    if SignalLever is 3 {',
             '        aspect CLEAR;',
             '    }',
             '    if RouteThumb is 0 {',

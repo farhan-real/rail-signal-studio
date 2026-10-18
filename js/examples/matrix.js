@@ -29,6 +29,11 @@
             '    set RED;',
             '}',
             '',
+            'aspect CAUTION {',
+            '    unset ALL;',
+            '    set YELLOW;',
+            '}',
+            '',
             'aspect PROCEED {',
             '    unset ALL;',
             '    set GREEN;',
@@ -37,10 +42,18 @@
             'mainloop {',
             '    if MasterLever is 0 {',
             '        aspect DANGER;',
+            '        unset FEATHERS;',
+            '        unset matrix;',
             '        end;',
             '    }',
             '',
-            '    aspect PROCEED;',
+            '    if MasterLever is 1 {',
+            '        aspect CAUTION;',
+            '    }',
+            '',
+            '    if MasterLever is 2 {',
+            '        aspect PROCEED;',
+            '    }',
             '',
             '    if TrackSelector is MAIN {',
             '        set matrix "M";',
@@ -64,4 +77,4 @@
     };
 
     window.ExampleMatrix = ExampleMatrix;
-})(window);
+})(window); 

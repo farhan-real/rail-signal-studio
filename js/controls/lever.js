@@ -8,13 +8,15 @@
             var color = ctrl.color || '#d92525';
             var positions = ctrl.positions || 2;
             var currentVal = SignalState.getControlValue(id) || 0;
-            var angle = currentVal === 0 ? -25 : (positions === 3 && currentVal === 1 ? 0 : 25);
+            var minAngle = -25, maxAngle = 25;
+            var stepAngle = (maxAngle - minAngle) / Math.max(1, positions - 1);
+            var angle = minAngle + currentVal * stepAngle;
 
             var html = [
                 '<div class="console-item lever-item" data-control-id="' + id + '">',
                 '  <div class="lever-housing">',
                 '    <div class="lever-arc"></div>',
-                '    <div class="lever-handle" style="transform: rotate(' + angle + 'deg); background-color: ' + color + ';">',
+                '    <div class="lever-handle" style="transform: rotate(' + angle.toFixed(1) + 'deg); background-color: ' + color + ';">',
                 '      <div class="lever-grip"></div>',
                 '      <div class="lever-latch"></div>',
                 '    </div>',

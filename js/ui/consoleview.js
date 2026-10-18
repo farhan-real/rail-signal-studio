@@ -191,8 +191,10 @@
                             vEl.textContent = 'POS ' + curVal;
                             var handle = el.querySelector('.lever-handle');
                             if (handle) {
-                                var angle = curVal === 0 ? -25 : ((c.positions || 2) === 3 && curVal === 1 ? 0 : 25);
-                                handle.style.transform = 'rotate(' + angle + 'deg)';
+                                var numPos = c.positions || 2;
+                                var step = 50 / Math.max(1, numPos - 1);
+                                var angle = -25 + curVal * step;
+                                handle.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
                             }
                         } else if (c.type === 'knob') {
                             var states = KnobControl.getStates(c);
