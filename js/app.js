@@ -2,7 +2,23 @@
     'use strict';
 
     var App = {
+        presetsMap: {
+            indian: { data: window.PresetIndian, key: 'indian' },
+            french: { data: window.PresetFrench, key: 'french' },
+            british: { data: window.PresetBritish, key: 'british' },
+            dwarf: { data: window.PresetDwarf, key: 'dwarf' },
+            examplesections: { data: window.ExampleSections, key: 'examplesections' },
+            examplegroup: { data: window.ExampleGroup, key: 'examplegroup' },
+            exampledelay: { data: window.ExampleDelay, key: 'exampledelay' },
+            exampleif: { data: window.ExampleIf, key: 'exampleif' },
+            exampleknob: { data: window.ExampleKnob, key: 'exampleknob' },
+            examplebutton: { data: window.ExampleButton, key: 'examplebutton' },
+            examplematrix: { data: window.ExampleMatrix, key: 'examplematrix' },
+            examplejump: { data: window.ExampleJump, key: 'examplejump' }
+        },
+
         init: function() {
+            this.bindPresets();
             ViewportUI.init();
             InspectorUI.init();
             ConsoleUI.init();
@@ -14,23 +30,46 @@
             this.loadInitial();
         },
 
+        bindPresets: function() {
+            this.presetsMap.indian.data = window.PresetIndian;
+            this.presetsMap.french.data = window.PresetFrench;
+            this.presetsMap.british.data = window.PresetBritish;
+            this.presetsMap.dwarf.data = window.PresetDwarf;
+            this.presetsMap.examplesections.data = window.ExampleSections;
+            this.presetsMap.examplegroup.data = window.ExampleGroup;
+            this.presetsMap.exampledelay.data = window.ExampleDelay;
+            this.presetsMap.exampleif.data = window.ExampleIf;
+            this.presetsMap.exampleknob.data = window.ExampleKnob;
+            this.presetsMap.examplebutton.data = window.ExampleButton;
+            this.presetsMap.examplematrix.data = window.ExampleMatrix;
+            this.presetsMap.examplejump.data = window.ExampleJump;
+        },
+
+        updateHeaderTitle: function(name) {
+            var titleEl = document.getElementById('signalTitleBadge');
+            if (titleEl && name) {
+                titleEl.textContent = name;
+            }
+        },
+
         bindHeader: function() {
+            var self = this;
             var presetSelect = document.getElementById('presetSelector');
+
             presetSelect.addEventListener('change', function() {
                 var val = this.value;
-                if (val === 'indian') SignalState.load(PresetIndian);
-                else if (val === 'french') SignalState.load(PresetFrench);
-                else if (val === 'british') SignalState.load(PresetBritish);
-                else if (val === 'dwarf') SignalState.load(PresetDwarf);
-                else if (val === 'examplesections') SignalState.load(ExampleSections);
-                else if (val === 'examplegroup') SignalState.load(ExampleGroup);
-                else if (val === 'exampledelay') SignalState.load(ExampleDelay);
-                else if (val === 'exampleif') SignalState.load(ExampleIf);
-                else if (val === 'exampleknob') SignalState.load(ExampleKnob);
-                else if (val === 'examplebutton') SignalState.load(ExampleButton);
-                else if (val === 'examplematrix') SignalState.load(ExampleMatrix);
-                else if (val === 'examplejump') SignalState.load(ExampleJump);
-                presetSelect.value = '';
+                if (!val || !self.presetsMap[val]) return;
+
+                var entry = self.presetsMap[val];
+                if (entry && entry.data) {
+                    SignalState.load(entry.data);
+                    self.updateHeaderTitle(entry.data.name || 'Railway Signal');
+                    if (EditorUI && EditorUI.compile) EditorUI.compile();
+                    if (SignalRuntime.ast && SignalRuntime.ast.aspectList && SignalRuntime.ast.aspectList.length > 0) {
+                        SignalRuntime.setAspect(SignalRuntime.ast.aspectList[0]);
+                    }
+                    SignalRuntime.resume();
+                }
             });
 
             document.getElementById('btnQuickSave').addEventListener('click', function() {
@@ -50,8 +89,13 @@
             fileIn.addEventListener('change', function(e) {
                 if (e.target.files && e.target.files[0]) {
                     SignalStorage.importFile(e.target.files[0], function(err, data) {
-                        if (err) alert('Import error: ' + err.message);
-                        else SignalState.load(data);
+                        if (err) {
+                            alert('Import error: ' + err.message);
+                        } else {
+                            SignalState.load(data);
+                            self.updateHeaderTitle(data.name || 'Imported Signal');
+                            presetSelect.value = '';
+                        }
                     });
                 }
             });
@@ -78,6 +122,7 @@
             btnSaveAs.addEventListener('click', function() {
                 var n = nameInput.value.trim() || 'Custom Signal';
                 SignalStorage.saveNamed(n);
+                self.updateHeaderTitle(n);
                 self.renderLibraryList();
             });
         },
@@ -113,6 +158,8 @@
                     var sData = SignalStorage.loadById(this.getAttribute('data-id'));
                     if (sData) {
                         SignalState.load(sData);
+                        self.updateHeaderTitle(sData.name || 'Saved Signal');
+                        document.getElementById('presetSelector').value = '';
                         document.getElementById('libraryModal').classList.remove('open');
                     }
                 });
@@ -137,12 +184,20 @@
         },
 
         loadInitial: function() {
+            this.bindPresets();
+            var presetSelect = document.getElementById('presetSelector');
             var draft = SignalStorage.loadDraft();
+
             if (draft) {
                 SignalState.load(draft);
+                this.updateHeaderTitle(draft.name || 'Saved Signal');
+                if (presetSelect) presetSelect.value = '';
             } else {
-                SignalState.load(PresetIndian);
+                SignalState.load(window.PresetIndian);
+                this.updateHeaderTitle((window.PresetIndian && window.PresetIndian.name) || 'Indian MACLS');
+                if (presetSelect) presetSelect.value = 'indian';
             }
+
             if (EditorUI && EditorUI.compile) {
                 EditorUI.compile();
             }

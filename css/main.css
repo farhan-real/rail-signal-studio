@@ -59,13 +59,28 @@ html, body {
 .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .brand-title {
     font-weight: 700;
     letter-spacing: 0.5px;
     font-size: 15px;
+}
+
+.signal-title-badge {
+    background: #171b26;
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #a0aec0;
+    letter-spacing: 0.3px;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .aspect-badge {
@@ -98,6 +113,7 @@ html, body {
     padding: 6px 10px;
     font-size: 12px;
     outline: none;
+    cursor: pointer;
 }
 
 .header-btn, .tool-btn, .console-btn, .btn-primary {

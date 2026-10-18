@@ -28,7 +28,10 @@
             window.addEventListener('resize', function() { self.centerView(); });
 
             SignalEvents.on('state:changed', this.renderAll.bind(this));
-            SignalEvents.on('state:loaded', this.renderAll.bind(this));
+            SignalEvents.on('state:loaded', function() {
+                self.centerView();
+                self.renderAll();
+            });
             SignalEvents.on('lamp:updated', this.updateLampFast.bind(this));
             SignalEvents.on('lamp:blink', this.updateBlinkFast.bind(this));
             SignalEvents.on('matrix:updated', this.updateMatrixFast.bind(this));
