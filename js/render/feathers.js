@@ -116,15 +116,15 @@
         },
 
         renderLampOptic: function(lx, ly, lr) {
-            var off = '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr + 1.8).toFixed(1) + '" class="feather-lamp-bezel" />';
-            off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" class="lamp-glass-off" />';
+            var bezelR = (lr + 1.8).toFixed(1);
+            var off = '<circle cx="' + lx + '" cy="' + ly + '" r="' + bezelR + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.2" class="feather-lamp-bezel" />';
+            off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" class="lamp-glass-off" fill="#141926" stroke="#0a0d16" stroke-width="1.2" />';
             off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.7).toFixed(1) + '" class="fresnel-ring" />';
             off += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.35).toFixed(1) + '" class="fresnel-ring" />';
 
-            var lit = '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr + 1.8).toFixed(1) + '" fill="rgba(255, 252, 238, 0.45)" filter="url(#featherGlow)" />';
-            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + lr + '" fill="#fbfcf5" stroke="#ffffff" stroke-width="0.75" />';
+            var lit = '<circle cx="' + lx + '" cy="' + ly + '" r="' + bezelR + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.2" />';
+            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.76).toFixed(1) + '" fill="#fbfcf5" />';
             lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.42).toFixed(1) + '" fill="#ffffff" opacity="0.95" />';
-            lit += '<circle cx="' + lx + '" cy="' + ly + '" r="' + (lr * 0.7).toFixed(1) + '" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="0.5" />';
 
             var visor = this.renderVisor(lx, ly, lr + 1.4);
             return { off: off, lit: lit, visor: visor };

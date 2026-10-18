@@ -68,8 +68,7 @@
                         var py = startY + r * spacing;
 
                         if (bit === 1) {
-                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.9" fill="#ffffff" filter="url(#featherGlow)" class="theatre-pixel-on" />';
-                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.6" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" />';
+                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
                         } else {
                             svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                         }
@@ -91,8 +90,7 @@
                             var pY = sY + r2 * (spacing * 0.95);
 
                             if (b2 === 1) {
-                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.7" fill="#ffffff" filter="url(#featherGlow)" class="theatre-pixel-on" />';
-                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.4" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" />';
+                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.8" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
                             } else {
                                 svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                             }

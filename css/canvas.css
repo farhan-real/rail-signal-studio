@@ -61,11 +61,11 @@
 .feather-trunnion-bolt { fill: #3a455a; }
 
 .feather-unified-housing { fill: #0a0d16; stroke: #262d3e; stroke-width: 2.2; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7)); }
-.feather-lamp-bezel { fill: #08090d; stroke: #1a1f2b; stroke-width: 1.1; }
+.feather-lamp-bezel { fill: #0a0d16; stroke: #262d3e; stroke-width: 1.2; }
 .feather-visor { fill: #07080b; stroke: #181c25; stroke-width: 0.9; }
 .feather-unit { pointer-events: none; }
 .feather-common-lit-layer { pointer-events: none; }
 
 .theatre-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
 .theatre-pixel-off { fill: #151820; }
-.theatre-pixel-on { fill: #ffffff; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.95)); }
+.theatre-pixel-on { fill: #ffffff; }

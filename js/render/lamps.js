@@ -2,11 +2,11 @@
     'use strict';
 
     var LampColors = {
-        red: { off: '#240808', lit: '#ff2014', glow: 'rgba(255, 32, 20, 0.9)' },
-        yellow: { off: '#261b05', lit: '#ffb300', glow: 'rgba(255, 179, 0, 0.9)' },
-        green: { off: '#05220f', lit: '#00f543', glow: 'rgba(0, 245, 67, 0.9)' },
-        white: { off: '#1a1f26', lit: '#e6f3ff', glow: 'rgba(230, 243, 255, 0.95)' },
-        violet: { off: '#200826', lit: '#d03bff', glow: 'rgba(208, 59, 255, 0.9)' }
+        red: { off: '#240808', lit: '#ff1e10', core: '#ff3020' },
+        yellow: { off: '#261b05', lit: '#ff9e00', core: '#ffb31a' },
+        green: { off: '#05220f', lit: '#00e844', core: '#1afe56' },
+        white: { off: '#1a1f26', lit: '#eef5fc', core: '#f8fbff' },
+        violet: { off: '#200826', lit: '#cc22ff', core: '#d944ff' }
     };
 
     var LampRenderer = {
@@ -20,16 +20,15 @@
 
             var svg = '<g class="signal-lamp-unit ' + (isLit ? 'lit' : '') + '" data-lamp-id="' + lamp.id + '">';
 
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2) + '" fill="#090a0d" stroke="#1d222e" stroke-width="1.5" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#0a0b0e" stroke-width="1.5" class="lamp-glass-off" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.72) + '" class="fresnel-ring" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44) + '" class="fresnel-ring" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.22) + '" class="fresnel-ring" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r + 2.5) + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.5" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.off + '" stroke="#141926" stroke-width="2" class="lamp-glass-off" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.72).toFixed(1) + '" class="fresnel-ring" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" class="fresnel-ring" />';
 
             svg += '<g class="lamp-lit-layer" style="' + displayStyle + '">';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 1.85) + '" fill="' + palette.glow + '" opacity="' + (brightness * 0.45) + '" filter="url(#glowFilter)" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + palette.lit + '" opacity="' + brightness + '" stroke="#ffffff" stroke-width="1.2" />';
-            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.48) + '" fill="#ffffff" opacity="' + (brightness * 0.95) + '" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#0a0d16" stroke="#262d3e" stroke-width="1.8" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.74).toFixed(1) + '" fill="' + palette.lit + '" opacity="' + brightness + '" />';
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.44).toFixed(1) + '" fill="' + palette.core + '" opacity="' + brightness + '" />';
             svg += '</g>';
 
             svg += this.renderVisor(cx, cy, r, hoodType);
