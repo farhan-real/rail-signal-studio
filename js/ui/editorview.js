@@ -22,6 +22,8 @@
 
             document.getElementById('btnRunScript').addEventListener('click', function() { SignalRuntime.resume(); });
             document.getElementById('btnPauseScript').addEventListener('click', function() { SignalRuntime.pause(); });
+            var btnPrev = document.getElementById('btnPrevScript');
+            if (btnPrev) btnPrev.addEventListener('click', function() { SignalRuntime.stepPrev(); });
             document.getElementById('btnStepScript').addEventListener('click', function() { SignalRuntime.stepNext(); });
 
             SignalEvents.on('state:loaded', this.loadFromState.bind(this));
