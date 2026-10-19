@@ -20,6 +20,7 @@
             { id: 'GateSwitch', type: 'switch', label: 'Gate Closed', defaultValue: 1, x: 195, y: 15 }
         ],
         script: [
+            '%% Aspect Definitions',
             'aspect DANGER {',
             '    unset ALL;',
             '    set RED;',
@@ -35,20 +36,14 @@
             '    set GREEN;',
             '}',
             '',
+            '%% Interlocking Conditions',
             'mainloop {',
             '    if MasterLever is 0 OR NOT GateSwitch is 1 {',
             '        aspect DANGER;',
-            '        end;',
-            '    }',
-            '',
-            '    if MasterLever is 1 OR TrackSwitch is 0 {',
+            '    } elif MasterLever is 1 OR TrackSwitch is 0 {',
             '        aspect CAUTION;',
-            '        end;',
-            '    }',
-            '',
-            '    if MasterLever is 2 AND (TrackSwitch is 1 AND GateSwitch is 1) {',
+            '    } else {',
             '        aspect PROCEED;',
-            '        end;',
             '    }',
             '}'
         ].join('\n')

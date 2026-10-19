@@ -18,6 +18,7 @@
             { id: 'ShuntLever', type: 'lever', label: 'Ground Lever', color: '#22252c', positions: 2, defaultValue: 0, x: 20, y: 15 }
         ],
         script: [
+            '%% Aspect Definitions',
             'aspect STOP {',
             '    unset ALL;',
             '    set STOP_RED;',
@@ -30,11 +31,11 @@
             '    set PROCEED_WHITE;',
             '}',
             '',
+            '%% Interlocking Control',
             'mainloop {',
             '    if ShuntLever is 0 {',
             '        aspect STOP;',
-            '    }',
-            '    if ShuntLever is 1 {',
+            '    } else {',
             '        aspect PROCEED;',
             '    }',
             '}'
