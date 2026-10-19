@@ -2,12 +2,12 @@
     'use strict';
 
     var FeatherPositions = [
-        { key: 'left1', label: 'Left 1 (High Left, 45° Up)' },
-        { key: 'left2', label: 'Left 2 (Med Left, Horizontal)' },
-        { key: 'left3', label: 'Left 3 (Low Left, 45° Down)' },
-        { key: 'right1', label: 'Right 1 (High Right, 45° Up)' },
-        { key: 'right2', label: 'Right 2 (Med Right, Horizontal)' },
-        { key: 'right3', label: 'Right 3 (Low Right, 45° Down)' }
+        { key: 'left3', label: 'Left 3 (Top Left)' },
+        { key: 'left2', label: 'Left 2 (Middle Left)' },
+        { key: 'left1', label: 'Left 1 (Bottom Left)' },
+        { key: 'right3', label: 'Right 3 (Top Right)' },
+        { key: 'right2', label: 'Right 2 (Middle Right)' },
+        { key: 'right1', label: 'Right 1 (Bottom Right)' }
     ];
 
     var CreatorRoutes = {

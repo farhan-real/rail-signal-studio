@@ -18,7 +18,7 @@
             sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: 10, autoConnect: true
         },
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', lamps: 5 }
+            { id: 'FEATHER_L3', position: 'left3', lamps: 5 }
         ],
         matrix: { enabled: true, id: 'ROUTE_BOX', size: '1x', x: 0, yOffset: 0, posMode: 'relative', showBase: true, connectorHeight: 8, text: '' },
         controls: [
@@ -68,10 +68,10 @@
             '',
             '    if RouteKnob is MAIN {',
             '        matrix = "M";',
-            '        unset FEATHER_L1;',
+            '        unset FEATHER_L3;',
             '    } else {',
             '        matrix = "1";',
-            '        set FEATHER_L1;',
+            '        set FEATHER_L3;',
             '    }',
             '',
             '    if RED set {',

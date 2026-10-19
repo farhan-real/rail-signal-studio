@@ -18,8 +18,8 @@
             sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: 10, autoConnect: true
         },
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
+            { id: 'FEATHER_L3', position: 'left3', lamps: 5 },
+            { id: 'FEATHER_R3', position: 'right3', lamps: 5 }
         ],
         matrix: { enabled: true, id: 'ROUTE_BOX', size: '1x', x: 0, yOffset: 0, posMode: 'relative', showBase: true, connectorHeight: 8, text: '' },
         controls: [
@@ -32,7 +32,7 @@
             'RouteType selectedRoute = MAIN;',
             '',
             'group CautionLamps { YELLOW1, YELLOW2 };',
-            'group AllFeathers { FEATHER_L1, FEATHER_R1 };',
+            'group AllFeathers { FEATHER_L3, FEATHER_R3 };',
             '',
             '%% Aspect Definitions',
             'aspect DANGER {',
@@ -76,11 +76,11 @@
             '    } elif RouteKnob is DIVERGE_LEFT {',
             '        selectedRoute = DIVERGE_LEFT;',
             '        matrix = "1";',
-            '        set FEATHER_L1;',
+            '        set FEATHER_L3;',
             '    } else {',
             '        selectedRoute = DIVERGE_RIGHT;',
             '        matrix = "2";',
-            '        set FEATHER_R1;',
+            '        set FEATHER_R3;',
             '    }',
             '',
             '    if RED set {',

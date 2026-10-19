@@ -19,8 +19,8 @@
             { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 11, y: 136, hood: 'round', brightness: 0.95 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left2', lamps: 5 },
-            { id: 'FEATHER_L2', position: 'left1', lamps: 5 },
+            { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
+            { id: 'FEATHER_L2', position: 'left2', lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
         featherBase: {

@@ -3,18 +3,24 @@
 
     var FeatherRenderer = {
         positions: {
-            left1: { angle: -135 },
+            left1: { angle: 135 },
             left2: { angle: 180 },
-            left3: { angle: 135 },
-            right1: { angle: -45 },
+            left3: { angle: -135 },
+            l1: { angle: 135 },
+            l2: { angle: 180 },
+            l3: { angle: -135 },
+            right1: { angle: 45 },
             right2: { angle: 0 },
-            right3: { angle: 45 },
-            pos1: { angle: -135 },
+            right3: { angle: -45 },
+            r1: { angle: 45 },
+            r2: { angle: 0 },
+            r3: { angle: -45 },
+            pos1: { angle: 135 },
             pos2: { angle: 180 },
-            pos3: { angle: 135 },
-            pos4: { angle: -45 },
+            pos3: { angle: -135 },
+            pos4: { angle: 45 },
             pos5: { angle: 0 },
-            pos6: { angle: 45 }
+            pos6: { angle: -45 }
         },
 
         getMainShape: function() {
