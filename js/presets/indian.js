@@ -23,6 +23,18 @@
             { id: 'FEATHER_L2', position: 'left1', lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
+        featherBase: {
+            enabled: true,
+            x: 0,
+            yOffset: 0,
+            posMode: 'relative',
+            sides: 8,
+            baseAngle: 0,
+            radius: 35.5,
+            collarWidth: 32,
+            collarHeight: null,
+            autoConnect: true
+        },
         matrix: { enabled: false },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 20 },

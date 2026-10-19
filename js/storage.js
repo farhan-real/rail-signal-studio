@@ -30,6 +30,7 @@
                 shapes: SignalState.shapes,
                 lamps: SignalState.lamps,
                 feathers: SignalState.feathers,
+                featherBase: SignalState.featherBase,
                 matrix: SignalState.matrix,
                 controls: SignalState.controls,
                 texts: SignalState.texts,
@@ -88,73 +89,6 @@
                 if (raw) {
                     var data = JSON.parse(raw);
                     if (data && data.script && typeof data.script === 'string' && data.script.indexOf('aspect') !== -1) {
-                        if (data.name && data.name.indexOf('Indian') !== -1) {
-                            if (window.PresetIndian) {
-                                data.shapes = window.PresetIndian.shapes;
-                                data.lamps = window.PresetIndian.lamps;
-                                data.feathers = window.PresetIndian.feathers;
-                                data.matrix = window.PresetIndian.matrix;
-                                data.controls = window.PresetIndian.controls;
-                                data.script = window.PresetIndian.script;
-                            }
-                        } else if (data.name && (data.name.indexOf('Dwarf') !== -1 || data.name.indexOf('Shunt') !== -1)) {
-                            if (window.PresetDwarf) {
-                                data.mast = window.PresetDwarf.mast;
-                                data.shapes = window.PresetDwarf.shapes;
-                                data.lamps = window.PresetDwarf.lamps;
-                                data.controls = window.PresetDwarf.controls;
-                                data.script = window.PresetDwarf.script;
-                            }
-                        } else if (data.name && data.name.indexOf('British') !== -1) {
-                            if (window.PresetBritish) {
-                                data.shapes = window.PresetBritish.shapes;
-                                data.lamps = window.PresetBritish.lamps;
-                                data.matrix = window.PresetBritish.matrix;
-                                data.controls = window.PresetBritish.controls;
-                                data.script = window.PresetBritish.script;
-                            }
-                        } else if (data.name && data.name.indexOf('French') !== -1) {
-                            if (window.PresetFrench) {
-                                data.shapes = window.PresetFrench.shapes;
-                                data.lamps = window.PresetFrench.lamps;
-                                data.controls = window.PresetFrench.controls;
-                                data.script = window.PresetFrench.script;
-                            }
-                        } else if (data.name && data.name.indexOf('Group') !== -1) {
-                            if (window.ExampleGroup) {
-                                data.shapes = window.ExampleGroup.shapes;
-                                data.lamps = window.ExampleGroup.lamps;
-                                data.feathers = window.ExampleGroup.feathers;
-                                data.matrix = window.ExampleGroup.matrix;
-                                data.controls = window.ExampleGroup.controls;
-                                data.script = window.ExampleGroup.script;
-                            }
-                        } else if (data.name && data.name.indexOf('Section') !== -1) {
-                            if (window.ExampleSections) {
-                                data.shapes = window.ExampleSections.shapes;
-                                data.lamps = window.ExampleSections.lamps;
-                                data.feathers = window.ExampleSections.feathers;
-                                data.matrix = window.ExampleSections.matrix;
-                                data.controls = window.ExampleSections.controls;
-                                data.script = window.ExampleSections.script;
-                            }
-                        } else if (data.name && data.name.indexOf('Matrix') !== -1) {
-                            if (window.ExampleMatrix) {
-                                data.shapes = window.ExampleMatrix.shapes;
-                                data.lamps = window.ExampleMatrix.lamps;
-                                data.feathers = window.ExampleMatrix.feathers;
-                                data.matrix = window.ExampleMatrix.matrix;
-                                data.controls = window.ExampleMatrix.controls;
-                                data.script = window.ExampleMatrix.script;
-                            }
-                        } else if (data.name && data.name.indexOf('Jump') !== -1) {
-                            if (window.ExampleJump) {
-                                data.shapes = window.ExampleJump.shapes;
-                                data.lamps = window.ExampleJump.lamps;
-                                data.controls = window.ExampleJump.controls;
-                                data.script = window.ExampleJump.script;
-                            }
-                        }
                         return data;
                     }
                 }

@@ -33,18 +33,20 @@
             var fb = window.SignalState && window.SignalState.featherBase;
             var feathers = (window.SignalState && window.SignalState.feathers) || [];
             var hasFeathers = feathers.length > 0;
-            var isBaseActive = hasFeathers || (fb && !!fb.enabled);
 
-            if (isBaseActive) {
+            if (hasFeathers || (fb && fb.enabled)) {
                 var hub = window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(fb) : { x: 0, y: -196 };
-                var topY = hub.y - 35.5;
+                var r = (fb && fb.radius) ? fb.radius : 35.5;
+                var topY = hub.y - r;
 
                 if (window.FeatherRenderer && hasFeathers) {
                     for (var i = 0; i < feathers.length; i++) {
-                        var pKey = (feathers[i].position || 'left1').toLowerCase();
-                        var conf = window.FeatherRenderer.positions[pKey];
-                        if (conf) {
-                            var rad = conf.angle * Math.PI / 180;
+                        var rad = feathers[i]._renderedRad;
+                        if (rad === undefined) {
+                            var conf = window.FeatherRenderer.positions[(feathers[i].position || 'left1').toLowerCase()];
+                            if (conf) rad = conf.angle * Math.PI / 180;
+                        }
+                        if (rad !== undefined) {
                             var armTipY = hub.y + Math.sin(rad) * 98.0 - 14.0;
                             if (armTipY < topY) topY = armTipY;
                         }
@@ -53,10 +55,8 @@
                 return topY;
             }
 
-            if (window.FeatherRenderer) {
-                return window.FeatherRenderer.detectShapeTopSurface(0, -100);
-            }
-            return -160;
+            return (window.FeatherRenderer && window.FeatherRenderer.detectHeadTopSurface) ?
+                window.FeatherRenderer.detectHeadTopSurface(0) : -160;
         },
 
         render: function(matrixConf, text) {
@@ -65,14 +65,8 @@
             var topAssemblyY = this.getSignalAssemblyTopY();
             var restingCenterY = topAssemblyY - 8 - (boxHeight / 2);
 
-            var cy;
-            if (matrixConf.yOffset !== undefined) {
-                cy = restingCenterY - matrixConf.yOffset;
-            } else if (matrixConf.y !== undefined) {
-                cy = matrixConf.y;
-            } else {
-                cy = restingCenterY;
-            }
+            var cy = (matrixConf.yOffset !== undefined) ? (restingCenterY - matrixConf.yOffset) :
+                (matrixConf.y !== undefined ? matrixConf.y : restingCenterY);
 
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
             var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
@@ -96,21 +90,16 @@
             if (!isMultiChar) {
                 var charKey = txt.length > 0 ? txt.charAt(0) : ' ';
                 var pattern = MatrixFont5x7[charKey] || MatrixFont5x7[' '];
-                var startX = cx - (2 * spacing);
-                var startY = cy - (3 * spacing);
+                var startX = cx - (2 * spacing), startY = cy - (3 * spacing);
 
                 for (var r = 0; r < 7; r++) {
                     var mask = pattern[r] || 0;
                     for (var c = 0; c < 5; c++) {
                         var bit = (mask >> (4 - c)) & 1;
-                        var px = startX + c * spacing;
-                        var py = startY + r * spacing;
-
-                        if (bit === 1 && isLit) {
-                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
-                        } else {
-                            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
-                        }
+                        var px = startX + c * spacing, py = startY + r * spacing;
+                        svg += (bit === 1 && isLit) ?
+                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
+                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                     }
                 }
             } else {
@@ -118,28 +107,22 @@
                     var chKey = txt.charAt(ch) || ' ';
                     var ptn = MatrixFont5x7[chKey] || MatrixFont5x7[' '];
                     var chCenterX = cx + (ch === 0 ? -14 : 14);
-                    var sX = chCenterX - (2 * (spacing * 0.8));
-                    var sY = cy - (3 * (spacing * 0.95));
+                    var sX = chCenterX - (2 * (spacing * 0.8)), sY = cy - (3 * (spacing * 0.95));
 
                     for (var r2 = 0; r2 < 7; r2++) {
                         var msk = ptn[r2] || 0;
                         for (var c2 = 0; c2 < 5; c2++) {
                             var b2 = (msk >> (4 - c2)) & 1;
-                            var pX = sX + c2 * (spacing * 0.8);
-                            var pY = sY + r2 * (spacing * 0.95);
-
-                            if (b2 === 1 && isLit) {
-                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.8" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
-                            } else {
-                                svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
-                            }
+                            var pX = sX + c2 * (spacing * 0.8), pY = sY + r2 * (spacing * 0.95);
+                            svg += (b2 === 1 && isLit) ?
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.8" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                         }
                     }
                 }
             }
 
-            svg += '</g>';
-            return svg;
+            return svg + '</g>';
         }
     };
 

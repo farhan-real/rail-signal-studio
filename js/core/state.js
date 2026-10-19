@@ -14,7 +14,10 @@
         shapes: [],
         lamps: [],
         feathers: [],
-        featherBase: { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true },
+        featherBase: {
+            enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+            sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+        },
         matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false },
         controls: [],
         texts: [],
@@ -32,7 +35,10 @@
             this.shapes = [];
             this.lamps = [];
             this.feathers = [];
-            this.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
+            this.featherBase = {
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+            };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             this.controls = [];
             this.texts = [];
@@ -63,7 +69,10 @@
                 { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 }
             ];
             this.feathers = [];
-            this.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
+            this.featherBase = {
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+            };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             this.controls = [
                 { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 0, x: 20, y: 20 }
@@ -123,10 +132,23 @@
             this.shapes = data.shapes || [];
             this.lamps = data.lamps || [];
             this.feathers = data.feathers || [];
-            this.featherBase = data.featherBase || {
-                enabled: !!(data.feathers && data.feathers.length > 0),
-                x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true
+
+            var fb = data.featherBase || {};
+            var hasFeathers = !!(data.feathers && data.feathers.length > 0);
+            this.featherBase = {
+                enabled: fb.enabled !== undefined ? fb.enabled : hasFeathers,
+                x: fb.x !== undefined ? fb.x : 0,
+                y: fb.y !== undefined ? fb.y : undefined,
+                yOffset: fb.yOffset !== undefined ? fb.yOffset : 0,
+                posMode: fb.posMode || (fb.y !== undefined && fb.yOffset === undefined ? 'direct' : 'relative'),
+                sides: (fb.sides && fb.sides >= 3 && fb.sides <= 16) ? parseInt(fb.sides, 10) : 8,
+                baseAngle: fb.baseAngle !== undefined ? parseFloat(fb.baseAngle) || 0 : 0,
+                radius: fb.radius !== undefined ? parseFloat(fb.radius) || 35.5 : 35.5,
+                collarWidth: fb.collarWidth !== undefined ? fb.collarWidth : 32,
+                collarHeight: fb.collarHeight !== undefined ? fb.collarHeight : null,
+                autoConnect: fb.autoConnect !== undefined ? fb.autoConnect : true
             };
+
             this.matrix = data.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             if (this.matrix.lit === undefined) this.matrix.lit = !!(this.matrix.text);
             this.controls = data.controls || [];

@@ -12,21 +12,43 @@
 
     var CreatorRoutes = {
         render: function(container) {
-            var fb = SignalState.featherBase || { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
-            var fbYOff = fb.yOffset !== undefined ? fb.yOffset : 0;
+            var fb = SignalState.featherBase || {
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+            };
+            var isDirect = (fb.posMode === 'direct');
+            var hubYVal = isDirect ? (fb.y !== undefined ? fb.y : -190) : (fb.yOffset !== undefined ? fb.yOffset : 0);
             var html = '';
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
-            html += '    <span class="card-badge">Feather Base (Hub & Trunnion Mount)</span>';
+            html += '    <span class="card-badge">Feather Base (Hub & Mount)</span>';
             html += '    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="chkFeatherBaseEnabled" ' + (fb.enabled ? 'checked' : '') + '/><span style="font-size:11px; font-weight:700;">Show Base</span></label>';
             html += '  </div>';
 
             if (fb.enabled) {
                 html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Placement Mode</label><select id="fbPosMode" class="form-select">';
+                html += '      <option value="relative"' + (!isDirect ? ' selected' : '') + '>1: Offset Above Signal Head</option>';
+                html += '      <option value="direct"' + (isDirect ? ' selected' : '') + '>2: Direct Coordinates (Fixed Y)</option>';
+                html += '    </select></div>';
                 html += '    <div><label class="form-label">Hub X (0 = Center)</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Hub Y (0 = Top of Signal, +ve Up)</label><input type="number" id="fbYOffset" class="form-input" value="' + fbYOff + '"/></div>';
                 html += '  </div>';
+
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">' + (isDirect ? 'Direct Y (px)' : 'Y Offset (px above head)') + '</label><input type="number" id="fbYInput" class="form-input" value="' + hubYVal + '"/></div>';
+                html += '    <div><label class="form-label">Base Sides (Facets)</label><select id="fbSides" class="form-select">';
+                [6, 8, 10, 12, 16].forEach(function(s) {
+                    html += '<option value="' + s + '"' + ((fb.sides || 8) === s ? ' selected' : '') + '>' + s + ' Sides' + (s === 8 ? ' (Octagon)' : (s === 6 ? ' (Hexagon)' : '')) + '</option>';
+                });
+                html += '    </select></div>';
+                html += '  </div>';
+
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Base Angle Rotation (°)</label><input type="number" min="-180" max="180" id="fbAngle" class="form-input" value="' + (fb.baseAngle || 0) + '"/></div>';
+                html += '    <div><label class="form-label">Hub Radius (px)</label><input type="number" min="16" max="70" id="fbRadius" class="form-input" value="' + (fb.radius || 35.5) + '"/></div>';
+                html += '  </div>';
+
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
                 html += '    <div><label class="form-label">Collar Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
@@ -54,7 +76,7 @@
                     html += '  </div>';
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Feather ID</label><input type="text" class="form-input ft-prop" data-prop="id" value="' + fth.id + '"/></div>';
-                    html += '    <div><label class="form-label">Position / Angle</label><select class="form-select ft-prop" data-prop="position">';
+                    html += '    <div><label class="form-label">Position / Direction</label><select class="form-select ft-prop" data-prop="position">';
                     for (var p = 0; p < FeatherPositions.length; p++) {
                         var sel = (fth.position || 'left1') === FeatherPositions[p].key ? 'selected' : '';
                         html += '<option value="' + FeatherPositions[p].key + '" ' + sel + '>' + FeatherPositions[p].label + '</option>';
@@ -84,7 +106,7 @@
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Matrix Y (0 = Top of Signal, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
+                html += '    <div><label class="form-label">Matrix Y Offset (0 = Top)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
                 html += '  </div>';
                 html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
                 html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of assembly; +ve moves up</span>';
@@ -101,8 +123,20 @@
             var chkFb = document.getElementById('chkFeatherBaseEnabled');
             if (chkFb) {
                 chkFb.addEventListener('change', function() {
-                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
                     SignalState.featherBase.enabled = this.checked;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
+                });
+            }
+
+            var posModeSel = document.getElementById('fbPosMode');
+            if (posModeSel) {
+                posModeSel.addEventListener('change', function() {
+                    SignalState.featherBase.posMode = this.value;
+                    if (this.value === 'direct' && SignalState.featherBase.y === undefined) {
+                        SignalState.featherBase.y = Math.round(window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(SignalState.featherBase).y : -190);
+                    }
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
@@ -113,52 +147,91 @@
             if (fbX) {
                 var onFbX = function() {
                     var raw = fbX.value.trim();
-                    if (raw === '' || raw === '-') return;
-                    SignalState.featherBase.x = parseFloat(raw) || 0;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
-                };
-                fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
-            }
-
-            var fbYOffInp = document.getElementById('fbYOffset');
-            if (fbYOffInp) {
-                var onFbYOff = function() {
-                    var raw = fbYOffInp.value.trim();
-                    if (raw === '' || raw === '-') return;
-                    var val = parseFloat(raw);
-                    if (!isNaN(val)) {
-                        SignalState.featherBase.yOffset = val;
-                        delete SignalState.featherBase.y;
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.featherBase.x = parseFloat(raw) || 0;
                         SignalEvents.emit('state:changed');
                         SignalEvents.emit('state:persist');
                     }
                 };
-                fbYOffInp.addEventListener('input', onFbYOff);
-                fbYOffInp.addEventListener('change', onFbYOff);
+                fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
+            }
+
+            var fbYInput = document.getElementById('fbYInput');
+            if (fbYInput) {
+                var onFbY = function() {
+                    var raw = fbYInput.value.trim();
+                    if (raw !== '' && raw !== '-') {
+                        var val = parseFloat(raw) || 0;
+                        if (SignalState.featherBase.posMode === 'direct') {
+                            SignalState.featherBase.y = val;
+                        } else {
+                            SignalState.featherBase.yOffset = val;
+                            delete SignalState.featherBase.y;
+                        }
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
+                };
+                fbYInput.addEventListener('input', onFbY); fbYInput.addEventListener('change', onFbY);
+            }
+
+            var fbSides = document.getElementById('fbSides');
+            if (fbSides) {
+                fbSides.addEventListener('change', function() {
+                    SignalState.featherBase.sides = parseInt(this.value, 10) || 8;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                });
+            }
+
+            var fbAngle = document.getElementById('fbAngle');
+            if (fbAngle) {
+                var onAngle = function() {
+                    var raw = fbAngle.value.trim();
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.featherBase.baseAngle = parseFloat(raw) || 0;
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
+                };
+                fbAngle.addEventListener('input', onAngle); fbAngle.addEventListener('change', onAngle);
+            }
+
+            var fbRadius = document.getElementById('fbRadius');
+            if (fbRadius) {
+                var onRad = function() {
+                    var raw = fbRadius.value.trim();
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.featherBase.radius = Math.max(16, Math.min(80, parseFloat(raw) || 35.5));
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
+                };
+                fbRadius.addEventListener('input', onRad); fbRadius.addEventListener('change', onRad);
             }
 
             var fbCW = document.getElementById('fbCollarWidth');
             if (fbCW) {
-                var onFbCW = function() {
+                var onCW = function() {
                     var raw = fbCW.value.trim();
-                    if (raw === '' || raw === '-') return;
-                    SignalState.featherBase.collarWidth = Math.max(10, parseFloat(raw) || 32);
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.featherBase.collarWidth = Math.max(10, parseFloat(raw) || 32);
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
                 };
-                fbCW.addEventListener('input', onFbCW); fbCW.addEventListener('change', onFbCW);
+                fbCW.addEventListener('input', onCW); fbCW.addEventListener('change', onCW);
             }
 
             var fbCH = document.getElementById('fbCollarHeight');
             if (fbCH) {
-                var onFbCH = function() {
+                var onCH = function() {
                     var v = fbCH.value.trim();
                     SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v));
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
-                fbCH.addEventListener('input', onFbCH); fbCH.addEventListener('change', onFbCH);
+                fbCH.addEventListener('input', onCH); fbCH.addEventListener('change', onCH);
             }
 
             var chkAuto = document.getElementById('chkFbAutoConnect');
@@ -168,7 +241,6 @@
             if (btnAdd) {
                 btnAdd.addEventListener('click', function() {
                     if (!SignalState.feathers) SignalState.feathers = [];
-                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: true, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
                     SignalState.featherBase.enabled = true;
                     var num = SignalState.feathers.length + 1;
                     var pos = (num % 2 === 1) ? 'left1' : 'right1';
@@ -224,7 +296,6 @@
             var chkMat = document.getElementById('chkMatrixEnabled');
             if (chkMat) {
                 chkMat.addEventListener('change', function() {
-                    if (!SignalState.matrix) SignalState.matrix = { id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
                     SignalState.matrix.enabled = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
@@ -252,10 +323,11 @@
             if (mX) {
                 var onMx = function() {
                     var raw = mX.value.trim();
-                    if (raw === '' || raw === '-') return;
-                    SignalState.matrix.x = parseFloat(raw) || 0;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.matrix.x = parseFloat(raw) || 0;
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
                 };
                 mX.addEventListener('input', onMx); mX.addEventListener('change', onMx);
             }
@@ -264,10 +336,8 @@
             if (mYOff) {
                 var onMy = function() {
                     var raw = mYOff.value.trim();
-                    if (raw === '' || raw === '-') return;
-                    var val = parseFloat(raw);
-                    if (!isNaN(val)) {
-                        SignalState.matrix.yOffset = val;
+                    if (raw !== '' && raw !== '-') {
+                        SignalState.matrix.yOffset = parseFloat(raw) || 0;
                         delete SignalState.matrix.y;
                         SignalEvents.emit('state:changed');
                         SignalEvents.emit('state:persist');
