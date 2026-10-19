@@ -12,7 +12,8 @@
 
     var CreatorRoutes = {
         render: function(container) {
-            var fb = SignalState.featherBase || { enabled: false, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true };
+            var fb = SignalState.featherBase || { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
+            var fbYOff = fb.yOffset !== undefined ? fb.yOffset : 0;
             var html = '';
 
             html += '<div class="builder-card">';
@@ -23,8 +24,8 @@
 
             if (fb.enabled) {
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">Hub Center X</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Hub Center Y</label><input type="number" id="fbY" class="form-input" value="' + (fb.y !== undefined ? fb.y : -196) + '"/></div>';
+                html += '    <div><label class="form-label">Hub X (0 = Center)</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
+                html += '    <div><label class="form-label">Hub Y (0 = Top of Signal, +ve Up)</label><input type="number" id="fbYOffset" class="form-input" value="' + fbYOff + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
@@ -68,7 +69,7 @@
             html += '</div>';
 
             var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
-            if (mat.yOffset === undefined) mat.yOffset = 0;
+            var matYOffset = mat.yOffset !== undefined ? mat.yOffset : 0;
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
@@ -82,11 +83,11 @@
                 html += '    <div><label class="form-label">Stencil Text (e.g. M, 1, 2)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M" value="' + (mat.text || '') + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">X Offset</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Y Offset (0 = On Top, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + mat.yOffset + '"/></div>';
+                html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
+                html += '    <div><label class="form-label">Matrix Y (0 = Top of Signal, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
                 html += '  </div>';
                 html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
-                html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of signal; +ve moves up</span>';
+                html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of assembly; +ve moves up</span>';
                 html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix">Preview Lit</button>';
                 html += '  </div>';
             }
@@ -100,7 +101,7 @@
             var chkFb = document.getElementById('chkFeatherBaseEnabled');
             if (chkFb) {
                 chkFb.addEventListener('change', function() {
-                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: false, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true };
+                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
                     SignalState.featherBase.enabled = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
@@ -120,16 +121,21 @@
                 fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
             }
 
-            var fbY = document.getElementById('fbY');
-            if (fbY) {
-                var onFbY = function() {
-                    var raw = fbY.value.trim();
+            var fbYOffInp = document.getElementById('fbYOffset');
+            if (fbYOffInp) {
+                var onFbYOff = function() {
+                    var raw = fbYOffInp.value.trim();
                     if (raw === '' || raw === '-') return;
-                    SignalState.featherBase.y = parseFloat(raw) || 0;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    var val = parseFloat(raw);
+                    if (!isNaN(val)) {
+                        SignalState.featherBase.yOffset = val;
+                        delete SignalState.featherBase.y;
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
                 };
-                fbY.addEventListener('input', onFbY); fbY.addEventListener('change', onFbY);
+                fbYOffInp.addEventListener('input', onFbYOff);
+                fbYOffInp.addEventListener('change', onFbYOff);
             }
 
             var fbCW = document.getElementById('fbCollarWidth');
@@ -162,7 +168,7 @@
             if (btnAdd) {
                 btnAdd.addEventListener('click', function() {
                     if (!SignalState.feathers) SignalState.feathers = [];
-                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: true, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true };
+                    if (!SignalState.featherBase) SignalState.featherBase = { enabled: true, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
                     SignalState.featherBase.enabled = true;
                     var num = SignalState.feathers.length + 1;
                     var pos = (num % 2 === 1) ? 'left1' : 'right1';

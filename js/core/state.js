@@ -6,11 +6,11 @@
     var SignalState = {
         id: null,
         name: 'New Signal',
-        mast: { type: 'tubular', height: 380, x: 0, y: 0, platform: true, platformX: null, platformY: 45, platformWidth: 54, platformHeight: 6, ladder: true },
+        mast: { type: 'tubular', height: 380, x: 0, y: 0, platform: true, platformX: null, platformY: null, platformWidth: 54, platformHeight: 6, ladder: true },
         shapes: [],
         lamps: [],
         feathers: [],
-        featherBase: { enabled: false, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true },
+        featherBase: { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true },
         matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false },
         controls: [],
         texts: [],
@@ -28,7 +28,7 @@
             this.shapes = [];
             this.lamps = [];
             this.feathers = [];
-            this.featherBase = { enabled: false, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true };
+            this.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             this.controls = [];
             this.texts = [];
@@ -46,7 +46,7 @@
             var n = name || 'Custom Signal';
             this.id = 'sig_' + Date.now();
             this.name = n;
-            this.mast = { type: 'tubular', height: 380, x: 0, y: -20, platform: true, platformX: null, platformY: 50, platformWidth: 54, platformHeight: 6, ladder: true };
+            this.mast = { type: 'tubular', height: 380, x: 0, y: -20, platform: true, platformX: null, platformY: null, platformWidth: 54, platformHeight: 6, ladder: true };
             this.shapes = [
                 { id: 'plate_main', name: 'Main Head Plate', type: 'rounded-rect', x: -26, y: -130, width: 52, height: 110, corners: [26, 26, 26, 26], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 }
             ];
@@ -55,7 +55,7 @@
                 { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 }
             ];
             this.feathers = [];
-            this.featherBase = { enabled: false, x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true };
+            this.featherBase = { enabled: false, x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             this.controls = [
                 { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 0, x: 20, y: 20 }
@@ -108,7 +108,7 @@
             this.feathers = data.feathers || [];
             this.featherBase = data.featherBase || {
                 enabled: !!(data.feathers && data.feathers.length > 0),
-                x: 0, y: -196, collarWidth: 32, collarHeight: null, autoConnect: true
+                x: 0, yOffset: 0, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             this.matrix = data.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
             if (this.matrix.lit === undefined) this.matrix.lit = !!(this.matrix.text);

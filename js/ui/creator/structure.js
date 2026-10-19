@@ -33,11 +33,11 @@
 
             if (mast.platform) {
                 var headBottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
-                var defPy = mast.platformY !== undefined ? mast.platformY : Math.round(headBottom + 4);
+                var currentGap = (mast.platformY !== undefined && mast.platformY !== null) ? Math.round(mast.platformY - headBottom) : 4;
 
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">X Pos (px)</label><input type="number" id="platformXInp" class="form-input" placeholder="Centered" value="' + (mast.platformX !== null && mast.platformX !== undefined ? mast.platformX : '') + '"/></div>';
-                html += '    <div><label class="form-label">Y Pos (px)</label><input type="number" id="platformYInp" class="form-input" value="' + defPy + '"/></div>';
+                html += '    <div><label class="form-label">X Pos (0 = Center)</label><input type="number" id="platformXInp" class="form-input" placeholder="0 (Centered)" value="' + (mast.platformX !== null && mast.platformX !== undefined ? mast.platformX : '') + '"/></div>';
+                html += '    <div><label class="form-label">Gap Below Head (px)</label><input type="number" id="platformGapInp" class="form-input" value="' + currentGap + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Width (px)</label><input type="number" id="platformWidthInp" class="form-input" value="' + (mast.platformWidth || 52) + '"/></div>';
@@ -45,7 +45,7 @@
                 html += '  </div>';
                 html += '  <div class="form-row-2" style="margin-top:6px;">';
                 html += '    <button id="btnCenterPlatformX" class="tool-btn" style="font-size:10px;">Center X</button>';
-                html += '    <button id="btnSnapPlatform" class="tool-btn" style="font-size:10px;">Snap Below Head</button>';
+                html += '    <button id="btnSnapPlatform" class="tool-btn" style="font-size:10px;">Snap Directly Below Head</button>';
                 html += '  </div>';
             }
             html += '</div>';
@@ -80,17 +80,19 @@
                 pxInp.addEventListener('change', onPx);
             }
 
-            var pyInp = document.getElementById('platformYInp');
-            if (pyInp) {
-                var onPy = function() {
-                    var v = pyInp.value.trim();
+            var gapInp = document.getElementById('platformGapInp');
+            if (gapInp) {
+                var onGap = function() {
+                    var v = gapInp.value.trim();
                     if (v === '' || v === '-') return;
-                    SignalState.mast.platformY = parseFloat(v) || 0;
+                    var gap = parseFloat(v) || 0;
+                    var bottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
+                    SignalState.mast.platformY = Math.round(bottom + gap);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
-                pyInp.addEventListener('input', onPy);
-                pyInp.addEventListener('change', onPy);
+                gapInp.addEventListener('input', onGap);
+                gapInp.addEventListener('change', onGap);
             }
 
             var pwInp = document.getElementById('platformWidthInp');
@@ -133,9 +135,8 @@
             if (btnSnap) {
                 btnSnap.addEventListener('click', function() {
                     var bottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
-                    var targetY = Math.round(bottom + 4);
-                    SignalState.mast.platformY = targetY;
-                    if (pyInp) pyInp.value = targetY;
+                    SignalState.mast.platformY = Math.round(bottom + 4);
+                    if (gapInp) gapInp.value = 4;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 });

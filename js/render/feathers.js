@@ -17,15 +17,6 @@
             pos6: { angle: -45, facetIndex: 1 }
         },
 
-        getHubCenter: function(fb) {
-            if (fb && fb.x !== undefined && fb.y !== undefined) return { x: fb.x, y: fb.y };
-            if (window.SignalState && window.SignalState.featherBase) {
-                var s = window.SignalState.featherBase;
-                return { x: s.x !== undefined ? s.x : 0, y: s.y !== undefined ? s.y : -196 };
-            }
-            return { x: 0, y: -196 };
-        },
-
         detectShapeTopSurface: function(targetX, minAboveY) {
             var shapes = (window.SignalState && window.SignalState.shapes) || [];
             var closestY = null;
@@ -64,6 +55,21 @@
                 }
             }
             return closestY !== null ? closestY : -160;
+        },
+
+        getHubCenter: function(fb) {
+            var hx = (fb && fb.x !== undefined) ? fb.x : 0;
+            var topY = this.detectShapeTopSurface(hx, -100);
+            var colH = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) ? fb.collarHeight : 24;
+            var restingHubY = topY - 35.5 - colH;
+
+            var hy = restingHubY;
+            if (fb && fb.yOffset !== undefined) {
+                hy = restingHubY - fb.yOffset;
+            } else if (fb && fb.y !== undefined) {
+                hy = fb.y;
+            }
+            return { x: hx, y: hy };
         },
 
         getOctagonVertices: function(cx, cy) {

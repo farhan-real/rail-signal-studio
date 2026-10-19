@@ -20,10 +20,13 @@
                 return;
             }
 
+            var topY = window.FeatherRenderer ? window.FeatherRenderer.detectShapeTopSurface(0, -100) : -160;
+
             for (var i = 0; i < SignalState.lamps.length; i++) {
                 var l = SignalState.lamps[i];
                 var isLit = SignalState.getLamp(l.id);
                 var activeLitClass = isLit ? 'active' : '';
+                var userY = Math.round(topY - (l.y !== undefined ? l.y : topY));
 
                 html += '<div class="builder-card" data-lamp-index="' + i + '">';
                 html += '  <div class="builder-card-header">';
@@ -46,8 +49,8 @@
                 html += '  </div>';
 
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">X Offset</label><input type="number" class="form-input lp-prop" data-prop="x" value="' + (l.x !== undefined ? l.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Y Offset</label><input type="number" class="form-input lp-prop" data-prop="y" value="' + (l.y !== undefined ? l.y : 0) + '"/></div>';
+                html += '    <div><label class="form-label">X Pos (0 = Center)</label><input type="number" class="form-input lp-prop" data-prop="x" value="' + (l.x !== undefined ? l.x : 0) + '"/></div>';
+                html += '    <div><label class="form-label">Y Pos (0 = Top, -ve Down)</label><input type="number" class="form-input lp-y-user" data-lamp-index="' + i + '" value="' + userY + '"/></div>';
                 html += '  </div>';
 
                 html += '  <div class="form-row-2">';
@@ -93,6 +96,8 @@
 
         bindCardEvents: function(container) {
             var cards = container.querySelectorAll('.builder-card');
+            var topY = window.FeatherRenderer ? window.FeatherRenderer.detectShapeTopSurface(0, -100) : -160;
+
             for (var c = 0; c < cards.length; c++) {
                 (function(card) {
                     var lIdx = parseInt(card.getAttribute('data-lamp-index'), 10);
@@ -118,6 +123,22 @@
                             inp.addEventListener('input', updateVal);
                             inp.addEventListener('change', updateVal);
                         })(props[p]);
+                    }
+
+                    var yUserInp = card.querySelector('.lp-y-user');
+                    if (yUserInp) {
+                        var updateY = function() {
+                            var raw = yUserInp.value.trim();
+                            if (raw === '' || raw === '-') return;
+                            var uVal = parseFloat(raw);
+                            if (!isNaN(uVal)) {
+                                lamp.y = topY - uVal;
+                                SignalEvents.emit('state:changed');
+                                SignalEvents.emit('state:persist');
+                            }
+                        };
+                        yUserInp.addEventListener('input', updateY);
+                        yUserInp.addEventListener('change', updateY);
                     }
 
                     var btnLit = card.querySelector('.btn-preview-lit');
