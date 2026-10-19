@@ -34,8 +34,7 @@
                 for (var sIdx = 0; sIdx < SignalState.shapes.length; sIdx++) {
                     var shp = SignalState.shapes[sIdx];
                     var sName = shp.name || ('Plate ' + (sIdx + 1));
-                    var sSel = (fb.anchorShapeId === shp.id) ? ' selected' : '';
-                    html += '<option value="' + (shp.id || '') + '"' + sSel + '>' + sName + (shp.isMain ? ' [Main]' : '') + '</option>';
+                    html += '<option value="' + (shp.id || '') + '"' + (fb.anchorShapeId === shp.id ? ' selected' : '') + '>' + sName + (shp.isMain ? ' [Main]' : '') + '</option>';
                 }
                 html += '    </select></div>';
                 html += '    <div><label class="form-label">Placement Mode</label><select id="fbPosMode" class="form-select">';
@@ -64,7 +63,7 @@
                 if (showConn) {
                     html += '  <div class="form-row-2" style="margin-top:4px;">';
                     html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
-                    html += '    <div><label class="form-label">Collar Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
+                    html += '    <div><label class="form-label">Connector Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
                     html += '  </div>';
                     html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbAutoConnect" ' + (fb.autoConnect !== false ? 'checked' : '') + '/><span>Auto-connect collar to shape boundary</span></label></div>';
                 }
@@ -92,8 +91,7 @@
                     html += '    <div><label class="form-label">Feather ID</label><input type="text" class="form-input ft-prop" data-prop="id" value="' + fth.id + '"/></div>';
                     html += '    <div><label class="form-label">Position / Direction</label><select class="form-select ft-prop" data-prop="position">';
                     for (var p = 0; p < FeatherPositions.length; p++) {
-                        var sel = (fth.position || 'left1') === FeatherPositions[p].key ? 'selected' : '';
-                        html += '<option value="' + FeatherPositions[p].key + '" ' + sel + '>' + FeatherPositions[p].label + '</option>';
+                        html += '<option value="' + FeatherPositions[p].key + '" ' + ((fth.position || 'left1') === FeatherPositions[p].key ? 'selected' : '') + '>' + FeatherPositions[p].label + '</option>';
                     }
                     html += '    </select></div>';
                     html += '  </div>';
@@ -104,7 +102,7 @@
             }
             html += '</div>';
 
-            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
+            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, connectorHeight: null, text: '', lit: false };
             var matIsDirect = (mat.posMode === 'direct');
             var matYVal = matIsDirect ? Math.round(-(mat.y !== undefined ? mat.y : -240)) : (mat.yOffset !== undefined ? mat.yOffset : 0);
             var isMat2x = (mat.size === '2x');
@@ -134,10 +132,11 @@
                 html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
                 html += '    <div><label class="form-label">' + (matIsDirect ? 'Direct Y (px, +Y Up)' : 'Y Offset (px above top)') + '</label><input type="number" id="matYInput" class="form-input" value="' + matYVal + '"/></div>';
                 html += '  </div>';
-                html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
-                html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label>';
-                html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="height:26px;">Preview Lit</button>';
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Connector Height</label><input type="number" id="matConnHeight" class="form-input" placeholder="Auto" value="' + (mat.connectorHeight !== null && mat.connectorHeight !== undefined ? mat.connectorHeight : '') + '"/></div>';
+                html += '    <div style="display:flex; align-items:flex-end; padding-bottom:1px;"><button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="width:100%; height:26px;">Preview Lit</button></div>';
                 html += '  </div>';
+                html += '  <div style="margin-top:4px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label></div>';
             }
             html += '</div>';
 
@@ -206,7 +205,13 @@
 
             bindInp('fbCollarWidth', function(v) { SignalState.featherBase.collarWidth = Math.max(10, v); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             var fbCH = document.getElementById('fbCollarHeight');
-            if (fbCH) fbCH.addEventListener('input', function() { var v = this.value.trim(); SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v)); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            if (fbCH) {
+                fbCH.addEventListener('input', function() {
+                    var v = this.value.trim();
+                    SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v));
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                });
+            }
 
             var chkAuto = document.getElementById('chkFbAutoConnect');
             if (chkAuto) chkAuto.addEventListener('change', function() { SignalState.featherBase.autoConnect = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
@@ -301,6 +306,15 @@
                 else { SignalState.matrix.yOffset = v; delete SignalState.matrix.y; }
                 SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
             });
+
+            var matCH = document.getElementById('matConnHeight');
+            if (matCH) {
+                matCH.addEventListener('input', function() {
+                    var v = this.value.trim();
+                    SignalState.matrix.connectorHeight = (v === '' ? null : parseFloat(v));
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                });
+            }
 
             var chkMatBase = document.getElementById('chkMatrixShowBase');
             if (chkMatBase) {

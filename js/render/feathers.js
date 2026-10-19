@@ -29,23 +29,15 @@
 
         getShapeTopAtX: function(s, targetX) {
             if (!s) return null;
-            if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) {
-                return s.y !== undefined ? s.y : 0;
-            }
+            if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) return s.y !== undefined ? s.y : 0;
             if (s.type === 'triangle') {
                 var tx = s.x || 0, tw = s.width || 40, ty = s.y || 0, th = s.height || 40;
                 var dir = (s.direction || 'up').toLowerCase();
-                if (targetX >= tx && targetX <= (tx + tw)) {
-                    return (dir === 'up') ? ty + (Math.abs(targetX - (tx + tw / 2)) / (tw / 2)) * th : ty;
-                }
-                return ty;
+                return (targetX >= tx && targetX <= (tx + tw)) ? ((dir === 'up') ? ty + (Math.abs(targetX - (tx + tw / 2)) / (tw / 2)) * th : ty) : ty;
             }
             if (s.type === 'circle-sector') {
                 var cx = s.x || 0, cy = s.y || 0, r = s.radius || 30;
-                if (Math.abs(targetX - cx) <= r) {
-                    return cy - Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2)));
-                }
-                return cy - r;
+                return (Math.abs(targetX - cx) <= r) ? cy - Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2))) : cy - r;
             }
             return s.y !== undefined ? s.y : null;
         },
@@ -54,8 +46,7 @@
             var mainShape = this.getMainShape();
             if (mainShape) {
                 var y = this.getShapeTopAtX(mainShape, targetX);
-                if (y !== null) return y;
-                return mainShape.y !== undefined ? mainShape.y : -160;
+                return y !== null ? y : (mainShape.y !== undefined ? mainShape.y : -160);
             }
             return -160;
         },
@@ -77,16 +68,13 @@
             var hx = (fb && fb.x !== undefined) ? fb.x : 0;
             var r = (fb && fb.radius !== undefined) ? fb.radius : 35.5;
             var posMode = (fb && fb.posMode) || (fb && fb.y !== undefined && fb.yOffset === undefined ? 'direct' : 'relative');
-
-            if (posMode === 'direct' && fb && fb.y !== undefined) {
-                return { x: hx, y: fb.y };
-            }
+            if (posMode === 'direct' && fb && fb.y !== undefined) return { x: hx, y: fb.y };
 
             var topY = this.detectHeadTopSurface(hx);
-            var colH = (fb && fb.showConnector !== false && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) ? fb.collarHeight : 24;
-            var restingHubY = topY - r - (fb && fb.showConnector === false ? 0 : colH);
+            var hasH = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined);
+            var colH = (fb && fb.showConnector !== false) ? (hasH ? Math.max(2, parseFloat(fb.collarHeight)) : 24) : 0;
             var yOff = (fb && fb.yOffset !== undefined) ? fb.yOffset : 0;
-            return { x: hx, y: restingHubY - yOff };
+            return { x: hx, y: topY - r - colH - yOff };
         },
 
         getPolygonVertices: function(cx, cy, sides, baseAngle, apothem) {
@@ -100,10 +88,7 @@
             var verts = [];
             for (var i = 0; i < n; i++) {
                 var vAngle = rotRad + i * stepRad - halfAngle;
-                verts.push({
-                    x: cx + rOut * Math.cos(vAngle),
-                    y: cy + rOut * Math.sin(vAngle)
-                });
+                verts.push({ x: cx + rOut * Math.cos(vAngle), y: cy + rOut * Math.sin(vAngle) });
             }
             return verts;
         },
@@ -124,17 +109,14 @@
             var colW = (fb && fb.collarWidth) ? fb.collarWidth : 32;
             var halfW = colW / 2;
 
-            var headTopY = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) ?
-                hubBottomY + Math.max(4, fb.collarHeight) : this.detectShapeSurfaceBelow(hx, hubBottomY);
-
-            var collarHeight = Math.max(4, headTopY - hubBottomY);
-            var leftContactY = this.detectShapeSurfaceBelow(hx - halfW, hubBottomY);
-            var rightContactY = this.detectShapeSurfaceBelow(hx + halfW, hubBottomY);
+            var hasH = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined);
+            var collarHeight = hasH ? Math.max(2, parseFloat(fb.collarHeight)) : Math.max(4, this.detectShapeSurfaceBelow(hx, hubBottomY) - hubBottomY);
+            var contactY = hubBottomY + collarHeight;
 
             var svg = '<g class="feather-trunnion-group">';
             svg += '<rect x="' + (hx - halfW) + '" y="' + hubBottomY.toFixed(1) + '" width="' + colW + '" height="' + collarHeight.toFixed(1) + '" class="feather-trunnion-collar" />';
             svg += '<line x1="' + (hx - halfW - 2) + '" y1="' + hubBottomY.toFixed(1) + '" x2="' + (hx + halfW + 2) + '" y2="' + hubBottomY.toFixed(1) + '" class="feather-trunnion-flange" />';
-            svg += '<line x1="' + (hx - halfW - 3) + '" y1="' + leftContactY.toFixed(1) + '" x2="' + (hx + halfW + 3) + '" y2="' + rightContactY.toFixed(1) + '" class="feather-trunnion-flange" />';
+            svg += '<line x1="' + (hx - halfW - 3) + '" y1="' + contactY.toFixed(1) + '" x2="' + (hx + halfW + 3) + '" y2="' + contactY.toFixed(1) + '" class="feather-trunnion-flange" />';
             svg += '<circle cx="' + (hx - 7) + '" cy="' + (hubBottomY + 3.0).toFixed(1) + '" r="1.4" class="feather-trunnion-bolt" />';
             svg += '<circle cx="' + (hx + 7) + '" cy="' + (hubBottomY + 3.0).toFixed(1) + '" r="1.4" class="feather-trunnion-bolt" />';
             svg += '</g>';
@@ -146,8 +128,7 @@
             var bAngle = (fb && fb.baseAngle) ? fb.baseAngle : 0;
             var r = (fb && fb.radius) ? fb.radius : 35.5;
             var verts = this.getPolygonVertices(hub.x, hub.y, sides, bAngle, r);
-            var n = verts.length;
-            var stepDeg = 360 / n;
+            var n = verts.length, stepDeg = 360 / n;
 
             var attached = {};
             if (feathers && feathers.length > 0) {
@@ -172,15 +153,11 @@
             var hw = 14.0, hwBottom = 10.5, tDist = 9.0, straightLen = 98.0;
 
             for (var k = 0; k < n; k++) {
-                var vStart = verts[k], vEnd = verts[(k + 1) % n];
-                var arm = attached[k];
-
+                var vStart = verts[k], vEnd = verts[(k + 1) % n], arm = attached[k];
                 if (!arm) {
                     path += ' L ' + vEnd.x.toFixed(1) + ' ' + vEnd.y.toFixed(1);
                 } else {
-                    var rad = arm.rad;
-                    var ux = Math.cos(rad), uy = Math.sin(rad);
-                    var tx = -uy, ty = ux;
+                    var rad = arm.rad, ux = Math.cos(rad), uy = Math.sin(rad), tx = -uy, ty = ux;
                     var mx = (vStart.x + vEnd.x) / 2, my = (vStart.y + vEnd.y) / 2;
 
                     path += ' L ' + (mx - tx * hwBottom).toFixed(1) + ' ' + (my - ty * hwBottom).toFixed(1);

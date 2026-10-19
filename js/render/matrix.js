@@ -84,7 +84,9 @@
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
             var boxHeight = 52;
             var topAssemblyY = this.getSignalAssemblyTopY();
-            var restingCenterY = topAssemblyY - (matrixConf.showBase === false ? 2 : 8) - (boxHeight / 2);
+            var hasH = (matrixConf && matrixConf.connectorHeight !== null && matrixConf.connectorHeight !== undefined);
+            var connH = hasH ? Math.max(2, parseFloat(matrixConf.connectorHeight)) : 8;
+            var restingCenterY = topAssemblyY - (matrixConf.showBase === false ? 2 : connH) - (boxHeight / 2);
 
             var posMode = (matrixConf && matrixConf.posMode) || (matrixConf && matrixConf.y !== undefined && matrixConf.yOffset === undefined ? 'direct' : 'relative');
             var cy = (posMode === 'direct' && matrixConf.y !== undefined) ? matrixConf.y :
@@ -97,8 +99,7 @@
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
             var boxBottomY = by + boxHeight;
 
-            var mountTargetY = topAssemblyY;
-            var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
+            var bracketHeight = hasH ? Math.max(2, parseFloat(matrixConf.connectorHeight)) : Math.max(4, topAssemblyY - boxBottomY);
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
             if (matrixConf && matrixConf.showBase !== false) {
@@ -138,8 +139,7 @@
 
                 for (var cell = 0; cell < 2; cell++) {
                     var cPattern = this.getPattern(chars[cell]);
-                    var cStartX = cellCenters[cell] - (2 * spacing);
-                    var cStartY = cy - (3 * spacing);
+                    var cStartX = cellCenters[cell] - (2 * spacing), cStartY = cy - (3 * spacing);
 
                     for (var r2 = 0; r2 < 7; r2++) {
                         var msk = cPattern[r2] || 0;
