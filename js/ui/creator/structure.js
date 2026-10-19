@@ -20,10 +20,34 @@
             html += '    <div><label class="form-label">X Offset</label><input type="number" id="mastXInp" class="form-input" value="' + (mast.x || 0) + '"/></div>';
             html += '    <div><label class="form-label">Y Offset</label><input type="number" id="mastYInp" class="form-input" value="' + (mast.y || 0) + '"/></div>';
             html += '  </div>';
-            html += '  <div class="form-row-2" style="margin-top:6px;">';
-            html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMastPlatform" ' + (mast.platform ? 'checked' : '') + '/><span>Service Platform</span></label>';
-            html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMastLadder" ' + (mast.ladder ? 'checked' : '') + '/><span>Access Ladder</span></label>';
+            html += '  <div style="margin-top:6px;">';
+            html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMastLadder" ' + (mast.ladder ? 'checked' : '') + '/><span>Access Ladder with safety cage</span></label>';
             html += '  </div>';
+            html += '</div>';
+
+            html += '<div class="builder-card">';
+            html += '  <div class="builder-card-header">';
+            html += '    <span class="card-badge">Service Platform / Footplate (Circled on Mast)</span>';
+            html += '    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="chkMastPlatform" ' + (mast.platform ? 'checked' : '') + '/><span style="font-size:11px; font-weight:700;">Show Platform</span></label>';
+            html += '  </div>';
+
+            if (mast.platform) {
+                var headBottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
+                var defPy = mast.platformY !== undefined ? mast.platformY : (headBottom !== null ? (headBottom + 12) : 60);
+
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">X Pos (px)</label><input type="number" id="platformXInp" class="form-input" placeholder="Centered" value="' + (mast.platformX !== null && mast.platformX !== undefined ? mast.platformX : '') + '"/></div>';
+                html += '    <div><label class="form-label">Y Pos (px)</label><input type="number" id="platformYInp" class="form-input" value="' + defPy + '"/></div>';
+                html += '  </div>';
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Width (px)</label><input type="number" id="platformWidthInp" class="form-input" value="' + (mast.platformWidth || 52) + '"/></div>';
+                html += '    <div><label class="form-label">Height (px)</label><input type="number" id="platformHeightInp" class="form-input" value="' + (mast.platformHeight || 6) + '"/></div>';
+                html += '  </div>';
+                html += '  <div class="form-row-2" style="margin-top:6px;">';
+                html += '    <button id="btnCenterPlatformX" class="tool-btn" style="font-size:10px;">Center X</button>';
+                html += '    <button id="btnSnapPlatform" class="tool-btn" style="font-size:10px;">Snap Below Head</button>';
+                html += '  </div>';
+            }
             html += '</div>';
 
             container.innerHTML = html;
@@ -32,8 +56,81 @@
             document.getElementById('mastHeightInp').addEventListener('change', function() { SignalState.mast.height = parseFloat(this.value) || 300; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             document.getElementById('mastXInp').addEventListener('change', function() { SignalState.mast.x = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             document.getElementById('mastYInp').addEventListener('change', function() { SignalState.mast.y = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
-            document.getElementById('chkMastPlatform').addEventListener('change', function() { SignalState.mast.platform = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             document.getElementById('chkMastLadder').addEventListener('change', function() { SignalState.mast.ladder = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+
+            var chkPlat = document.getElementById('chkMastPlatform');
+            if (chkPlat) {
+                chkPlat.addEventListener('change', function() {
+                    SignalState.mast.platform = this.checked;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                });
+            }
+
+            var pxInp = document.getElementById('platformXInp');
+            if (pxInp) {
+                var onPx = function() {
+                    var v = pxInp.value.trim();
+                    SignalState.mast.platformX = (v === '' ? null : parseFloat(v));
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                pxInp.addEventListener('input', onPx);
+                pxInp.addEventListener('change', onPx);
+            }
+
+            var pyInp = document.getElementById('platformYInp');
+            if (pyInp) {
+                var onPy = function() {
+                    SignalState.mast.platformY = parseFloat(pyInp.value) || 0;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                pyInp.addEventListener('input', onPy);
+                pyInp.addEventListener('change', onPy);
+            }
+
+            var pwInp = document.getElementById('platformWidthInp');
+            if (pwInp) {
+                var onPw = function() {
+                    SignalState.mast.platformWidth = Math.max(10, parseFloat(pwInp.value) || 52);
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                pwInp.addEventListener('input', onPw);
+                pwInp.addEventListener('change', onPw);
+            }
+
+            var phInp = document.getElementById('platformHeightInp');
+            if (phInp) {
+                var onPh = function() {
+                    SignalState.mast.platformHeight = Math.max(2, parseFloat(phInp.value) || 6);
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                phInp.addEventListener('input', onPh);
+                phInp.addEventListener('change', onPh);
+            }
+
+            var btnCenter = document.getElementById('btnCenterPlatformX');
+            if (btnCenter) {
+                btnCenter.addEventListener('click', function() {
+                    SignalState.mast.platformX = null;
+                    if (pxInp) pxInp.value = '';
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                });
+            }
+
+            var btnSnap = document.getElementById('btnSnapPlatform');
+            if (btnSnap) {
+                btnSnap.addEventListener('click', function() {
+                    var bottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
+                    SignalState.mast.platformY = (bottom !== null ? bottom + 12 : 60);
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                });
+            }
         }
     };
 

@@ -47,7 +47,10 @@
                     html += '    <div><label class="form-label">Width</label><input type="number" class="form-input sh-prop" data-prop="width" value="' + (s.width || 60) + '"/></div>';
                     html += '    <div><label class="form-label">Height</label><input type="number" class="form-input sh-prop" data-prop="height" value="' + (s.height || 100) + '"/></div>';
                     html += '  </div>';
-                    html += '  <label class="form-label" style="display:flex; justify-content:space-between; margin-top:2px;"><span>Corner Radii (TL, TR, BR, BL)</span><button class="tool-btn btn-sync-corners" data-index="' + i + '" style="font-size:9px; padding:1px 5px;">Set All Same</button></label>';
+                    html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">';
+                    html += '    <label class="form-label">Corner Radii</label>';
+                    html += '    <div style="display:flex; gap:4px;"><button class="tool-btn btn-center-x" data-index="' + i + '" style="font-size:9px; padding:1px 5px;">Center X: 0</button><button class="tool-btn btn-sync-corners" data-index="' + i + '" style="font-size:9px; padding:1px 5px;">Set All Same</button></div>';
+                    html += '  </div>';
                     html += '  <div class="corner-matrix">';
                     html += '    <div class="corner-cell"><span style="font-size:9px; color:var(--text-secondary);">Top Left</span><input type="number" min="0" class="form-input corner-input" data-c-idx="0" value="' + (corners[0] || 0) + '"/></div>';
                     html += '    <div class="corner-cell"><span style="font-size:9px; color:var(--text-secondary);">Top Right</span><input type="number" min="0" class="form-input corner-input" data-c-idx="1" value="' + (corners[1] || 0) + '"/></div>';
@@ -142,21 +145,39 @@
 
                     var props = card.querySelectorAll('.sh-prop');
                     for (var p = 0; p < props.length; p++) {
-                        props[p].addEventListener('change', function() {
-                            var pr = this.getAttribute('data-prop');
-                            var val = (this.type === 'number') ? parseFloat(this.value) : this.value;
-                            shape[pr] = val;
-                            SignalEvents.emit('state:changed');
-                            SignalEvents.emit('state:persist');
-                        });
+                        (function(inp) {
+                            var updateVal = function() {
+                                var pr = inp.getAttribute('data-prop');
+                                var val = (inp.type === 'number') ? parseFloat(inp.value) : inp.value;
+                                shape[pr] = val;
+                                SignalEvents.emit('state:changed');
+                                SignalEvents.emit('state:persist');
+                            };
+                            inp.addEventListener('input', updateVal);
+                            inp.addEventListener('change', updateVal);
+                        })(props[p]);
                     }
 
                     var corners = card.querySelectorAll('.corner-input');
                     for (var ci = 0; ci < corners.length; ci++) {
-                        corners[ci].addEventListener('change', function() {
-                            var cPos = parseInt(this.getAttribute('data-c-idx'), 10);
-                            if (!shape.corners) shape.corners = [0, 0, 0, 0];
-                            shape.corners[cPos] = Math.max(0, parseFloat(this.value) || 0);
+                        (function(cinp) {
+                            var updateCorner = function() {
+                                var cPos = parseInt(cinp.getAttribute('data-c-idx'), 10);
+                                if (!shape.corners) shape.corners = [0, 0, 0, 0];
+                                shape.corners[cPos] = Math.max(0, parseFloat(cinp.value) || 0);
+                                SignalEvents.emit('state:changed');
+                                SignalEvents.emit('state:persist');
+                            };
+                            cinp.addEventListener('input', updateCorner);
+                            cinp.addEventListener('change', updateCorner);
+                        })(corners[ci]);
+                    }
+
+                    var btnCenter = card.querySelector('.btn-center-x');
+                    if (btnCenter) {
+                        btnCenter.addEventListener('click', function() {
+                            var w = shape.width || 60;
+                            shape.x = -Math.round(w / 2);
                             SignalEvents.emit('state:changed');
                             SignalEvents.emit('state:persist');
                         });

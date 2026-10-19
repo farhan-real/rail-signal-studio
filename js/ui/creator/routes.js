@@ -23,14 +23,14 @@
 
             if (fb.enabled) {
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">Hub X</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Hub Y</label><input type="number" id="fbY" class="form-input" value="' + (fb.y !== undefined ? fb.y : -196) + '"/></div>';
+                html += '    <div><label class="form-label">Hub Center X</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
+                html += '    <div><label class="form-label">Hub Center Y</label><input type="number" id="fbY" class="form-input" value="' + (fb.y !== undefined ? fb.y : -196) + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
                 html += '    <div><label class="form-label">Collar Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
                 html += '  </div>';
-                html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbAutoConnect" ' + (fb.autoConnect !== false ? 'checked' : '') + '/><span>Auto-connect collar to underlying shape boundary</span></label></div>';
+                html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbAutoConnect" ' + (fb.autoConnect !== false ? 'checked' : '') + '/><span>Auto-connect collar to shape boundary</span></label></div>';
             }
             html += '</div>';
 
@@ -67,7 +67,9 @@
             }
             html += '</div>';
 
-            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: -192, text: '', lit: false };
+            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
+            var matYOffset = mat.yOffset !== undefined ? mat.yOffset : 0;
+
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
             html += '    <span class="card-badge">5x7 Theatre Route Matrix Box</span>';
@@ -77,14 +79,15 @@
             if (mat.enabled) {
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Box ID</label><input type="text" id="matId" class="form-input" value="' + (mat.id || 'ROUTE_BOX') + '"/></div>';
-                html += '    <div><label class="form-label">Stencil Text (e.g. M, 1, 2)</label><input type="text" id="matText" class="form-input" maxlength="2" value="' + (mat.text || '') + '"/></div>';
+                html += '    <div><label class="form-label">Stencil Text (e.g. M, 1, 2)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M" value="' + (mat.text || '') + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">X Offset</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Y Offset</label><input type="number" id="matY" class="form-input" value="' + (mat.y !== undefined ? mat.y : -192) + '"/></div>';
+                html += '    <div><label class="form-label">Y Offset (0 = On Top, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
                 html += '  </div>';
-                html += '  <div style="display:flex; justify-content:flex-end; margin-top:4px;">';
-                html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix">Toggle Matrix Lit</button>';
+                html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
+                html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of signal; +ve moves up</span>';
+                html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix">Preview Lit</button>';
                 html += '  </div>';
             }
             html += '</div>';
@@ -105,21 +108,33 @@
             }
 
             var fbX = document.getElementById('fbX');
-            if (fbX) fbX.addEventListener('change', function() { SignalState.featherBase.x = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            if (fbX) {
+                var onFbX = function() { SignalState.featherBase.x = parseFloat(fbX.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
+            }
 
             var fbY = document.getElementById('fbY');
-            if (fbY) fbY.addEventListener('change', function() { SignalState.featherBase.y = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            if (fbY) {
+                var onFbY = function() { SignalState.featherBase.y = parseFloat(fbY.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                fbY.addEventListener('input', onFbY); fbY.addEventListener('change', onFbY);
+            }
 
             var fbCW = document.getElementById('fbCollarWidth');
-            if (fbCW) fbCW.addEventListener('change', function() { SignalState.featherBase.collarWidth = Math.max(10, parseFloat(this.value) || 32); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            if (fbCW) {
+                var onFbCW = function() { SignalState.featherBase.collarWidth = Math.max(10, parseFloat(fbCW.value) || 32); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                fbCW.addEventListener('input', onFbCW); fbCW.addEventListener('change', onFbCW);
+            }
 
             var fbCH = document.getElementById('fbCollarHeight');
-            if (fbCH) fbCH.addEventListener('change', function() {
-                var v = this.value.trim();
-                SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v));
-                SignalEvents.emit('state:changed');
-                SignalEvents.emit('state:persist');
-            });
+            if (fbCH) {
+                var onFbCH = function() {
+                    var v = fbCH.value.trim();
+                    SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v));
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                fbCH.addEventListener('input', onFbCH); fbCH.addEventListener('change', onFbCH);
+            }
 
             var chkAuto = document.getElementById('chkFbAutoConnect');
             if (chkAuto) chkAuto.addEventListener('change', function() { SignalState.featherBase.autoConnect = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
@@ -182,7 +197,7 @@
             var chkMat = document.getElementById('chkMatrixEnabled');
             if (chkMat) {
                 chkMat.addEventListener('change', function() {
-                    if (!SignalState.matrix) SignalState.matrix = { id: 'ROUTE_BOX', x: 0, y: -192, text: '', lit: false };
+                    if (!SignalState.matrix) SignalState.matrix = { id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
                     SignalState.matrix.enabled = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
@@ -202,15 +217,31 @@
             if (mId) mId.addEventListener('change', function() { SignalState.matrix.id = this.value; SignalEvents.emit('state:persist'); });
 
             var mX = document.getElementById('matX');
-            if (mX) mX.addEventListener('change', function() { SignalState.matrix.x = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            if (mX) {
+                var onMx = function() { SignalState.matrix.x = parseFloat(mX.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                mX.addEventListener('input', onMx); mX.addEventListener('change', onMx);
+            }
 
-            var mY = document.getElementById('matY');
-            if (mY) mY.addEventListener('change', function() { SignalState.matrix.y = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            var mYOff = document.getElementById('matYOffset');
+            if (mYOff) {
+                var onMy = function() {
+                    SignalState.matrix.yOffset = parseFloat(mYOff.value) || 0;
+                    delete SignalState.matrix.y;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
+                mYOff.addEventListener('input', onMy); mYOff.addEventListener('change', onMy);
+            }
 
             var btnMatLit = document.getElementById('btnPreviewMatrix');
             if (btnMatLit) {
                 btnMatLit.addEventListener('click', function() {
                     SignalState.matrix.lit = !SignalState.matrix.lit;
+                    if (SignalState.matrix.lit && !SignalState.matrix.text) {
+                        SignalState.matrix.text = 'M';
+                        var txtInp = document.getElementById('matText');
+                        if (txtInp) txtInp.value = 'M';
+                    }
                     SignalEvents.emit('matrix:updated', SignalState.matrix.lit ? SignalState.matrix.text : '');
                     this.classList.toggle('active', !!SignalState.matrix.lit);
                     SignalEvents.emit('state:persist');
