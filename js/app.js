@@ -7,6 +7,7 @@
             french: { data: window.PresetFrench, key: 'french' },
             british: { data: window.PresetBritish, key: 'british' },
             dwarf: { data: window.PresetDwarf, key: 'dwarf' },
+            examplecascade: { data: window.ExampleCascade, key: 'examplecascade' },
             examplesections: { data: window.ExampleSections, key: 'examplesections' },
             examplegroup: { data: window.ExampleGroup, key: 'examplegroup' },
             exampledelay: { data: window.ExampleDelay, key: 'exampledelay' },
@@ -35,6 +36,7 @@
             this.presetsMap.french.data = window.PresetFrench;
             this.presetsMap.british.data = window.PresetBritish;
             this.presetsMap.dwarf.data = window.PresetDwarf;
+            this.presetsMap.examplecascade.data = window.ExampleCascade;
             this.presetsMap.examplesections.data = window.ExampleSections;
             this.presetsMap.examplegroup.data = window.ExampleGroup;
             this.presetsMap.exampledelay.data = window.ExampleDelay;
@@ -200,8 +202,14 @@
             var draft = SignalStorage.loadDraft();
 
             if (draft) {
-                if (draft.name === 'Indian Railways 4-Aspect MACLS' && draft.feathers && draft.feathers.some(function(f) { return f.position === 'left1' || f.position === 'right1'; })) {
-                    draft.feathers = window.PresetIndian.feathers;
+                if (draft.name === 'Indian Railways 4-Aspect MACLS') {
+                    if (draft.feathers && draft.feathers.some(function(f) { return f.position === 'left1' || f.position === 'right1'; })) {
+                        draft.feathers = window.PresetIndian.feathers;
+                    }
+                    if (draft.script && draft.script.indexOf('group') === -1) {
+                        draft.script = window.PresetIndian.script;
+                        draft.groups = window.PresetIndian.groups;
+                    }
                 }
                 SignalState.load(draft);
                 this.updateHeaderTitle(draft.name || 'Saved Signal');
