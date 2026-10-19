@@ -2,12 +2,12 @@
     'use strict';
 
     var FeatherPositions = [
-        { key: 'left1', label: 'Left 1 (-135° High Left)' },
-        { key: 'left2', label: 'Left 2 (-180° Med Left)' },
-        { key: 'left3', label: 'Left 3 (+135° Low Left)' },
-        { key: 'right1', label: 'Right 1 (-45° High Right)' },
-        { key: 'right2', label: 'Right 2 (0° Med Right)' },
-        { key: 'right3', label: 'Right 3 (+45° Low Right)' }
+        { key: 'left1', label: 'Left 1 (Low Left)' },
+        { key: 'left2', label: 'Left 2 (Med Left)' },
+        { key: 'left3', label: 'Left 3 (High Left)' },
+        { key: 'right1', label: 'Right 1 (Low Right)' },
+        { key: 'right2', label: 'Right 2 (Med Right)' },
+        { key: 'right3', label: 'Right 3 (High Right)' }
     ];
 
     var CreatorRoutes = {
@@ -68,7 +68,7 @@
             html += '</div>';
 
             var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
-            var matYOffset = mat.yOffset !== undefined ? mat.yOffset : 0;
+            if (mat.yOffset === undefined) mat.yOffset = 0;
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
@@ -83,7 +83,7 @@
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">X Offset</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Y Offset (0 = On Top, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
+                html += '    <div><label class="form-label">Y Offset (0 = On Top, +ve Up)</label><input type="number" id="matYOffset" class="form-input" value="' + mat.yOffset + '"/></div>';
                 html += '  </div>';
                 html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
                 html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of signal; +ve moves up</span>';
@@ -255,10 +255,13 @@
                 var onMy = function() {
                     var raw = mYOff.value.trim();
                     if (raw === '' || raw === '-') return;
-                    SignalState.matrix.yOffset = parseFloat(raw) || 0;
-                    delete SignalState.matrix.y;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    var val = parseFloat(raw);
+                    if (!isNaN(val)) {
+                        SignalState.matrix.yOffset = val;
+                        delete SignalState.matrix.y;
+                        SignalEvents.emit('state:changed');
+                        SignalEvents.emit('state:persist');
+                    }
                 };
                 mYOff.addEventListener('input', onMy); mYOff.addEventListener('change', onMy);
             }

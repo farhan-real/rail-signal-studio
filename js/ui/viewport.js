@@ -128,8 +128,10 @@
             if (SignalState.mast) out += MastRenderer.render(SignalState.mast);
             for (var i = 0; i < SignalState.shapes.length; i++) out += ShapeRenderer.render(SignalState.shapes[i]);
 
-            if (SignalState.feathers && SignalState.feathers.length > 0) {
-                out += FeatherRenderer.renderAll(SignalState.feathers, function(id) {
+            var hasFeathers = SignalState.feathers && SignalState.feathers.length > 0;
+            var isBaseEnabled = SignalState.featherBase && SignalState.featherBase.enabled;
+            if (hasFeathers || isBaseEnabled) {
+                out += FeatherRenderer.renderAll(SignalState.feathers || [], function(id) {
                     return SignalState.getLamp(id);
                 });
             }

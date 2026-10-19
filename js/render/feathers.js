@@ -3,18 +3,18 @@
 
     var FeatherRenderer = {
         positions: {
-            left1: { angle: -135, facetIndex: 7 },
+            left1: { angle: 135, facetIndex: 5 },
             left2: { angle: -180, facetIndex: 6 },
-            left3: { angle: 135, facetIndex: 5 },
-            right1: { angle: -45, facetIndex: 1 },
+            left3: { angle: -135, facetIndex: 7 },
+            right1: { angle: 45, facetIndex: 3 },
             right2: { angle: 0, facetIndex: 2 },
-            right3: { angle: 45, facetIndex: 3 },
-            pos1: { angle: -135, facetIndex: 7 },
+            right3: { angle: -45, facetIndex: 1 },
+            pos1: { angle: 135, facetIndex: 5 },
             pos2: { angle: -180, facetIndex: 6 },
-            pos3: { angle: 135, facetIndex: 5 },
-            pos4: { angle: -45, facetIndex: 1 },
+            pos3: { angle: -135, facetIndex: 7 },
+            pos4: { angle: 45, facetIndex: 3 },
             pos5: { angle: 0, facetIndex: 2 },
-            pos6: { angle: 45, facetIndex: 3 }
+            pos6: { angle: -45, facetIndex: 1 }
         },
 
         getHubCenter: function(fb) {

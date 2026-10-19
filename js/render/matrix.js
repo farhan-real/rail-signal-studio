@@ -29,37 +29,65 @@
     };
 
     var MatrixRenderer = {
+        getSignalAssemblyTopY: function() {
+            var fb = window.SignalState && window.SignalState.featherBase;
+            var feathers = (window.SignalState && window.SignalState.feathers) || [];
+            var hasFeathers = feathers.length > 0;
+            var isBaseActive = hasFeathers || (fb && !!fb.enabled);
+
+            if (isBaseActive) {
+                var hub = window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(fb) : { x: 0, y: -196 };
+                var topY = hub.y - 35.5;
+
+                if (window.FeatherRenderer && hasFeathers) {
+                    for (var i = 0; i < feathers.length; i++) {
+                        var pKey = (feathers[i].position || 'left1').toLowerCase();
+                        var conf = window.FeatherRenderer.positions[pKey];
+                        if (conf) {
+                            var rad = conf.angle * Math.PI / 180;
+                            var armTipY = hub.y + Math.sin(rad) * 98.0 - 14.0;
+                            if (armTipY < topY) topY = armTipY;
+                        }
+                    }
+                }
+                return topY;
+            }
+
+            if (window.FeatherRenderer) {
+                return window.FeatherRenderer.detectShapeTopSurface(0, -100);
+            }
+            return -160;
+        },
+
         render: function(matrixConf, text) {
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
-            var hasFeathers = (window.SignalState && window.SignalState.feathers && window.SignalState.feathers.length > 0) ||
-                (window.SignalState && window.SignalState.featherBase && window.SignalState.featherBase.enabled);
+            var boxHeight = 52;
+            var topAssemblyY = this.getSignalAssemblyTopY();
+            var restingCenterY = topAssemblyY - 8 - (boxHeight / 2);
 
-            var cy = matrixConf.y !== undefined ? matrixConf.y : (hasFeathers ? -258 : -192);
+            var cy;
+            if (matrixConf.yOffset !== undefined) {
+                cy = restingCenterY - matrixConf.yOffset;
+            } else if (matrixConf.y !== undefined) {
+                cy = matrixConf.y;
+            } else {
+                cy = restingCenterY;
+            }
+
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
             var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
             var txt = isLit ? rawTxt : '';
             var isMultiChar = txt.length > 1;
             var boxWidth = isMultiChar ? 62 : 44;
-            var boxHeight = 52;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
             var boxBottomY = by + boxHeight;
 
-            var mountTargetY;
-            if (hasFeathers && window.FeatherRenderer) {
-                var hub = window.FeatherRenderer.getHubCenter(window.SignalState.featherBase);
-                mountTargetY = hub.y - 35.5;
-            } else if (window.FeatherRenderer) {
-                mountTargetY = window.FeatherRenderer.detectShapeTopSurface(cx, boxBottomY);
-            } else {
-                mountTargetY = -160;
-            }
-
+            var mountTargetY = topAssemblyY;
             var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
             svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';
             svg += '<line x1="' + (cx - 13) + '" y1="' + (boxBottomY + bracketHeight).toFixed(1) + '" x2="' + (cx + 13) + '" y2="' + (boxBottomY + bracketHeight).toFixed(1) + '" stroke="#384256" stroke-width="2" />';
-
             svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
             svg += '<rect x="' + (bx - 1).toFixed(1) + '" y="' + (by - 2).toFixed(1) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 
