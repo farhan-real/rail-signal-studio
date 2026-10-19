@@ -24,13 +24,30 @@
             return { isHalf: isHalf, minAngle: minAngle, maxAngle: maxAngle, stepAngle: stepAngle };
         },
 
+        getShortestAngle: function(currentAngle, targetAngle) {
+            if (currentAngle === undefined || isNaN(currentAngle)) {
+                return targetAngle;
+            }
+            var diff = (targetAngle - currentAngle) % 360;
+            if (diff < 0) diff += 360;
+
+            if (diff > 180) {
+                diff -= 360;
+            } else if (diff === 180) {
+                diff = 180;
+            }
+            return currentAngle + diff;
+        },
+
         render: function(ctrl) {
             var id = ctrl.id;
             var label = ctrl.label || id;
             var states = this.getStates(ctrl);
             var currentVal = SignalState.getControlValue(id) || 0;
             var cfg = this.getAngles(ctrl, states);
-            var angle = cfg.minAngle + currentVal * cfg.stepAngle;
+            var baseAngle = cfg.minAngle + currentVal * cfg.stepAngle;
+            var angle = this.getShortestAngle(ctrl._currentAngle, baseAngle);
+            ctrl._currentAngle = angle;
 
             var cx = 70, cy = cfg.isHalf ? 48 : 48;
             var labelsHtml = '';

@@ -230,7 +230,9 @@
                         var cfg = KnobControl.getAngles(c, states);
                         var knobBody = el.querySelector('.knob-body');
                         if (knobBody) {
-                            var kAngle = cfg.minAngle + curVal * cfg.stepAngle;
+                            var baseAngle = cfg.minAngle + curVal * cfg.stepAngle;
+                            var kAngle = KnobControl.getShortestAngle(c._currentAngle, baseAngle);
+                            c._currentAngle = kAngle;
                             knobBody.style.transform = 'rotate(' + kAngle.toFixed(1) + 'deg)';
                         }
                         var dialLabels = el.querySelectorAll('.knob-dial-label');
