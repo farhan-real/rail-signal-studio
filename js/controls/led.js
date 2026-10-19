@@ -33,7 +33,7 @@
                 '    </div>',
                 '  </div>',
                 '  <div class="led-meta">',
-                '    <span class="led-label">' + label + '</span>',
+                '    <span class="led-label" data-edit-label="' + id + '">' + label + '</span>',
                 '  </div>',
                 '</div>'
             ].join('');

@@ -1,0 +1,311 @@
+/* Interlocking Control Desk 2D Engineering Grid */
+.console-desk {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background-color: #10131d;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(46, 104, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(46, 104, 248, 0.08) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+    touch-action: none;
+}
+
+/* Draggable Control Placement Wrapper */
+.draggable-wrapper {
+    position: absolute;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    touch-action: none;
+    z-index: 5;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.draggable-wrapper.dragging {
+    cursor: grabbing;
+    z-index: 100;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+.draggable-wrapper .btn-remove-control {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: #e53935;
+    border: 1px solid #ff7961;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 16px;
+    display: none;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.draggable-wrapper:hover .btn-remove-control {
+    display: flex;
+}
+
+.console-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(18, 22, 33, 0.88);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(4px);
+    transition: border-color 0.15s, background 0.15s;
+}
+.draggable-wrapper:hover .console-item {
+    border-color: rgba(46, 104, 248, 0.45);
+    background: rgba(22, 28, 42, 0.95);
+}
+
+/* Mechanical Railway Lever */
+.lever-item { min-width: 72px; }
+.lever-frame {
+    width: 58px;
+    height: 94px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+}
+.lever-quadrant {
+    position: absolute;
+    top: 36px;
+    width: 52px;
+    height: 38px;
+    border: 2px solid #384259;
+    border-bottom: none;
+    border-radius: 26px 26px 0 0;
+    background: linear-gradient(180deg, #1d2230 0%, #10131a 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+.lever-notch {
+    position: absolute;
+    bottom: 2px;
+    left: 24px;
+    width: 2px;
+    height: 36px;
+    transform-origin: 50% 100%;
+    pointer-events: none;
+}
+.lever-notch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 4px;
+    height: 5px;
+    background: #4b5874;
+    border-radius: 1px;
+}
+.lever-notch.active::before { background: var(--accent); }
+.lever-handle {
+    position: absolute;
+    bottom: 12px;
+    width: 14px;
+    height: 82px;
+    transform-origin: 50% 86%;
+    transition: transform 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+.lever-rod { width: 5px; height: 50px; background: linear-gradient(90deg, #b0b8c8 0%, #687285 50%, #444c5c 100%); border-radius: 2px; box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6); }
+.lever-grip { width: 14px; height: 32px; border-radius: 7px 7px 3px 3px; box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.6); }
+.lever-latch-trigger { position: absolute; top: 22px; right: 11px; width: 4px; height: 20px; background: #8893a6; border-radius: 2px; border: 1px solid #2b313d; }
+.lever-pivot-bolt { position: absolute; bottom: 8px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fa9bb 0%, #303746 80%); border: 1px solid #141720; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); z-index: 3; }
+.lever-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.lever-label { font-size: 11px; font-weight: 700; color: #d0d7e5; letter-spacing: 0.3px; }
+.lever-val { font-size: 9px; font-weight: 600; color: #8893a6; }
+
+/* Rotary Selector Dial with Radial Position Labels */
+.knob-item { min-width: 120px; }
+.knob-assembly {
+    position: relative;
+    width: 112px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+}
+.knob-bezel {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3d4558 0%, #12151f 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+.knob-body {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #262c3b 0%, #12151e 100%);
+    border: 1px solid #2f3747;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+.knob-pointer {
+    position: absolute;
+    top: 2px;
+    left: 16px;
+    width: 3px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 2px;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+.knob-cap {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #32384a 0%, #151822 100%);
+}
+.knob-dial-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: #6d7890;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s, text-shadow 0.15s;
+    pointer-events: auto;
+}
+.knob-dial-label:hover { color: #d0d7e5; }
+.knob-dial-label.active {
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 0 8px var(--accent);
+}
+.knob-meta { margin-top: 4px; display: flex; flex-direction: column; align-items: center; }
+.knob-label { font-size: 11px; font-weight: 700; color: #d0d7e5; }
+
+/* 3D Push Button */
+.button-item { min-width: 70px; }
+.button-bezel {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #373e4f 0%, #141720 100%);
+    border: 1px solid #2c3342;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+.button-cap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -3px 4px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s, box-shadow 0.08s;
+}
+.button-item:active .button-cap,
+.button-item.button-pressed .button-cap {
+    transform: scale(0.93) translateY(2px);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.button-light {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transition: background 0.1s, box-shadow 0.1s;
+}
+.button-item.button-pressed .button-light {
+    background: #ffffff;
+    box-shadow: 0 0 8px #ffffff;
+}
+.button-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.button-label { font-size: 11px; font-weight: 700; color: #d0d7e5; }
+.button-state { font-size: 9px; font-weight: 600; color: #8893a6; }
+
+/* Industrial Toggle Switch */
+.switch-item { min-width: 66px; }
+.switch-plate {
+    width: 32px;
+    height: 52px;
+    background: linear-gradient(135deg, #373f50 0%, #1d212b 100%);
+    border: 1px solid #4a5468;
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+.switch-screw {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #252a36;
+    border: 1px solid #576278;
+}
+.screw-tl { top: 3px; left: 3px; }
+.screw-br { bottom: 3px; right: 3px; }
+.switch-well {
+    width: 10px;
+    height: 28px;
+    background: #0b0c11;
+    border-radius: 5px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.switch-bat {
+    position: absolute;
+    width: 8px;
+    height: 18px;
+    background: linear-gradient(90deg, #d8dee8 0%, #7e8798 50%, #444b58 100%);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+.switch-item.switch-on .switch-bat {
+    transform: translateY(-5px);
+    background: linear-gradient(90deg, #ffffff 0%, #a2adbf 50%, #687282 100%);
+    box-shadow: 0 3px 6px rgba(0, 238, 68, 0.4);
+}
+.switch-item.switch-off .switch-bat {
+    transform: translateY(14px);
+}
+.switch-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.switch-label { font-size: 11px; font-weight: 700; color: #d0d7e5; }
+.switch-state { font-size: 9px; font-weight: 700; color: #8893a6; }
+.switch-item.switch-on .switch-state { color: #00f543; }
+
+/* Panel LED & Track Marker text */
+.led-item { min-width: 54px; }
+.text-item { min-width: 60px; padding: 4px 8px; }
+.text-content { font-size: 12px; font-weight: 700; color: #e6eaf2; pointer-events: auto; background: transparent; border: 1px solid transparent; border-radius: 2px; outline: none; text-align: center; }
+.text-content:focus { background: #1c2130; border-color: var(--border-highlight); }
