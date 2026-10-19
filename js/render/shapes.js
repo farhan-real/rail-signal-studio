@@ -77,10 +77,23 @@
         },
 
         renderTriangle: function(s) {
-            var pts = s.points || [[0, 0], [40, 20], [0, 40]];
-            var strPts = pts.map(function(p) { return p[0] + ',' + p[1]; }).join(' ');
             var fill = s.fill || '#0a0d16', stroke = s.stroke || '#262d3e', sw = s.strokeWidth || 2;
             var triStyle = 'fill: ' + fill + '; stroke: ' + stroke + '; stroke-width: ' + sw + 'px;';
+            var pts = s.points;
+
+            if (!pts || !pts.length) {
+                var x = s.x !== undefined ? s.x : -20;
+                var y = s.y !== undefined ? s.y : -20;
+                var w = s.width || 40, h = s.height || 40;
+                var dir = (s.direction || 'up').toLowerCase();
+
+                if (dir === 'up') pts = [[x + w / 2, y], [x + w, y + h], [x, y + h]];
+                else if (dir === 'down') pts = [[x, y], [x + w, y], [x + w / 2, y + h]];
+                else if (dir === 'left') pts = [[x, y + h / 2], [x + w, y], [x + w, y + h]];
+                else pts = [[x, y], [x + w, y + h / 2], [x, y + h]];
+            }
+
+            var strPts = pts.map(function(p) { return p[0] + ',' + p[1]; }).join(' ');
             return '<polygon points="' + strPts + '" style="' + triStyle + '" class="target-plate" />';
         }
     };

@@ -20,7 +20,7 @@
         init: function() {
             this.bindPresets();
             ViewportUI.init();
-            InspectorUI.init();
+            CreatorUI.init();
             ConsoleUI.init();
             EditorUI.init();
 
@@ -47,14 +47,25 @@
 
         updateHeaderTitle: function(name) {
             var titleEl = document.getElementById('signalTitleBadge');
-            if (titleEl && name) {
-                titleEl.textContent = name;
-            }
+            if (titleEl && name) titleEl.textContent = name;
         },
 
         bindHeader: function() {
             var self = this;
             var presetSelect = document.getElementById('presetSelector');
+
+            var btnNew = document.getElementById('btnNewSignal');
+            if (btnNew) {
+                btnNew.addEventListener('click', function() {
+                    var n = prompt('Enter a name for the new signal:', 'New Signal');
+                    if (n !== null) {
+                        SignalState.newBlankSignal(n.trim() || 'New Signal');
+                        self.updateHeaderTitle(SignalState.name);
+                        presetSelect.value = '';
+                        if (EditorUI && EditorUI.compile) EditorUI.compile();
+                    }
+                });
+            }
 
             presetSelect.addEventListener('change', function() {
                 var val = this.value;
@@ -198,9 +209,7 @@
                 if (presetSelect) presetSelect.value = 'indian';
             }
 
-            if (EditorUI && EditorUI.compile) {
-                EditorUI.compile();
-            }
+            if (EditorUI && EditorUI.compile) EditorUI.compile();
             if (SignalRuntime.ast && SignalRuntime.ast.aspectList && SignalRuntime.ast.aspectList.length > 0) {
                 SignalRuntime.setAspect(SignalRuntime.ast.aspectList[0]);
             }

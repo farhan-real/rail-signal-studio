@@ -19,6 +19,7 @@
                 <span id="signalTitleBadge" class="signal-title-badge">Indian MACLS</span>
             </div>
             <div class="header-actions">
+                <button id="btnNewSignal" class="header-btn btn-primary" title="Create New Signal">+ New</button>
                 <select id="presetSelector" class="header-select" title="Load Preset">
                     <option value="">Presets...</option>
                     <optgroup label="Signals">
@@ -43,8 +44,8 @@
                 <button id="btnExport" class="header-btn" title="Export JSON">Export</button>
                 <button id="btnTriggerImport" class="header-btn" title="Import JSON">Import</button>
                 <input type="file" id="fileImporter" accept=".json" style="display:none">
-                <button id="btnToggleInspector" class="header-btn" title="Component Inspector">
-                    <img src="icons/gear.svg" alt="Inspector" class="icon-svg">
+                <button id="btnToggleCreator" class="header-btn" title="Signal Creator">
+                    <img src="icons/gear.svg" alt="Signal Creator" class="icon-svg">
                 </button>
                 <button id="btnToggleEditor" class="header-btn" title="Script Editor">
                     <img src="icons/code.svg" alt="Editor" class="icon-svg">
@@ -82,12 +83,12 @@
                 </div>
             </section>
 
-            <aside id="inspectorDrawer" class="drawer inspector-drawer">
+            <aside id="creatorDrawer" class="drawer creator-drawer">
                 <div class="drawer-header">
-                    <h3>Visual Builder</h3>
-                    <button id="btnCloseInspector" class="drawer-close">&times;</button>
+                    <h3>Signal Creator</h3>
+                    <button id="btnCloseCreator" class="drawer-close">&times;</button>
                 </div>
-                <div id="inspectorContent" class="drawer-content"></div>
+                <div id="creatorContent" class="drawer-content"></div>
             </aside>
 
             <aside id="editorDrawer" class="drawer editor-drawer">
@@ -172,7 +173,10 @@
     <script src="js/controls/button.js"></script>
     <script src="js/controls/led.js"></script>
     <script src="js/ui/viewport.js"></script>
-    <script src="js/ui/inspector.js"></script>
+    <script src="js/ui/creator/shapes.js"></script>
+    <script src="js/ui/creator/lamps.js"></script>
+    <script src="js/ui/creator/extras.js"></script>
+    <script src="js/ui/creator/creator.js"></script>
     <script src="js/ui/consolemenu.js"></script>
     <script src="js/ui/consoleview.js"></script>
     <script src="js/ui/editorview.js"></script>

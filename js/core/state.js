@@ -40,6 +40,54 @@
             SignalEvents.emit('state:changed');
         },
 
+        newBlankSignal: function(name) {
+            var n = name || 'Custom Signal';
+            this.id = 'sig_' + Date.now();
+            this.name = n;
+            this.mast = { type: 'tubular', height: 380, x: 0, y: -20, platform: true, ladder: true };
+            this.shapes = [
+                { type: 'rounded-rect', x: -26, y: -130, width: 52, height: 110, corners: [26, 26, 26, 26], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 }
+            ];
+            this.lamps = [
+                { id: 'RED', color: 'red', diameter: 34, x: 0, y: -95, hood: 'round', brightness: 1.0 },
+                { id: 'GREEN', color: 'green', diameter: 34, x: 0, y: -45, hood: 'round', brightness: 1.0 }
+            ];
+            this.feathers = [];
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: -192, text: '', lit: false };
+            this.controls = [
+                { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 0, x: 20, y: 20 }
+            ];
+            this.texts = [];
+            this.groups = {};
+            this.variables = {};
+            this.enums = {};
+            this.script = [
+                '%% Aspect Definitions',
+                'aspect DANGER {',
+                '    unset ALL;',
+                '    set RED;',
+                '}',
+                '',
+                'aspect PROCEED {',
+                '    unset ALL;',
+                '    set GREEN;',
+                '}',
+                '',
+                '%% Interlocking Logic',
+                'mainloop {',
+                '    if SignalLever is 0 {',
+                '        aspect DANGER;',
+                '    } else {',
+                '        aspect PROCEED;',
+                '    }',
+                '}'
+            ].join('\n');
+            this.lampStates = { RED: false, GREEN: false };
+            this.controlValues = { SignalLever: 0 };
+            SignalEvents.emit('state:loaded');
+            SignalEvents.emit('state:persist');
+        },
+
         getControlWidth: function(c) {
             if (!c) return 100;
             if (c.type === 'knob') return 160;
@@ -84,10 +132,8 @@
 
                 for (var p = 0; p < placedBoxes.length; p++) {
                     var b = placedBoxes[p];
-                    if (Math.abs(cy - b.y) < 60) {
-                        if (cx < b.right) {
-                            cx = b.right;
-                        }
+                    if (Math.abs(cy - b.y) < 60 && cx < b.right) {
+                        cx = b.right;
                     }
                 }
                 ctrl.x = cx;
@@ -127,13 +173,8 @@
             return this.controlValues[controlId];
         },
 
-        getVar: function(name) {
-            return this.variables[name];
-        },
-
-        setVar: function(name, val) {
-            this.variables[name] = val;
-        },
+        getVar: function(name) { return this.variables[name]; },
+        setVar: function(name, val) { this.variables[name] = val; },
 
         updateControlPos: function(id, x, y) {
             for (var i = 0; i < this.controls.length; i++) {
@@ -151,16 +192,6 @@
                 if (this.texts[i].id === id) {
                     this.texts[i].x = x;
                     this.texts[i].y = y;
-                    SignalEvents.emit('state:persist');
-                    break;
-                }
-            }
-        },
-
-        updateTextContent: function(id, text) {
-            for (var i = 0; i < this.texts.length; i++) {
-                if (this.texts[i].id === id) {
-                    this.texts[i].text = text;
                     SignalEvents.emit('state:persist');
                     break;
                 }
