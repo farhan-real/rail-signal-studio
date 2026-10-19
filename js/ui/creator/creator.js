@@ -23,7 +23,10 @@
 
         toggle: function() {
             this.drawer.classList.toggle('open');
-            if (this.drawer.classList.contains('open')) this.render();
+            if (this.drawer.classList.contains('open')) {
+                if (window.EditorUI && window.EditorUI.close) window.EditorUI.close();
+                this.render();
+            }
         },
 
         close: function() {
@@ -126,5 +129,4 @@
     };
 
     window.CreatorUI = CreatorUI;
-    window.InspectorUI = CreatorUI;
 })(window);

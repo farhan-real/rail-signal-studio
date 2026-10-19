@@ -10,7 +10,9 @@
         linear-gradient(rgba(46, 104, 248, 0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(46, 104, 248, 0.08) 1px, transparent 1px);
     background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
-    touch-action: none;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 24px;
 }
 
 /* Draggable Control Placement Wrapper */
@@ -19,7 +21,7 @@
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    touch-action: none;
+    touch-action: auto;
     z-index: 5;
     user-select: none;
     -webkit-user-select: none;
@@ -27,10 +29,12 @@
 }
 .draggable-wrapper.move-active {
     cursor: grab;
+    touch-action: none;
     z-index: 50;
 }
 .draggable-wrapper.dragging {
     cursor: grabbing;
+    touch-action: none;
     z-index: 100;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
 }
@@ -60,7 +64,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }
 
-/* Tiny Anchor Dot */
+/* Control Options Anchor Dot */
 .control-dot {
     position: absolute;
     top: -5px;
@@ -74,6 +78,15 @@
     cursor: pointer;
     z-index: 25;
     transition: transform 0.15s, background 0.15s;
+    touch-action: manipulation;
+}
+.control-dot::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
 }
 .control-dot:hover {
     transform: scale(1.35);

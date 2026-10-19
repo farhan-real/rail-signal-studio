@@ -78,5 +78,12 @@
     .viewport-toolbar {
         top: 6px;
         left: 6px;
+        padding: 4px 6px;
+    }
+    .viewport-toolbar .tool-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-width: 26px;
+        min-height: 26px;
     }
 }

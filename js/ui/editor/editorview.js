@@ -37,7 +37,12 @@
             SignalEvents.on('runtime:status', this.updateRunStatus.bind(this));
         },
 
-        toggle: function() { this.drawer.classList.toggle('open'); },
+        toggle: function() {
+            this.drawer.classList.toggle('open');
+            if (this.drawer.classList.contains('open') && window.CreatorUI && window.CreatorUI.close) {
+                window.CreatorUI.close();
+            }
+        },
         close: function() { this.drawer.classList.remove('open'); },
 
         loadFromState: function() {

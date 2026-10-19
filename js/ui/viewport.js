@@ -39,29 +39,84 @@
 
         getSignalBounds: function() {
             var minY = -160, maxY = 380;
+            var minX = -35, maxX = 35;
+
             if (SignalState.mast) {
                 var mh = SignalState.mast.height || 380;
                 var my = SignalState.mast.y || 0;
+                var mx = SignalState.mast.x || 0;
+                var mType = SignalState.mast.type || 'tubular';
+                var footW = SignalState.mast.footWidth || (mType === 'tubular' ? 64 : 110);
                 maxY = Math.max(maxY, my + mh + 15);
                 minY = Math.min(minY, my);
+                minX = Math.min(minX, mx - footW / 2);
+                maxX = Math.max(maxX, mx + footW / 2);
+                if (mType === 'gantry') {
+                    minX = Math.min(minX, mx - 130);
+                    maxX = Math.max(maxX, mx + 90);
+                }
             }
+
             if (SignalState.shapes && SignalState.shapes.length) {
                 for (var i = 0; i < SignalState.shapes.length; i++) {
                     var s = SignalState.shapes[i];
+                    var sx = s.x !== undefined ? s.x : 0;
                     var sy = s.y !== undefined ? s.y : 0;
+                    var sw = s.width || (s.radius ? s.radius * 2 : 60);
                     var sh = s.height || (s.radius ? s.radius * 2 : 40);
                     minY = Math.min(minY, sy);
                     maxY = Math.max(maxY, sy + sh);
+                    minX = Math.min(minX, sx);
+                    maxX = Math.max(maxX, sx + sw);
                 }
             }
+
+            if (SignalState.lamps && SignalState.lamps.length) {
+                for (var j = 0; j < SignalState.lamps.length; j++) {
+                    var l = SignalState.lamps[j];
+                    var lx = l.x !== undefined ? l.x : 0;
+                    var ly = l.y !== undefined ? l.y : 0;
+                    var lr = (l.diameter || 34) / 2;
+                    minX = Math.min(minX, lx - lr);
+                    maxX = Math.max(maxX, lx + lr);
+                    minY = Math.min(minY, ly - lr);
+                    maxY = Math.max(maxY, ly + lr);
+                }
+            }
+
+            var fb = SignalState.featherBase;
+            var hasFeathers = SignalState.feathers && SignalState.feathers.length > 0;
+            if (hasFeathers || (fb && fb.enabled)) {
+                var hx = (fb && fb.x !== undefined) ? fb.x : 0;
+                var hub = window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(fb) : { x: hx, y: -205 };
+                minY = Math.min(minY, hub.y - 40);
+                minX = Math.min(minX, hx - 125);
+                maxX = Math.max(maxX, hx + 125);
+            }
+
             if (SignalState.matrix && SignalState.matrix.enabled) {
+                var mat = SignalState.matrix;
+                var matX = mat.x !== undefined ? mat.x : 0;
+                var matW = mat.size === '2x' ? 80 : 44;
                 var matTopY = (window.MatrixRenderer && window.MatrixRenderer.getSignalAssemblyTopY) ?
                     window.MatrixRenderer.getSignalAssemblyTopY() - 65 : -320;
                 minY = Math.min(minY, matTopY);
-            } else if (SignalState.feathers && SignalState.feathers.length) {
-                minY = Math.min(minY, -280);
+                minX = Math.min(minX, matX - matW / 2);
+                maxX = Math.max(maxX, matX + matW / 2);
             }
-            return { minY: minY, maxY: maxY, height: Math.max(160, maxY - minY), centerY: (minY + maxY) / 2 };
+
+            var totalW = Math.max(70, maxX - minX);
+            var totalH = Math.max(150, maxY - minY);
+            return {
+                minX: minX,
+                maxX: maxX,
+                minY: minY,
+                maxY: maxY,
+                width: totalW,
+                height: totalH,
+                centerX: (minX + maxX) / 2,
+                centerY: (minY + maxY) / 2
+            };
         },
 
         centerView: function() {
@@ -69,15 +124,16 @@
             var w = (container && container.clientWidth) ? container.clientWidth : (window.innerWidth / 2);
             var h = (container && container.clientHeight) ? container.clientHeight : (window.innerHeight / 2);
             var bounds = this.getSignalBounds();
-            var availH = Math.max(100, h - 30);
-            var availW = Math.max(100, w - 30);
+            var pad = 24;
+            var availH = Math.max(80, h - pad * 2);
+            var availW = Math.max(80, w - pad * 2);
 
             var fitScaleY = availH / bounds.height;
-            var fitScaleX = availW / 260;
+            var fitScaleX = availW / bounds.width;
             var targetScale = Math.min(fitScaleY, fitScaleX);
-            this.scale = Math.min(1.0, Math.max(0.28, Math.round(targetScale * 100) / 100));
+            this.scale = Math.min(1.2, Math.max(0.12, Math.round(targetScale * 100) / 100));
 
-            this.panX = Math.round(w / 2);
+            this.panX = Math.round(w / 2 - bounds.centerX * this.scale);
             this.panY = Math.round(h / 2 - bounds.centerY * this.scale);
             this.applyTransform();
         },
@@ -130,16 +186,17 @@
 
             container.addEventListener('touchmove', function(e) {
                 if (e.touches.length === 2 && self.initialDistance > 0) {
+                    if (e.cancelable) e.preventDefault();
                     var dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                    self.scale = Math.min(3.5, Math.max(0.2, self.baseScale * (dist / self.initialDistance)));
+                    self.scale = Math.min(3.5, Math.max(0.1, self.baseScale * (dist / self.initialDistance)));
                     self.scheduleTransform();
                 }
-            }, { passive: true });
+            }, { passive: false });
 
             container.addEventListener('wheel', function(e) {
                 e.preventDefault();
                 var delta = e.deltaY > 0 ? 0.9 : 1.1;
-                self.scale = Math.min(3.5, Math.max(0.2, self.scale * delta));
+                self.scale = Math.min(3.5, Math.max(0.1, self.scale * delta));
                 self.scheduleTransform();
             }, { passive: false });
 
@@ -149,7 +206,7 @@
             });
 
             document.getElementById('btnZoomOut').addEventListener('click', function() {
-                self.scale = Math.max(0.2, self.scale / 1.2);
+                self.scale = Math.max(0.1, self.scale / 1.2);
                 self.scheduleTransform();
             });
 
