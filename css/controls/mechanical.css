@@ -1,0 +1,187 @@
+/* Base Desk Control Module Card */
+.console-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(18, 22, 33, 0.88);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(4px);
+    transition: border-color 0.15s, background 0.15s;
+    overflow: visible;
+}
+
+/* Mechanical Railway Lever */
+.lever-item { min-width: 72px; }
+.lever-frame {
+    width: 58px;
+    height: 94px;
+    position: relative;
+    cursor: pointer;
+    touch-action: none;
+}
+.lever-quadrant {
+    position: absolute;
+    top: 36px;
+    left: 3px;
+    width: 52px;
+    height: 42px;
+    border: 2px solid #384259;
+    border-bottom: none;
+    border-radius: 26px 26px 0 0;
+    background: linear-gradient(180deg, #1d2230 0%, #10131a 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+    box-sizing: border-box;
+}
+.lever-notch {
+    position: absolute;
+    top: 2px;
+    left: 23px;
+    width: 2px;
+    height: 40px;
+    transform-origin: 50% 100%;
+    pointer-events: none;
+}
+.lever-notch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 4px;
+    height: 5px;
+    background: #4b5874;
+    border-radius: 1px;
+}
+.lever-notch.active::before { background: var(--accent); }
+.lever-handle {
+    position: absolute;
+    top: 3px;
+    left: 22px;
+    width: 14px;
+    height: 80px;
+    transform-origin: 7px 75px;
+    transition: transform 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    cursor: grab;
+}
+.lever-handle:active { cursor: grabbing; transition: none; }
+.lever-rod { width: 4px; height: 48px; background: linear-gradient(90deg, #b0b8c8 0%, #687285 50%, #444c5c 100%); border-radius: 2px; box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6); }
+.lever-grip { width: 14px; height: 32px; border-radius: 7px 7px 3px 3px; box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.6); }
+.lever-latch-trigger { position: absolute; top: 22px; right: 11px; width: 4px; height: 20px; background: #8893a6; border-radius: 2px; border: 1px solid #2b313d; }
+.lever-pivot-bolt { position: absolute; top: 71px; left: 22px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fa9bb 0%, #303746 80%); border: 1px solid #141720; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); z-index: 3; }
+.lever-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+.lever-label { font-size: 11px; font-weight: 700; color: #d0d7e5; letter-spacing: 0.3px; }
+.lever-val { font-size: 9px; font-weight: 600; color: #8893a6; }
+
+/* Rotary Selector Dial with Radial Position Labels */
+.knob-item { min-width: 144px; }
+.knob-assembly {
+    position: relative;
+    width: 140px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    overflow: visible;
+}
+.knob-assembly.mode-half { height: 80px; }
+.knob-bezel {
+    position: absolute;
+    left: 48px;
+    top: 26px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3d4558 0%, #12151f 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    z-index: 4;
+    touch-action: none;
+}
+.knob-bezel:active { cursor: grabbing; }
+.knob-body {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #262c3b 0%, #12151e 100%);
+    border: 1px solid #2f3747;
+    position: relative;
+    transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+.knob-pointer {
+    position: absolute;
+    top: 2px;
+    left: 16px;
+    width: 3px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 2px;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+.knob-cap {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #32384a 0%, #151822 100%);
+}
+.knob-ticks-layer {
+    position: absolute;
+    left: 48px;
+    top: 26px;
+    width: 44px;
+    height: 44px;
+    pointer-events: none;
+    z-index: 2;
+}
+.knob-tick {
+    position: absolute;
+    top: 0;
+    left: 21px;
+    width: 2px;
+    height: 44px;
+    transform-origin: 50% 50%;
+}
+.knob-tick::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 2px;
+    height: 5px;
+    background: #4b5874;
+    border-radius: 1px;
+}
+.knob-tick.active::before { background: #ffffff; box-shadow: 0 0 4px #ffffff; }
+.knob-dial-label {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8c97ad;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s, text-shadow 0.15s;
+    pointer-events: auto;
+    z-index: 10;
+    letter-spacing: 0.2px;
+}
+.knob-dial-label:hover { color: #d0d7e5; }
+.knob-dial-label.active {
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 0 0 8px var(--accent);
+}
+.knob-meta { margin-top: 4px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.knob-label { font-size: 11px; font-weight: 700; color: #d0d7e5; }

@@ -189,7 +189,27 @@
             panel.appendChild(nameLbl);
             panel.appendChild(nameInp);
 
-            if (target.type === 'knob') {
+            if (target.type === 'led') {
+                var cLbl = document.createElement('span');
+                cLbl.className = 'cmenu-label';
+                cLbl.textContent = 'LED Color';
+                var cRow = document.createElement('div');
+                cRow.className = 'cmenu-row';
+                ['red', 'yellow', 'green', 'white', 'blue'].forEach(function(ck) {
+                    var btn = document.createElement('button');
+                    btn.className = 'cmenu-btn' + ((target.colorKey || 'red').toLowerCase() === ck ? ' active' : '');
+                    btn.textContent = ck.charAt(0).toUpperCase() + ck.slice(1);
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        target.colorKey = ck;
+                        SignalEvents.emit('state:persist');
+                        if (window.ConsoleUI) window.ConsoleUI.render();
+                    });
+                    cRow.appendChild(btn);
+                });
+                panel.appendChild(cLbl);
+                panel.appendChild(cRow);
+            } else if (target.type === 'knob') {
                 var modeLbl = document.createElement('span');
                 modeLbl.className = 'cmenu-label';
                 modeLbl.textContent = 'Dial Arc Mode';
@@ -208,7 +228,7 @@
 
                 var btnFull = document.createElement('button');
                 btnFull.className = 'cmenu-btn' + (target.mode !== 'half' ? ' active' : '');
-                btnFull.textContent = 'Full 270°';
+                btnFull.textContent = 'Full 270 deg';
                 btnFull.addEventListener('click', function(e) {
                     e.stopPropagation();
                     target.mode = 'full';

@@ -19,11 +19,13 @@
             var cKey = (ctrl.colorKey || 'red').toLowerCase();
             var pal = this.palette[cKey] || this.palette.red;
             var isLit = SignalState.getLamp(id);
+            var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!window.SignalRuntime.activeBlinks[id];
+            var stateText = isBlinking ? 'BLINK' : (isLit ? 'ON' : 'OFF');
 
             var litClass = isLit ? 'is-lit' : 'is-off';
             var inlineStyle = '--led-on: ' + pal.hex + '; --led-glow: ' + pal.glow + '; --led-off: ' + pal.off + ';';
 
-            var html = [
+            return [
                 '<div class="console-item led-item" data-control-id="' + id + '" style="' + inlineStyle + '">',
                 '  <div class="panel-led">',
                 '    <div class="led-bezel">',
@@ -34,31 +36,14 @@
                 '  </div>',
                 '  <div class="led-meta">',
                 '    <span class="led-label" data-edit-label="' + id + '">' + label + '</span>',
+                '    <span class="led-state-text">' + stateText + '</span>',
                 '  </div>',
                 '</div>'
             ].join('');
-
-            return html;
         },
 
-        bindEvents: function(container) {
-            var self = this;
-            var leds = container.querySelectorAll('.led-item');
-            for (var i = 0; i < leds.length; i++) {
-                (function(el) {
-                    var id = el.getAttribute('data-control-id');
-                    var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
-                    if (!ctrl) return;
-
-                    el.addEventListener('contextmenu', function(e) {
-                        e.preventDefault();
-                        var curKey = (ctrl.colorKey || 'red').toLowerCase();
-                        var nextIdx = (self.colorKeys.indexOf(curKey) + 1) % self.colorKeys.length;
-                        ctrl.colorKey = self.colorKeys[nextIdx];
-                        SignalEvents.emit('state:changed');
-                    });
-                })(leds[i]);
-            }
+        bindEvents: function() {
+            // Panel indicator LEDs are output displays driven by interlocking simulation
         }
     };
 

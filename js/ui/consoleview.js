@@ -262,18 +262,34 @@
         },
 
         updateLeds: function(payload) {
-            var el = this.desk.querySelector('[data-control-id="' + payload.id + '"] .led-lens');
-            if (el) {
-                el.classList.toggle('is-lit', !!payload.lit);
-                el.classList.toggle('is-off', !payload.lit);
+            var item = this.desk.querySelector('[data-control-id="' + payload.id + '"]');
+            if (item) {
+                var lens = item.querySelector('.led-lens');
+                if (lens) {
+                    lens.classList.toggle('is-lit', !!payload.lit);
+                    lens.classList.toggle('is-off', !payload.lit);
+                }
+                var txt = item.querySelector('.led-state-text');
+                if (txt) {
+                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!window.SignalRuntime.activeBlinks[payload.id];
+                    txt.textContent = isBlinking ? 'BLINK' : (payload.lit ? 'ON' : 'OFF');
+                }
             }
         },
 
         updateLedBlink: function(payload) {
-            var el = this.desk.querySelector('[data-control-id="' + payload.id + '"] .led-lens');
-            if (el) {
-                el.classList.toggle('is-lit', !!payload.visible);
-                el.classList.toggle('is-off', !payload.visible);
+            var item = this.desk.querySelector('[data-control-id="' + payload.id + '"]');
+            if (item) {
+                var lens = item.querySelector('.led-lens');
+                if (lens) {
+                    lens.classList.toggle('is-lit', !!payload.visible);
+                    lens.classList.toggle('is-off', !payload.visible);
+                }
+                var txt = item.querySelector('.led-state-text');
+                if (txt) {
+                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!window.SignalRuntime.activeBlinks[payload.id];
+                    txt.textContent = isBlinking ? 'BLINK' : (payload.visible ? 'ON' : 'OFF');
+                }
             }
         }
     };
