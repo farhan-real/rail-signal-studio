@@ -33,7 +33,7 @@
 
             document.getElementById('btnAddKnob').addEventListener('click', function() {
                 var id = 'Knob' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 120 + 20;
+                var col = (SignalState.controls.length % 7) * 150 + 20;
                 var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
                 SignalState.controls.push({
                     id: id, type: 'knob', label: id, states: ['0', '1', '2'], mode: 'half', defaultValue: 0,
@@ -214,6 +214,10 @@
                         var dialLabels = el.querySelectorAll('.knob-dial-label');
                         for (var d = 0; d < dialLabels.length; d++) {
                             dialLabels[d].classList.toggle('active', d === curVal);
+                        }
+                        var ticks = el.querySelectorAll('.knob-tick');
+                        for (var tk = 0; tk < ticks.length; tk++) {
+                            ticks[tk].classList.toggle('active', tk === curVal);
                         }
                     } else if (c.type === 'button') {
                         var btnEl = el.querySelector('.button-item');

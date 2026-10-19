@@ -23,6 +23,7 @@
     z-index: 5;
     user-select: none;
     -webkit-user-select: none;
+    overflow: visible;
 }
 .draggable-wrapper.move-active {
     cursor: grab;
@@ -118,13 +119,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(18, 22, 33, 0.88);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(4px);
     transition: border-color 0.15s, background 0.15s;
+    overflow: visible;
 }
 
 /* Mechanical Railway Lever */
@@ -192,18 +194,22 @@
 .lever-val { font-size: 9px; font-weight: 600; color: #8893a6; }
 
 /* Rotary Selector Dial with Radial Position Labels */
-.knob-item { min-width: 124px; }
+.knob-item { min-width: 144px; }
 .knob-assembly {
     position: relative;
-    width: 116px;
+    width: 140px;
     height: 96px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 4px;
+    overflow: visible;
 }
-.knob-assembly.mode-half { height: 76px; }
+.knob-assembly.mode-half { height: 80px; }
 .knob-bezel {
+    position: absolute;
+    left: 48px;
+    top: 26px;
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -213,7 +219,7 @@
     align-items: center;
     justify-content: center;
     cursor: grab;
-    z-index: 2;
+    z-index: 4;
     touch-action: none;
 }
 .knob-bezel:active { cursor: grabbing; }
@@ -245,16 +251,45 @@
     border-radius: 50%;
     background: linear-gradient(135deg, #32384a 0%, #151822 100%);
 }
+.knob-ticks-layer {
+    position: absolute;
+    left: 48px;
+    top: 26px;
+    width: 44px;
+    height: 44px;
+    pointer-events: none;
+    z-index: 2;
+}
+.knob-tick {
+    position: absolute;
+    top: 0;
+    left: 21px;
+    width: 2px;
+    height: 44px;
+    transform-origin: 50% 50%;
+}
+.knob-tick::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 2px;
+    height: 5px;
+    background: #4b5874;
+    border-radius: 1px;
+}
+.knob-tick.active::before { background: #ffffff; box-shadow: 0 0 4px #ffffff; }
 .knob-dial-label {
     position: absolute;
-    transform: translate(-50%, -50%);
-    font-size: 9px;
-    font-weight: 600;
-    color: #6d7890;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8c97ad;
     white-space: nowrap;
     cursor: pointer;
     transition: color 0.15s, text-shadow 0.15s;
     pointer-events: auto;
+    z-index: 10;
+    letter-spacing: 0.2px;
 }
 .knob-dial-label:hover { color: #d0d7e5; }
 .knob-dial-label.active {
@@ -370,4 +405,4 @@
 .led-item { min-width: 54px; }
 .text-item { min-width: 60px; padding: 4px 8px; }
 .text-content { font-size: 12px; font-weight: 700; color: #e6eaf2; pointer-events: auto; background: transparent; border: 1px solid transparent; border-radius: 2px; outline: none; text-align: center; }
-.text-content:focus { background: #1c2130; border-color: var(--border-highlight); }
+.text-content:focus { background: #1c2130; border-color: var(--border-highlight); } 

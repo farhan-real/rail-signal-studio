@@ -19,14 +19,14 @@
             { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 11, y: 136, hood: 'round', brightness: 0.95 }
         ],
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
-            { id: 'FEATHER_L2', position: 'left2', lamps: 5 },
+            { id: 'FEATHER_L1', position: 'left2', lamps: 5 },
+            { id: 'FEATHER_L2', position: 'left1', lamps: 5 },
             { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
         matrix: { enabled: false },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 15 },
-            { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], defaultValue: 0, x: 110, y: 15 },
+            { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], mode: 'half', defaultValue: 0, x: 110, y: 15 },
             { id: 'ShuntSwitch', type: 'switch', label: 'Shunt', defaultValue: 0, x: 200, y: 15 }
         ],
         script: [

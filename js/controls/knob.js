@@ -32,18 +32,29 @@
             var cfg = this.getAngles(ctrl, states);
             var angle = cfg.minAngle + currentVal * cfg.stepAngle;
 
-            var cx = 58, cy = cfg.isHalf ? 50 : 48;
-            var radius = cfg.isHalf ? 36 : 38;
+            var cx = 70, cy = cfg.isHalf ? 48 : 48;
             var labelsHtml = '';
+            var ticksHtml = '';
 
             for (var i = 0; i < states.length; i++) {
                 var itemAngle = cfg.minAngle + i * cfg.stepAngle;
                 var rad = itemAngle * Math.PI / 180;
-                var lx = cx + Math.sin(rad) * radius;
-                var ly = cy - Math.cos(rad) * radius;
                 var isActive = (i === currentVal) ? 'active' : '';
+
+                var dist = (itemAngle > -45 && itemAngle < 45) ? 32 : 28;
+                var lx = cx + Math.sin(rad) * dist;
+                var ly = cy - Math.cos(rad) * dist;
+
+                var transform = 'translate(-50%, -100%)';
+                if (itemAngle <= -45) {
+                    transform = 'translate(-100%, -50%)';
+                } else if (itemAngle >= 45) {
+                    transform = 'translate(0%, -50%)';
+                }
+
                 var stateText = states[i];
-                labelsHtml += '<span class="knob-dial-label ' + isActive + '" style="left:' + lx.toFixed(1) + 'px; top:' + ly.toFixed(1) + 'px;" data-knob-id="' + id + '" data-pos-idx="' + i + '">' + stateText + '</span>';
+                labelsHtml += '<span class="knob-dial-label ' + isActive + '" style="left:' + lx.toFixed(1) + 'px; top:' + ly.toFixed(1) + 'px; transform:' + transform + ';" data-knob-id="' + id + '" data-pos-idx="' + i + '">' + stateText + '</span>';
+                ticksHtml += '<div class="knob-tick ' + isActive + '" style="transform: rotate(' + itemAngle.toFixed(1) + 'deg)" data-tick-idx="' + i + '"></div>';
             }
 
             var assemblyClass = 'knob-assembly' + (cfg.isHalf ? ' mode-half' : '');
@@ -51,6 +62,7 @@
                 '<div class="console-item knob-item" data-control-id="' + id + '">',
                 '  <div class="' + assemblyClass + '">',
                 labelsHtml,
+                '    <div class="knob-ticks-layer">' + ticksHtml + '</div>',
                 '    <div class="knob-bezel">',
                 '      <div class="knob-body" style="transform: rotate(' + angle.toFixed(1) + 'deg)">',
                 '        <div class="knob-pointer"></div>',
