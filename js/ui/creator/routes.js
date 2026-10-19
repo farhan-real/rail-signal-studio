@@ -235,8 +235,12 @@
             var mText = document.getElementById('matText');
             if (mText) {
                 mText.addEventListener('input', function() {
+                    SignalState.matrix.enabled = true;
                     SignalState.matrix.text = this.value.toUpperCase();
-                    SignalEvents.emit('matrix:updated', SignalState.matrix.lit ? SignalState.matrix.text : '');
+                    SignalState.matrix.lit = true;
+                    var btn = document.getElementById('btnPreviewMatrix');
+                    if (btn) btn.classList.add('active');
+                    SignalEvents.emit('matrix:updated', SignalState.matrix.text);
                     SignalEvents.emit('state:persist');
                 });
             }

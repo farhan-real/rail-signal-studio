@@ -200,10 +200,12 @@
                 try {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + svgStr + '</svg>', 'image/svg+xml');
-                    var newEl = doc.documentElement.firstElementChild;
-                    if (mContainer && newEl && mContainer.parentNode) {
-                        mContainer.parentNode.replaceChild(document.importNode(newEl, true), mContainer);
-                        return;
+                    if (!doc.querySelector('parsererror')) {
+                        var newEl = doc.documentElement.firstElementChild;
+                        if (mContainer && newEl && mContainer.parentNode) {
+                            mContainer.parentNode.replaceChild(document.importNode(newEl, true), mContainer);
+                            return;
+                        }
                     }
                 } catch (e) {}
                 this.renderAll();

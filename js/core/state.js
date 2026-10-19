@@ -150,6 +150,7 @@
             if (!lampId) return;
             if (lampId.toUpperCase() === 'MATRIX' && this.matrix) {
                 var bVal = !!isLit;
+                this.matrix.enabled = true;
                 if (this.matrix.lit === bVal) return;
                 this.matrix.lit = bVal;
                 SignalEvents.emit('matrix:updated', bVal ? this.matrix.text : '');

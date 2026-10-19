@@ -185,7 +185,8 @@
             if (!target) return;
             var tUpper = String(target).toUpperCase();
             if (tUpper === 'MATRIX') {
-                if (SignalState.matrix && SignalState.matrix.lit !== isLit) {
+                if (SignalState.matrix) {
+                    SignalState.matrix.enabled = true;
                     SignalState.matrix.lit = isLit;
                     SignalEvents.emit('matrix:updated', isLit ? SignalState.matrix.text : '');
                 }
@@ -262,24 +263,22 @@
                 this.applySetAction(act.target, false);
             } else if (act.op === 'matrix_assign') {
                 if (SignalState.matrix) {
+                    SignalState.matrix.enabled = true;
                     var assigned = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
-                    if (SignalState.matrix.text !== assigned) {
-                        SignalState.matrix.text = assigned;
-                        if (SignalState.matrix.lit) SignalEvents.emit('matrix:updated', assigned);
-                    }
+                    SignalState.matrix.text = assigned;
+                    if (SignalState.matrix.lit) SignalEvents.emit('matrix:updated', assigned);
                 }
             } else if (act.op === 'matrix_set') {
                 if (SignalState.matrix) {
+                    SignalState.matrix.enabled = true;
                     if (act.text !== undefined && act.text !== '') {
                         SignalState.matrix.text = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
                     }
-                    if (!SignalState.matrix.lit) {
-                        SignalState.matrix.lit = true;
-                        SignalEvents.emit('matrix:updated', SignalState.matrix.text);
-                    }
+                    SignalState.matrix.lit = true;
+                    SignalEvents.emit('matrix:updated', SignalState.matrix.text);
                 }
             } else if (act.op === 'matrix_unset') {
-                if (SignalState.matrix && SignalState.matrix.lit) {
+                if (SignalState.matrix) {
                     SignalState.matrix.lit = false;
                     SignalEvents.emit('matrix:updated', '');
                 }
@@ -458,11 +457,12 @@
             for (var j = 0; j < aspect.sets.length; j++) this.applySetAction(aspect.sets[j], true);
 
             if (aspect.matrixLit !== undefined && SignalState.matrix) {
-                if (aspect.matrixText !== undefined && aspect.matrixText !== '') SignalState.matrix.text = aspect.matrixText;
-                if (SignalState.matrix.lit !== aspect.matrixLit) {
-                    SignalState.matrix.lit = aspect.matrixLit;
-                    SignalEvents.emit('matrix:updated', aspect.matrixLit ? SignalState.matrix.text : '');
+                SignalState.matrix.enabled = true;
+                if (aspect.matrixText !== undefined && aspect.matrixText !== '') {
+                    SignalState.matrix.text = aspect.matrixText;
                 }
+                SignalState.matrix.lit = aspect.matrixLit;
+                SignalEvents.emit('matrix:updated', aspect.matrixLit ? SignalState.matrix.text : '');
             }
             SignalEvents.emit('aspect:changed', aspectName);
         },
