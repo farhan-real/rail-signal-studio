@@ -147,7 +147,8 @@
         },
 
         setLamp: function(lampId, isLit) {
-            if (lampId && lampId.toUpperCase() === 'MATRIX' && this.matrix) {
+            if (!lampId) return;
+            if (lampId.toUpperCase() === 'MATRIX' && this.matrix) {
                 var bVal = !!isLit;
                 if (this.matrix.lit === bVal) return;
                 this.matrix.lit = bVal;
@@ -155,14 +156,32 @@
                 return;
             }
             var boolVal = !!isLit;
-            if (this.lampStates[lampId] === boolVal) return;
-            this.lampStates[lampId] = boolVal;
-            SignalEvents.emit('lamp:updated', { id: lampId, lit: boolVal });
+            var targetId = lampId;
+            var uId = String(lampId).toUpperCase();
+            for (var i = 0; i < this.lamps.length; i++) {
+                if (this.lamps[i].id.toUpperCase() === uId) { targetId = this.lamps[i].id; break; }
+            }
+            for (var f = 0; f < this.feathers.length; f++) {
+                if (this.feathers[f].id.toUpperCase() === uId) { targetId = this.feathers[f].id; break; }
+            }
+            for (var c = 0; c < this.controls.length; c++) {
+                if (this.controls[c].id.toUpperCase() === uId) { targetId = this.controls[c].id; break; }
+            }
+
+            if (this.lampStates[targetId] === boolVal) return;
+            this.lampStates[targetId] = boolVal;
+            SignalEvents.emit('lamp:updated', { id: targetId, lit: boolVal });
         },
 
         getLamp: function(lampId) {
-            if (lampId && lampId.toUpperCase() === 'MATRIX' && this.matrix) return !!this.matrix.lit;
-            return !!this.lampStates[lampId];
+            if (!lampId) return false;
+            if (lampId.toUpperCase() === 'MATRIX' && this.matrix) return !!this.matrix.lit;
+            var uId = String(lampId).toUpperCase();
+            if (this.lampStates[lampId] !== undefined) return !!this.lampStates[lampId];
+            for (var k in this.lampStates) {
+                if (k.toUpperCase() === uId) return !!this.lampStates[k];
+            }
+            return false;
         },
 
         setControlValue: function(controlId, value) {

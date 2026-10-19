@@ -150,7 +150,17 @@
         },
 
         updateLampFast: function(payload) {
+            var targetId = String(payload.id).toUpperCase();
             var el = this.sceneRoot.querySelector('[data-lamp-id="' + payload.id + '"], [data-feather-id="' + payload.id + '"]');
+            if (!el) {
+                var allFeathers = this.sceneRoot.querySelectorAll('[data-feather-id]');
+                for (var f = 0; f < allFeathers.length; f++) {
+                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) {
+                        el = allFeathers[f];
+                        break;
+                    }
+                }
+            }
             if (el) {
                 el.classList.toggle('lit', !!payload.lit);
                 var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
@@ -162,7 +172,17 @@
         },
 
         updateBlinkFast: function(payload) {
+            var targetId = String(payload.id).toUpperCase();
             var el = this.sceneRoot.querySelector('[data-lamp-id="' + payload.id + '"], [data-feather-id="' + payload.id + '"]');
+            if (!el) {
+                var allFeathers = this.sceneRoot.querySelectorAll('[data-feather-id]');
+                for (var f = 0; f < allFeathers.length; f++) {
+                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) {
+                        el = allFeathers[f];
+                        break;
+                    }
+                }
+            }
             if (el) {
                 el.classList.toggle('lit', !!payload.visible);
                 var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');

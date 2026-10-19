@@ -86,14 +86,12 @@
                     if (this.evalExpr(node.elifs[i].expr)) return { actions: node.elifs[i].actions, key: '_elif' + i };
                 }
             }
-            if (node.elseActions && node.elseActions.length) {
-                return { actions: node.elseActions, key: '_else' };
-            }
+            if (node.elseActions && node.elseActions.length) return { actions: node.elseActions, key: '_else' };
             return null;
         },
 
         checkIs: function(leftId, rightVal) {
-            var ctrl = SignalState.controls.filter(function(c) { return c.id === leftId; })[0];
+            var ctrl = SignalState.controls.filter(function(c) { return c.id.toUpperCase() === String(leftId).toUpperCase(); })[0];
             if (ctrl) {
                 var curIdx = SignalState.getControlValue(ctrl.id);
                 if (curIdx === undefined) curIdx = 0;
@@ -113,7 +111,11 @@
                 }
                 return false;
             }
-            return String(this.resolveValue(leftId)).replace(/[\s"']/g, '').toUpperCase() === String(this.resolveValue(rightVal)).replace(/[\s"']/g, '').toUpperCase();
+            var lVal = String(this.resolveValue(leftId)).replace(/[\s"']/g, '').toUpperCase();
+            var rVal = String(this.resolveValue(rightVal)).replace(/[\s"']/g, '').toUpperCase();
+            if (rVal === 'ON' || rVal === 'SET') return lVal === '1' || lVal === 'ON' || lVal === 'SET';
+            if (rVal === 'OFF') return lVal === '0' || lVal === 'OFF';
+            return lVal === rVal;
         },
 
         resolveValue: function(name) {
@@ -121,6 +123,13 @@
             if (v !== undefined) return v;
             var ctrlVal = SignalState.getControlValue(name);
             if (ctrlVal !== undefined) return ctrlVal;
+            var uName = String(name).toUpperCase();
+            for (var i = 0; i < SignalState.lamps.length; i++) {
+                if (SignalState.lamps[i].id.toUpperCase() === uName) return SignalState.getLamp(SignalState.lamps[i].id) ? 1 : 0;
+            }
+            for (var f = 0; f < SignalState.feathers.length; f++) {
+                if (SignalState.feathers[f].id.toUpperCase() === uName) return SignalState.getLamp(SignalState.feathers[f].id) ? 1 : 0;
+            }
             return name;
         },
 
@@ -150,15 +159,13 @@
                 for (var a = 0; a < all.length; a++) { if (!SignalState.getLamp(all[a].id)) return false; }
                 return true;
             }
-            if (uName === 'FEATHERS') {
+            if (uName === 'FEATHERS' || uName === 'FEATHER') {
                 for (var f = 0; f < SignalState.feathers.length; f++) {
                     if (SignalState.getLamp(SignalState.feathers[f].id)) return true;
                 }
                 return false;
             }
-            if (uName === 'MATRIX') {
-                return !!(SignalState.matrix && SignalState.matrix.lit);
-            }
+            if (uName === 'MATRIX') return !!(SignalState.matrix && SignalState.matrix.lit);
             var group = this.getGroup(name);
             if (group && group.length > 0) {
                 for (var i = 0; i < group.length; i++) { if (!SignalState.getLamp(group[i])) return false; }
@@ -186,16 +193,30 @@
                 }
                 return;
             }
-            if (tUpper === 'FEATHERS') {
+            if (tUpper === 'FEATHERS' || tUpper === 'FEATHER') {
                 for (var k = 0; k < SignalState.feathers.length; k++) SignalState.setLamp(SignalState.feathers[k].id, isLit);
                 return;
             }
-            var isTargetFeather = SignalState.feathers.some(function(f) { return f.id === target; });
-            if (isTargetFeather && isLit) {
-                for (var f = 0; f < SignalState.feathers.length; f++) {
-                    if (SignalState.feathers[f].id !== target) SignalState.setLamp(SignalState.feathers[f].id, false);
+
+            var matchedFeather = null;
+            for (var f = 0; f < SignalState.feathers.length; f++) {
+                if (SignalState.feathers[f].id.toUpperCase() === tUpper) {
+                    matchedFeather = SignalState.feathers[f];
+                    break;
                 }
             }
+            if (matchedFeather) {
+                if (isLit) {
+                    for (var f2 = 0; f2 < SignalState.feathers.length; f2++) {
+                        if (SignalState.feathers[f2].id !== matchedFeather.id) {
+                            SignalState.setLamp(SignalState.feathers[f2].id, false);
+                        }
+                    }
+                }
+                SignalState.setLamp(matchedFeather.id, isLit);
+                return;
+            }
+
             var group = this.getGroup(target);
             if (group) {
                 for (var i = 0; i < group.length; i++) SignalState.setLamp(group[i], isLit);
@@ -206,9 +227,14 @@
 
         applyBlinkAction: function(target, rate) {
             if (!target) return;
-            if (String(target).toUpperCase() === 'ALL') {
+            var tUpper = String(target).toUpperCase();
+            if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) this.activeBlinks[all[a].id] = rate;
+                return;
+            }
+            if (tUpper === 'FEATHERS' || tUpper === 'FEATHER') {
+                for (var f = 0; f < SignalState.feathers.length; f++) this.activeBlinks[SignalState.feathers[f].id] = rate;
                 return;
             }
             var group = this.getGroup(target);
@@ -250,19 +276,6 @@
                     SignalState.matrix.lit = false;
                     SignalEvents.emit('matrix:updated', '');
                 }
-            } else if (act.op === 'matrix') {
-                if (SignalState.matrix) {
-                    if (act.text === '') {
-                        if (SignalState.matrix.lit) {
-                            SignalState.matrix.lit = false;
-                            SignalEvents.emit('matrix:updated', '');
-                        }
-                    } else {
-                        SignalState.matrix.text = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
-                        SignalState.matrix.lit = true;
-                        SignalEvents.emit('matrix:updated', SignalState.matrix.text);
-                    }
-                }
             } else if (act.op === 'blink') {
                 this.applyBlinkAction(act.target, act.rate || 500);
             } else if (act.op === 'resume_after') {
@@ -277,7 +290,7 @@
         },
 
         executeAssign: function(target, value) {
-            var ctrl = SignalState.controls.filter(function(c) { return c.id === target; })[0];
+            var ctrl = SignalState.controls.filter(function(c) { return c.id.toUpperCase() === String(target).toUpperCase(); })[0];
             if (ctrl) {
                 var targetIdx = -1;
                 for (var en in SignalState.enums) {
@@ -288,6 +301,17 @@
                     if (targetIdx !== -1) break;
                 }
                 SignalState.setControlValue(ctrl.id, targetIdx !== -1 ? targetIdx : (parseInt(value, 10) || 0));
+                return;
+            }
+
+            var uTarget = String(target).toUpperCase();
+            var isFeatherOrLamp = SignalState.feathers.concat(SignalState.lamps).some(function(u) {
+                return u.id.toUpperCase() === uTarget;
+            });
+            if (isFeatherOrLamp) {
+                var sVal = String(value).trim().toUpperCase();
+                var bVal = (sVal === '1' || sVal === 'ON' || sVal === 'SET' || sVal === 'TRUE');
+                this.applySetAction(target, bVal);
                 return;
             }
             SignalState.setVar(target, this.resolveValue(value));
@@ -313,9 +337,7 @@
                 if (act.op === 'end') return 'end';
                 this.executeAction(act);
             }
-            if (this.delayedQueues[ruleKey]) {
-                this.delayedQueues[ruleKey] = { completed: true };
-            }
+            if (this.delayedQueues[ruleKey]) this.delayedQueues[ruleKey] = { completed: true };
             return 'done';
         },
 
@@ -386,9 +408,7 @@
                         var branch = this.getMatchingBranch(stmt);
                         if (branch) {
                             var branchKey = ruleKey + branch.key;
-                            if (this.delayedQueues[ruleKey] && this.delayedQueues[ruleKey].branchKey !== branchKey) {
-                                delete this.delayedQueues[ruleKey];
-                            }
+                            if (this.delayedQueues[ruleKey] && this.delayedQueues[ruleKey].branchKey !== branchKey) delete this.delayedQueues[ruleKey];
                             var outcome;
                             if (this.delayedQueues[ruleKey]) {
                                 var queue = this.delayedQueues[ruleKey];
@@ -412,18 +432,6 @@
                 }
             }
 
-            var hasRedLit = false;
-            for (var rIdx = 0; rIdx < SignalState.lamps.length; rIdx++) {
-                var rLamp = SignalState.lamps[rIdx];
-                if (rLamp.color && rLamp.color.toLowerCase() === 'red' && SignalState.getLamp(rLamp.id)) {
-                    hasRedLit = true; break;
-                }
-            }
-            if (hasRedLit && SignalState.matrix && SignalState.matrix.lit) {
-                SignalState.matrix.lit = false;
-                SignalEvents.emit('matrix:updated', '');
-            }
-
             this.processLamps(now);
         },
 
@@ -437,23 +445,10 @@
             for (var j = 0; j < aspect.sets.length; j++) this.applySetAction(aspect.sets[j], true);
 
             if (aspect.matrixLit !== undefined && SignalState.matrix) {
-                if (aspect.matrixText !== undefined && aspect.matrixText !== '') {
-                    SignalState.matrix.text = aspect.matrixText;
-                }
+                if (aspect.matrixText !== undefined && aspect.matrixText !== '') SignalState.matrix.text = aspect.matrixText;
                 if (SignalState.matrix.lit !== aspect.matrixLit) {
                     SignalState.matrix.lit = aspect.matrixLit;
                     SignalEvents.emit('matrix:updated', aspect.matrixLit ? SignalState.matrix.text : '');
-                }
-            } else if (aspect.matrix !== undefined && SignalState.matrix) {
-                if (aspect.matrix === '') {
-                    if (SignalState.matrix.lit) {
-                        SignalState.matrix.lit = false;
-                        SignalEvents.emit('matrix:updated', '');
-                    }
-                } else {
-                    SignalState.matrix.text = aspect.matrix;
-                    SignalState.matrix.lit = true;
-                    SignalEvents.emit('matrix:updated', aspect.matrix);
                 }
             }
             SignalEvents.emit('aspect:changed', aspectName);
@@ -461,25 +456,10 @@
 
         stepNext: function() { if (!this.ast || !this.ast.aspectList.length) return; this.setAspect(this.ast.aspectList[(this.activeAspectIndex + 1) % this.ast.aspectList.length]); },
         stepPrev: function() { if (!this.ast || !this.ast.aspectList.length) return; this.setAspect(this.ast.aspectList[(this.activeAspectIndex - 1 + this.ast.aspectList.length) % this.ast.aspectList.length]); },
-
-        startTimer: function() {
-            this.stopTimer();
-            if (!this.ast || !this.ast.timers || !this.ast.timers.length) return;
-            var timer = this.ast.timers[0], self = this;
-            this.stepTimerId = setInterval(function() {
-                if (self.isPaused) return;
-                self.highlightLine(timer.line);
-                if (timer.action === 'next') self.stepNext();
-                else if (timer.action === 'prev') self.stepPrev();
-                else self.setAspect(timer.action);
-            }, timer.duration);
-        },
-
-        stopTimer: function() { if (this.stepTimerId) { clearInterval(this.stepTimerId); this.stepTimerId = null; } },
         highlightLine: function(lineNum) { this.activeLine = lineNum; SignalEvents.emit('runtime:line', lineNum); },
 
         stop: function() {
-            this.stopTimer(); this.stopMainClock(); this.activeBlinks = {}; this.blinkState = {};
+            this.stopMainClock(); this.activeBlinks = {}; this.blinkState = {};
             this.holdUntil = 0; this.holdOnNext = false; this.holdBlinks = {}; this.delayedQueues = {};
             this.isPaused = false;
         }
