@@ -57,9 +57,27 @@
 
 .editor-area { flex: 1; min-width: 0; min-height: 0; height: 100%; position: relative; overflow: hidden; }
 .editor-backdrop { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; overflow: hidden; }
-.editor-backdrop-content { position: absolute; top: 8px; left: 0; right: 0; }
-.section-separator-line { position: absolute; left: 0; right: 0; height: 20px; background: linear-gradient(90deg, rgba(46, 104, 248, 0.18) 0%, rgba(46, 104, 248, 0.04) 65%, transparent 100%); border-top: 1px solid rgba(46, 104, 248, 0.45); border-bottom: 1px solid rgba(46, 104, 248, 0.15); }
-.script-editor { width: 100%; height: 100%; background: transparent; border: none; padding: 8px 10px; font-family: var(--font-mono); font-size: 12px; line-height: 20px; color: #d8e0f0; outline: none; resize: none; white-space: pre; overflow: auto; tab-size: 4; }
+.editor-backdrop-content { position: absolute; top: 0; left: 0; width: 100%; }
+.section-separator-line { position: absolute; left: 0; right: 0; height: 20px; background: linear-gradient(90deg, rgba(46, 104, 248, 0.18) 0%, rgba(46, 104, 248, 0.04) 65%, transparent 100%); border-top: 1px solid rgba(46, 104, 248, 0.45); border-bottom: 1px solid rgba(46, 104, 248, 0.15); pointer-events: none; }
+
+/* Code Syntax Highlighting Layer */
+.editor-syntax-layer { position: absolute; top: 8px; left: 10px; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 12px; line-height: 20px; letter-spacing: normal; white-space: pre; tab-size: 4; color: #abb2bf; pointer-events: none; }
+.syntax-keyword { color: #c678dd; font-weight: 700; }
+.syntax-command { color: #61afef; font-weight: 600; }
+.syntax-logic { color: #56b6c2; font-weight: 700; }
+.syntax-builtin { color: #7fffd4; font-weight: 700; }
+.syntax-string { color: #d27d2d; }
+.syntax-number { color: #d19a66; }
+.syntax-comment { color: #5c6370; font-style: italic; }
+.syntax-section { color: #528bff; font-weight: 700; text-shadow: 0 0 8px rgba(82, 139, 255, 0.45); }
+.syntax-aspect { color: #7df9ff; font-weight: 700; }
+.syntax-var { color: #e06c75; font-weight: 600; }
+.syntax-lamp { color: #228b22; font-weight: 600; }
+.syntax-punct { color: #6d7687; }
+.syntax-ident { color: #abb2bf; }
+
+.script-editor { width: 100%; height: 100%; background: transparent; border: none; padding: 8px 10px; font-family: var(--font-mono); font-size: 12px; line-height: 20px; letter-spacing: normal; color: transparent; -webkit-text-fill-color: transparent; caret-color: #528bff; outline: none; resize: none; white-space: pre; overflow: auto; tab-size: 4; position: relative; z-index: 2; box-sizing: border-box; }
+.script-editor::selection { background: rgba(46, 104, 248, 0.45); -webkit-text-fill-color: #ffffff; color: #ffffff; }
 .editor-status { height: 26px; padding: 0 12px; background: #11141c; border-top: 1px solid var(--border-color); font-size: 11px; line-height: 26px; color: var(--text-secondary); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Autocomplete Floating Popup */

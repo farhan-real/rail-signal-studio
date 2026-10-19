@@ -94,10 +94,12 @@
             for (var i = 0; i < lines.length; i++) {
                 var isSec = /^\s*%%/.test(lines[i]);
                 numHtml += '<div class="' + (isSec ? 'gutter-num is-section' : 'gutter-num') + '">' + (i + 1) + '</div>';
-                if (isSec) sepHtml += '<div class="section-separator-line" style="top:' + (i * 20) + 'px;"></div>';
+                if (isSec) sepHtml += '<div class="section-separator-line" style="top:' + (i * 20 + 8) + 'px;"></div>';
             }
             this.gutterNumbers.innerHTML = numHtml;
-            this.backdropContent.innerHTML = sepHtml;
+
+            var codeHtml = window.SignalHighlighter ? window.SignalHighlighter.highlight(val) : '';
+            this.backdropContent.innerHTML = sepHtml + '<div class="editor-syntax-layer">' + codeHtml + '</div>';
             this.onScroll();
         },
 
