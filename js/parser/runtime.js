@@ -156,6 +156,9 @@
                 }
                 return false;
             }
+            if (uName === 'MATRIX') {
+                return !!(SignalState.matrix && SignalState.matrix.lit);
+            }
             var group = this.getGroup(name);
             if (group && group.length > 0) {
                 for (var i = 0; i < group.length; i++) { if (!SignalState.getLamp(group[i])) return false; }
@@ -167,11 +170,19 @@
         applySetAction: function(target, isLit) {
             if (!target) return;
             var tUpper = String(target).toUpperCase();
+            if (tUpper === 'MATRIX') {
+                if (SignalState.matrix && SignalState.matrix.lit !== isLit) {
+                    SignalState.matrix.lit = isLit;
+                    SignalEvents.emit('matrix:updated', isLit ? SignalState.matrix.text : '');
+                }
+                return;
+            }
             if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
                 for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
-                if (!isLit && SignalState.matrix && SignalState.matrix.text) {
-                    SignalState.matrix.text = ''; SignalEvents.emit('matrix:updated', '');
+                if (!isLit && SignalState.matrix && SignalState.matrix.lit) {
+                    SignalState.matrix.lit = false;
+                    SignalEvents.emit('matrix:updated', '');
                 }
                 return;
             }
@@ -216,9 +227,41 @@
                 this.applySetAction(act.target, true);
             } else if (act.op === 'unset') {
                 this.applySetAction(act.target, false);
+            } else if (act.op === 'matrix_assign') {
+                if (SignalState.matrix) {
+                    var assigned = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
+                    if (SignalState.matrix.text !== assigned) {
+                        SignalState.matrix.text = assigned;
+                        if (SignalState.matrix.lit) SignalEvents.emit('matrix:updated', assigned);
+                    }
+                }
+            } else if (act.op === 'matrix_set') {
+                if (SignalState.matrix) {
+                    if (act.text !== undefined && act.text !== '') {
+                        SignalState.matrix.text = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
+                    }
+                    if (!SignalState.matrix.lit) {
+                        SignalState.matrix.lit = true;
+                        SignalEvents.emit('matrix:updated', SignalState.matrix.text);
+                    }
+                }
+            } else if (act.op === 'matrix_unset') {
+                if (SignalState.matrix && SignalState.matrix.lit) {
+                    SignalState.matrix.lit = false;
+                    SignalEvents.emit('matrix:updated', '');
+                }
             } else if (act.op === 'matrix') {
-                if (SignalState.matrix && SignalState.matrix.text !== act.text) {
-                    SignalState.matrix.text = act.text; SignalEvents.emit('matrix:updated', act.text);
+                if (SignalState.matrix) {
+                    if (act.text === '') {
+                        if (SignalState.matrix.lit) {
+                            SignalState.matrix.lit = false;
+                            SignalEvents.emit('matrix:updated', '');
+                        }
+                    } else {
+                        SignalState.matrix.text = String(this.resolveValue(act.text)).replace(/[\s"']/g, '');
+                        SignalState.matrix.lit = true;
+                        SignalEvents.emit('matrix:updated', SignalState.matrix.text);
+                    }
                 }
             } else if (act.op === 'blink') {
                 this.applyBlinkAction(act.target, act.rate || 500);
@@ -376,8 +419,9 @@
                     hasRedLit = true; break;
                 }
             }
-            if (hasRedLit && SignalState.matrix && SignalState.matrix.text) {
-                SignalState.matrix.text = ''; SignalEvents.emit('matrix:updated', '');
+            if (hasRedLit && SignalState.matrix && SignalState.matrix.lit) {
+                SignalState.matrix.lit = false;
+                SignalEvents.emit('matrix:updated', '');
             }
 
             this.processLamps(now);
@@ -391,9 +435,24 @@
             this.highlightLine(aspect.line);
             for (var i = 0; i < aspect.unsets.length; i++) this.applySetAction(aspect.unsets[i], false);
             for (var j = 0; j < aspect.sets.length; j++) this.applySetAction(aspect.sets[j], true);
-            if (aspect.matrix !== undefined && SignalState.matrix) {
-                if (SignalState.matrix.text !== aspect.matrix) {
+
+            if (aspect.matrixLit !== undefined && SignalState.matrix) {
+                if (aspect.matrixText !== undefined && aspect.matrixText !== '') {
+                    SignalState.matrix.text = aspect.matrixText;
+                }
+                if (SignalState.matrix.lit !== aspect.matrixLit) {
+                    SignalState.matrix.lit = aspect.matrixLit;
+                    SignalEvents.emit('matrix:updated', aspect.matrixLit ? SignalState.matrix.text : '');
+                }
+            } else if (aspect.matrix !== undefined && SignalState.matrix) {
+                if (aspect.matrix === '') {
+                    if (SignalState.matrix.lit) {
+                        SignalState.matrix.lit = false;
+                        SignalEvents.emit('matrix:updated', '');
+                    }
+                } else {
                     SignalState.matrix.text = aspect.matrix;
+                    SignalState.matrix.lit = true;
                     SignalEvents.emit('matrix:updated', aspect.matrix);
                 }
             }

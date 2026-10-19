@@ -36,16 +36,14 @@
             var cy = matrixConf.y !== undefined ? matrixConf.y : (hasFeathers ? -258 : -192);
 
             if (hasFeathers) {
-                if (cy > -240 || cy === -202 || cy === -210) {
-                    cy = -258;
-                }
+                if (cy > -240 || cy === -202 || cy === -210) cy = -258;
             } else {
-                if (cy < -205 || cy === -215 || cy === -202) {
-                    cy = -192;
-                }
+                if (cy < -205 || cy === -215 || cy === -202) cy = -192;
             }
 
-            var txt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
+            var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
+            var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
+            var txt = isLit ? rawTxt : '';
             var isMultiChar = txt.length > 1;
             var boxWidth = isMultiChar ? 62 : 44;
             var boxHeight = 52;
@@ -78,7 +76,7 @@
                         var px = startX + c * spacing;
                         var py = startY + r * spacing;
 
-                        if (bit === 1) {
+                        if (bit === 1 && isLit) {
                             svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
                         } else {
                             svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
@@ -100,7 +98,7 @@
                             var pX = sX + c2 * (spacing * 0.8);
                             var pY = sY + r2 * (spacing * 0.95);
 
-                            if (b2 === 1) {
+                            if (b2 === 1 && isLit) {
                                 svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.8" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />';
                             } else {
                                 svg += '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';

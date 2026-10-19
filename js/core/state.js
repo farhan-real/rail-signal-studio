@@ -8,7 +8,7 @@
         shapes: [],
         lamps: [],
         feathers: [],
-        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '' },
+        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '', lit: false },
         controls: [],
         texts: [],
         groups: {},
@@ -25,7 +25,7 @@
             this.shapes = [];
             this.lamps = [];
             this.feathers = [];
-            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '' };
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '', lit: false };
             this.controls = [];
             this.texts = [];
             this.groups = {};
@@ -46,7 +46,10 @@
             this.shapes = data.shapes || [];
             this.lamps = data.lamps || [];
             this.feathers = data.feathers || [];
-            this.matrix = data.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '' };
+            this.matrix = data.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: -140, text: '', lit: false };
+            if (this.matrix.lit === undefined) {
+                this.matrix.lit = !!(this.matrix.text);
+            }
             this.controls = data.controls || [];
             this.texts = data.texts || [];
             this.groups = data.groups || {};
@@ -69,6 +72,13 @@
         },
 
         setLamp: function(lampId, isLit) {
+            if (lampId && lampId.toUpperCase() === 'MATRIX' && this.matrix) {
+                var bVal = !!isLit;
+                if (this.matrix.lit === bVal) return;
+                this.matrix.lit = bVal;
+                SignalEvents.emit('matrix:updated', bVal ? this.matrix.text : '');
+                return;
+            }
             var boolVal = !!isLit;
             if (this.lampStates[lampId] === boolVal) return;
             this.lampStates[lampId] = boolVal;
@@ -76,6 +86,9 @@
         },
 
         getLamp: function(lampId) {
+            if (lampId && lampId.toUpperCase() === 'MATRIX' && this.matrix) {
+                return !!this.matrix.lit;
+            }
             return !!this.lampStates[lampId];
         },
 

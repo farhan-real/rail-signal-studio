@@ -77,9 +77,7 @@
             function skipSemiBeforeBranch() {
                 if (peek().type === 'SEMI') {
                     var nextTok = tokens[pos + 1];
-                    if (nextTok && (nextTok.type === 'ELIF' || nextTok.type === 'ELSE')) {
-                        next();
-                    }
+                    if (nextTok && (nextTok.type === 'ELIF' || nextTok.type === 'ELSE')) next();
                 }
             }
 
@@ -146,24 +144,33 @@
                 if (tok.type === 'SET') {
                     next(); var sLamp = next();
                     if (sLamp && sLamp.type === 'MATRIX') {
-                        match('EQUALS'); var mText = (next() || {}).value || ''; match('SEMI');
-                        return { op: 'matrix', text: mText, line: tok.line };
+                        if (peek().type === 'EQUALS' || peek().type === 'STRING' || peek().type === 'IDENT' || peek().type === 'TIME_OR_NUM') {
+                            if (peek().type === 'EQUALS') match('EQUALS');
+                            var mText = (next() || {}).value || '';
+                            if (peek().type === 'SEMI') match('SEMI');
+                            return { op: 'matrix_set', text: mText, line: tok.line };
+                        }
+                        if (peek().type === 'SEMI') match('SEMI');
+                        return { op: 'matrix_set', line: tok.line };
                     }
-                    match('SEMI');
+                    if (peek().type === 'SEMI') match('SEMI');
                     return { op: 'set', target: (sLamp || {}).value || '', line: tok.line };
                 }
                 if (tok.type === 'UNSET') {
                     next(); var uLamp = next();
                     if (uLamp && uLamp.type === 'MATRIX') {
-                        match('SEMI');
-                        return { op: 'matrix', text: '', line: tok.line };
+                        if (peek().type === 'SEMI') match('SEMI');
+                        return { op: 'matrix_unset', line: tok.line };
                     }
-                    match('SEMI');
+                    if (peek().type === 'SEMI') match('SEMI');
                     return { op: 'unset', target: (uLamp || {}).value || '', line: tok.line };
                 }
                 if (tok.type === 'MATRIX') {
-                    next(); match('EQUALS'); var matText = (next() || {}).value || ''; match('SEMI');
-                    return { op: 'matrix', text: matText, line: tok.line };
+                    next();
+                    if (peek().type === 'EQUALS') match('EQUALS');
+                    var matText = (next() || {}).value || '';
+                    if (peek().type === 'SEMI') match('SEMI');
+                    return { op: 'matrix_assign', text: matText, line: tok.line };
                 }
                 if (tok.type === 'BLINK') {
                     next(); var bLamp = next(), bRate = next(); match('SEMI');
@@ -208,20 +215,31 @@
                     next(); var vName = next(); match('EQUALS'); ast.variables[vName.value] = (next() || {}).value; match('SEMI');
                 } else if (tok.type === 'ASPECT') {
                     next(); var aspName = (next() || {}).value || 'UNNAMED';
-                    var aspectDef = { name: aspName, line: tok.line, sets: [], unsets: [], matrix: undefined };
+                    var aspectDef = { name: aspName, line: tok.line, sets: [], unsets: [], matrixLit: undefined, matrixText: undefined };
                     match('LBRACE');
                     while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
                         var bTok = next();
                         if (bTok.type === 'SET') {
                             var lTok = next();
-                            if (lTok && lTok.type === 'MATRIX') { match('EQUALS'); aspectDef.matrix = (next() || {}).value || ''; }
-                            else if (lTok) aspectDef.sets.push(lTok.value);
+                            if (lTok && lTok.type === 'MATRIX') {
+                                if (peek().type === 'EQUALS' || peek().type === 'STRING' || peek().type === 'IDENT' || peek().type === 'TIME_OR_NUM') {
+                                    if (peek().type === 'EQUALS') match('EQUALS');
+                                    aspectDef.matrixText = (next() || {}).value || '';
+                                    aspectDef.matrixLit = true;
+                                } else {
+                                    aspectDef.matrixLit = true;
+                                }
+                            } else if (lTok) aspectDef.sets.push(lTok.value);
                         } else if (bTok.type === 'UNSET') {
                             var uTok = next();
-                            if (uTok && uTok.type === 'MATRIX') aspectDef.matrix = '';
-                            else if (uTok) aspectDef.unsets.push(uTok.value);
+                            if (uTok && uTok.type === 'MATRIX') {
+                                aspectDef.matrixLit = false;
+                            } else if (uTok) aspectDef.unsets.push(uTok.value);
+                        } else if (bTok.type === 'MATRIX') {
+                            if (peek().type === 'EQUALS') match('EQUALS');
+                            aspectDef.matrixText = (next() || {}).value || '';
                         }
-                        match('SEMI');
+                        if (peek().type === 'SEMI') match('SEMI');
                     }
                     match('RBRACE'); ast.aspects[aspName] = aspectDef; ast.aspectList.push(aspName);
                 } else if (tok.type === 'MAINLOOP' || tok.type === 'LOOP') {
