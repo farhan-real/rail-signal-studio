@@ -45,6 +45,11 @@
     };
 
     var MatrixRenderer = {
+        getPattern: function(ch) {
+            if (!ch) return MatrixFont5x7[' '];
+            return MatrixFont5x7[ch] || MatrixFont5x7[ch.toUpperCase()] || MatrixFont5x7[ch.toLowerCase()] || MatrixFont5x7[' '];
+        },
+
         getSignalAssemblyTopY: function() {
             var fb = window.SignalState && window.SignalState.featherBase;
             var feathers = (window.SignalState && window.SignalState.feathers) || [];
@@ -86,7 +91,7 @@
                 ((matrixConf.yOffset !== undefined) ? (restingCenterY - matrixConf.yOffset) : restingCenterY);
 
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
-            var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
+            var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).toString().trim().replace(/["']/g, '').toUpperCase();
             var txt = isLit ? rawTxt : '';
             var isMultiChar = txt.length > 1;
             var boxWidth = isMultiChar ? 62 : 44;
@@ -109,7 +114,7 @@
 
             if (!isMultiChar) {
                 var charKey = txt.length > 0 ? txt.charAt(0) : ' ';
-                var pattern = MatrixFont5x7[charKey] || MatrixFont5x7[' '];
+                var pattern = this.getPattern(charKey);
                 var startX = cx - (2 * spacing), startY = cy - (3 * spacing);
 
                 for (var r = 0; r < 7; r++) {
@@ -125,7 +130,7 @@
             } else {
                 for (var ch = 0; ch < 2; ch++) {
                     var chKey = txt.charAt(ch) || ' ';
-                    var ptn = MatrixFont5x7[chKey] || MatrixFont5x7[' '];
+                    var ptn = this.getPattern(chKey);
                     var chCenterX = cx + (ch === 0 ? -14 : 14);
                     var sX = chCenterX - (2 * (spacing * 0.8)), sY = cy - (3 * (spacing * 0.95));
 

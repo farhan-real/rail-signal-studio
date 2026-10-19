@@ -173,7 +173,7 @@
                 if (tok.type === 'SET') {
                     next(); var sLamp = next();
                     if (sLamp && sLamp.type === 'MATRIX') {
-                        if (peek().type === 'EQUALS' || peek().type === 'STRING' || peek().type === 'IDENT' || peek().type === 'TIME_OR_NUM') {
+                        if (peek().type !== 'SEMI' && peek().type !== 'EOF' && peek().type !== 'RBRACE') {
                             if (peek().type === 'EQUALS') match('EQUALS');
                             var mText = (next() || {}).value || '';
                             if (peek().type === 'SEMI') match('SEMI');
@@ -251,7 +251,7 @@
                         if (bTok.type === 'SET') {
                             var lTok = next();
                             if (lTok && lTok.type === 'MATRIX') {
-                                if (peek().type === 'EQUALS' || peek().type === 'STRING' || peek().type === 'IDENT' || peek().type === 'TIME_OR_NUM') {
+                                if (peek().type !== 'SEMI' && peek().type !== 'EOF' && peek().type !== 'RBRACE') {
                                     if (peek().type === 'EQUALS') match('EQUALS');
                                     aspectDef.matrixText = (next() || {}).value || '';
                                     aspectDef.matrixLit = true;
