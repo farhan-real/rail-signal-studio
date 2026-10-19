@@ -6,11 +6,12 @@
             var id = ctrl.id;
             var label = ctrl.label || id;
             var color = ctrl.color || '#d92525';
-            var positions = Math.max(2, ctrl.positions || 2);
+            var positions = Math.max(2, (ctrl.states && ctrl.states.length) ? ctrl.states.length : (ctrl.positions || 2));
             var currentVal = SignalState.getControlValue(id) || 0;
             var minAngle = -22, maxAngle = 22;
             var stepAngle = (maxAngle - minAngle) / (positions - 1);
             var angle = minAngle + currentVal * stepAngle;
+            var stateLabel = (ctrl.states && ctrl.states[currentVal]) ? ctrl.states[currentVal] : ('POS ' + currentVal);
 
             var notchesHtml = '';
             for (var p = 0; p < positions; p++) {
@@ -34,7 +35,7 @@
                 '  </div>',
                 '  <div class="lever-meta">',
                 '    <span class="lever-label">' + label + '</span>',
-                '    <span class="lever-val">POS ' + currentVal + '</span>',
+                '    <span class="lever-val">' + stateLabel + '</span>',
                 '  </div>',
                 '</div>'
             ].join('');
@@ -50,14 +51,13 @@
                     var frame = item.querySelector('.lever-frame');
                     if (!frame) return;
 
-                    var isPointerDown = false;
-                    var hasDragged = false;
+                    var isPointerDown = false, hasDragged = false;
                     var startX = 0, startY = 0;
 
                     var advanceNext = function() {
                         var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
                         if (!ctrl) return;
-                        var positions = Math.max(2, ctrl.positions || 2);
+                        var positions = Math.max(2, (ctrl.states && ctrl.states.length) ? ctrl.states.length : (ctrl.positions || 2));
                         var cur = SignalState.getControlValue(id) || 0;
                         var nextVal = (cur + 1) % positions;
                         SignalState.setControlValue(id, nextVal);
@@ -66,7 +66,7 @@
                     var selectNotchPosition = function(e) {
                         var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
                         if (!ctrl) return;
-                        var positions = Math.max(2, ctrl.positions || 2);
+                        var positions = Math.max(2, (ctrl.states && ctrl.states.length) ? ctrl.states.length : (ctrl.positions || 2));
                         var minAngle = -22, maxAngle = 22;
                         var stepAngle = (maxAngle - minAngle) / (positions - 1);
 
@@ -86,17 +86,14 @@
                     var onPointerDown = function(e) {
                         if (e.target.closest('.control-dot') || e.target.closest('.control-dot-menu')) return;
                         e.stopPropagation();
-                        isPointerDown = true;
-                        hasDragged = false;
-                        startX = e.clientX;
-                        startY = e.clientY;
+                        isPointerDown = true; hasDragged = false;
+                        startX = e.clientX; startY = e.clientY;
                         try { item.setPointerCapture(e.pointerId); } catch (err) {}
                     };
 
                     var onPointerMove = function(e) {
                         if (!isPointerDown) return;
-                        var dist = Math.hypot(e.clientX - startX, e.clientY - startY);
-                        if (dist > 8) {
+                        if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
                             hasDragged = true;
                             selectNotchPosition(e);
                         }
@@ -106,31 +103,17 @@
                         if (!isPointerDown) return;
                         isPointerDown = false;
                         try { item.releasePointerCapture(e.pointerId); } catch (err) {}
-
                         if (hasDragged) return;
 
                         if (e.target.closest('.lever-notch')) {
                             var pVal = parseInt(e.target.closest('.lever-notch').getAttribute('data-pos-val'), 10);
-                            if (!isNaN(pVal)) {
-                                SignalState.setControlValue(id, pVal);
-                                return;
-                            }
+                            if (!isNaN(pVal)) { SignalState.setControlValue(id, pVal); return; }
                         }
-
-                        if (e.target.closest('.lever-meta')) {
-                            advanceNext();
-                            return;
-                        }
+                        if (e.target.closest('.lever-meta')) { advanceNext(); return; }
 
                         var rect = frame.getBoundingClientRect();
-                        var pivotY = rect.top + 78;
-                        var dy = pivotY - e.clientY;
-
-                        if (dy > 18) {
-                            selectNotchPosition(e);
-                        } else {
-                            advanceNext();
-                        }
+                        if (rect.top + 78 - e.clientY > 18) selectNotchPosition(e);
+                        else advanceNext();
                     };
 
                     item.addEventListener('pointerdown', onPointerDown);

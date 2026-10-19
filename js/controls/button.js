@@ -29,6 +29,9 @@
             var label = ctrl.label || id;
             var currentVal = SignalState.getControlValue(id) || 0;
             var activeClass = currentVal === 1 ? 'switch-on' : 'switch-off';
+            var stOn = (ctrl.states && ctrl.states[1]) ? ctrl.states[1] : 'ON';
+            var stOff = (ctrl.states && ctrl.states[0]) ? ctrl.states[0] : 'OFF';
+            var stateLabel = currentVal === 1 ? stOn : stOff;
 
             return [
                 '<div class="console-item switch-item ' + activeClass + '" data-control-id="' + id + '">',
@@ -41,7 +44,7 @@
                 '  </div>',
                 '  <div class="switch-meta">',
                 '    <span class="switch-label" data-edit-label="' + id + '">' + label + '</span>',
-                '    <span class="switch-state">' + (currentVal === 1 ? 'ON' : 'OFF') + '</span>',
+                '    <span class="switch-state">' + stateLabel + '</span>',
                 '  </div>',
                 '</div>'
             ].join('');
@@ -54,7 +57,6 @@
                     var id = btn.getAttribute('data-control-id');
                     var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
                     if (!ctrl) return;
-
                     var bezel = btn.querySelector('.button-bezel');
                     if (!bezel) return;
 

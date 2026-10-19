@@ -33,9 +33,7 @@
                 }
             }
             var nextX = Math.ceil(rightmost / GRID) * GRID;
-            if (nextX + w > 860) {
-                return { x: 20, y: rowY + 140 };
-            }
+            if (nextX + w > 860) return { x: 20, y: rowY + 140 };
             return { x: nextX, y: rowY };
         },
 
@@ -213,18 +211,17 @@
                     var curVal = SignalState.getControlValue(c.id);
                     if (c.type === 'lever') {
                         var vEl = el.querySelector('.lever-val');
-                        if (vEl) vEl.textContent = 'POS ' + curVal;
+                        var stLabel = (c.states && c.states[curVal]) ? c.states[curVal] : ('POS ' + curVal);
+                        if (vEl) vEl.textContent = stLabel;
                         var handle = el.querySelector('.lever-handle');
                         if (handle) {
-                            var numPos = Math.max(2, c.positions || 2);
+                            var numPos = Math.max(2, (c.states && c.states.length) ? c.states.length : (c.positions || 2));
                             var step = 44 / (numPos - 1);
                             var angle = -22 + curVal * step;
                             handle.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
                         }
                         var notches = el.querySelectorAll('.lever-notch');
-                        for (var n = 0; n < notches.length; n++) {
-                            notches[n].classList.toggle('active', n === curVal);
-                        }
+                        for (var n = 0; n < notches.length; n++) notches[n].classList.toggle('active', n === curVal);
                     } else if (c.type === 'knob') {
                         var states = KnobControl.getStates(c);
                         var cfg = KnobControl.getAngles(c, states);
@@ -236,13 +233,9 @@
                             knobBody.style.transform = 'rotate(' + kAngle.toFixed(1) + 'deg)';
                         }
                         var dialLabels = el.querySelectorAll('.knob-dial-label');
-                        for (var d = 0; d < dialLabels.length; d++) {
-                            dialLabels[d].classList.toggle('active', d === curVal);
-                        }
+                        for (var d = 0; d < dialLabels.length; d++) dialLabels[d].classList.toggle('active', d === curVal);
                         var ticks = el.querySelectorAll('.knob-tick');
-                        for (var tk = 0; tk < ticks.length; tk++) {
-                            ticks[tk].classList.toggle('active', tk === curVal);
-                        }
+                        for (var tk = 0; tk < ticks.length; tk++) ticks[tk].classList.toggle('active', tk === curVal);
                     } else if (c.type === 'button') {
                         var btnEl = el.querySelector('.button-item');
                         if (btnEl) btnEl.classList.toggle('button-pressed', curVal === 1);
@@ -255,7 +248,10 @@
                             swEl.classList.toggle('switch-off', curVal !== 1);
                         }
                         var swState = el.querySelector('.switch-state');
-                        if (swState) swState.textContent = curVal === 1 ? 'ON' : 'OFF';
+                        if (swState) {
+                            var sLabel = curVal === 1 ? ((c.states && c.states[1]) ? c.states[1] : 'ON') : ((c.states && c.states[0]) ? c.states[0] : 'OFF');
+                            swState.textContent = sLabel;
+                        }
                     }
                 }
             }
