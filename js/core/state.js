@@ -6,7 +6,11 @@
     var SignalState = {
         id: null,
         name: 'New Signal',
-        mast: { type: 'tubular', height: 380, x: 0, y: 0, platform: true, platformX: null, platformY: null, platformWidth: 54, platformHeight: 6, ladder: true },
+        mast: {
+            type: 'tubular', height: 380, x: 0, y: 0,
+            platform: true, platformX: null, platformY: 45, platformWidth: 54, platformHeight: 6,
+            ladder: true, showFoot: true, footType: 'plate', footWidth: 64, footHeight: 14, footYOffset: 0
+        },
         shapes: [],
         lamps: [],
         feathers: [],
@@ -46,7 +50,11 @@
             var n = name || 'Custom Signal';
             this.id = 'sig_' + Date.now();
             this.name = n;
-            this.mast = { type: 'tubular', height: 380, x: 0, y: -20, platform: true, platformX: null, platformY: null, platformWidth: 54, platformHeight: 6, ladder: true };
+            this.mast = {
+                type: 'tubular', height: 380, x: 0, y: -20,
+                platform: true, platformX: null, platformY: null, platformWidth: 54, platformHeight: 6,
+                ladder: true, showFoot: true, footType: 'plate', footWidth: 64, footHeight: 14, footYOffset: 0
+            };
             this.shapes = [
                 { id: 'plate_main', name: 'Main Head Plate', type: 'rounded-rect', x: -26, y: -130, width: 52, height: 110, corners: [26, 26, 26, 26], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 }
             ];
@@ -102,7 +110,16 @@
             if (!data) return;
             this.id = data.id || null;
             this.name = data.name || 'Railway Signal';
-            this.mast = data.mast || { type: 'tubular', height: 380, x: 0, y: 0, platform: true, ladder: true };
+            this.mast = data.mast || {
+                type: 'tubular', height: 380, x: 0, y: 0, platform: true, ladder: true,
+                showFoot: true, footType: 'plate', footWidth: 64, footHeight: 14, footYOffset: 0
+            };
+            if (this.mast.showFoot === undefined) this.mast.showFoot = true;
+            if (this.mast.footType === undefined) this.mast.footType = 'plate';
+            if (this.mast.footWidth === undefined) this.mast.footWidth = (this.mast.type === 'tubular' ? 64 : 110);
+            if (this.mast.footHeight === undefined) this.mast.footHeight = 14;
+            if (this.mast.footYOffset === undefined) this.mast.footYOffset = 0;
+
             this.shapes = data.shapes || [];
             this.lamps = data.lamps || [];
             this.feathers = data.feathers || [];

@@ -21,6 +21,47 @@
             return maxY !== null ? maxY : 45;
         },
 
+        renderFooting: function(cx, baseCy, mast) {
+            if (mast.showFoot === false) return '';
+
+            var footW = mast.footWidth || (mast.type === 'tubular' ? 64 : 110);
+            var footH = mast.footHeight || 14;
+            var footYOff = mast.footYOffset || 0;
+            var footStyle = mast.footType || 'plate';
+            var footTopY = baseCy - footH - footYOff;
+            var footLeftX = cx - footW / 2;
+            var svg = '<g class="mast-footing-group">';
+
+            if (footStyle === 'concrete') {
+                var chamfer = 6;
+                var pts = [
+                    (footLeftX + chamfer) + ',' + footTopY,
+                    (footLeftX + footW - chamfer) + ',' + footTopY,
+                    (footLeftX + footW) + ',' + (footTopY + footH),
+                    footLeftX + ',' + (footTopY + footH)
+                ].join(' ');
+                svg += '<polygon points="' + pts + '" fill="#252a36" stroke="#485368" stroke-width="1.8" />';
+                svg += '<line x1="' + (footLeftX - 6) + '" y1="' + (footTopY + footH) + '" x2="' + (footLeftX + footW + 6) + '" y2="' + (footTopY + footH) + '" stroke="#151821" stroke-width="3" />';
+            } else if (footStyle === 'clamp') {
+                svg += '<rect x="' + footLeftX + '" y="' + footTopY + '" width="' + footW + '" height="' + footH + '" rx="4" fill="#181c26" stroke="#3d475c" stroke-width="2" />';
+                svg += '<circle cx="' + (cx - footW / 3) + '" cy="' + (footTopY + footH / 2) + '" r="2.2" fill="#5a6885" />';
+                svg += '<circle cx="' + (cx + footW / 3) + '" cy="' + (footTopY + footH / 2) + '" r="2.2" fill="#5a6885" />';
+            } else {
+                svg += '<rect x="' + footLeftX + '" y="' + footTopY + '" width="' + footW + '" height="' + footH + '" rx="2" fill="#141722" stroke="#323b4e" stroke-width="2" />';
+                var ribH = Math.min(18, Math.max(8, footH * 1.4));
+                var ribTopY = footTopY - ribH;
+                if (mast.type === 'tubular') {
+                    svg += '<polygon points="' + (cx - 9) + ',' + footTopY + ' ' + (cx - 9) + ',' + ribTopY + ' ' + (cx - footW / 2 + 4) + ',' + footTopY + '" fill="#1c212f" stroke="#323b4e" stroke-width="1.2" />';
+                    svg += '<polygon points="' + (cx + 9) + ',' + footTopY + ' ' + (cx + 9) + ',' + ribTopY + ' ' + (cx + footW / 2 - 4) + ',' + footTopY + '" fill="#1c212f" stroke="#323b4e" stroke-width="1.2" />';
+                }
+                svg += '<circle cx="' + (footLeftX + 6) + '" cy="' + (footTopY + footH / 2) + '" r="2" fill="#687899" />';
+                svg += '<circle cx="' + (footLeftX + footW - 6) + '" cy="' + (footTopY + footH / 2) + '" r="2" fill="#687899" />';
+            }
+
+            svg += '</g>';
+            return svg;
+        },
+
         render: function(mast) {
             var type = mast.type || 'tubular', h = mast.height || 360;
             var cx = mast.x || 0, baseCy = (mast.y || 0) + h;
@@ -42,19 +83,19 @@
             }
 
             if (type === 'tubular') {
-                svg += '<line x1="' + cx + '" y1="' + (mast.y || 0) + '" x2="' + cx + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="18" stroke-linecap="square" />';
-                svg += '<line x1="' + cx + '" y1="' + (mast.y || 0) + '" x2="' + cx + '" y2="' + baseCy + '" stroke="#363c4e" stroke-width="4" stroke-linecap="square" />';
+                svg += '<line x1="' + cx + '" y1="' + (mast.y || 0) + '" x2="' + cx + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="18" stroke-linecap="butt" />';
+                svg += '<line x1="' + cx + '" y1="' + (mast.y || 0) + '" x2="' + cx + '" y2="' + baseCy + '" stroke="#363c4e" stroke-width="4" stroke-linecap="butt" />';
             } else if (type === 'lattice') {
                 var w = 32, halfW = w / 2, leftX = cx - halfW, rightX = cx + halfW;
-                svg += '<line x1="' + leftX + '" y1="' + (mast.y || 0) + '" x2="' + leftX + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="5" />';
-                svg += '<line x1="' + rightX + '" y1="' + (mast.y || 0) + '" x2="' + rightX + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="5" />';
+                svg += '<line x1="' + leftX + '" y1="' + (mast.y || 0) + '" x2="' + leftX + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="5" stroke-linecap="butt" />';
+                svg += '<line x1="' + rightX + '" y1="' + (mast.y || 0) + '" x2="' + rightX + '" y2="' + baseCy + '" stroke="#252a38" stroke-width="5" stroke-linecap="butt" />';
                 for (var y = (mast.y || 0) + 20; y < baseCy; y += 30) {
                     svg += '<line x1="' + leftX + '" y1="' + y + '" x2="' + rightX + '" y2="' + (y + 25) + '" stroke="#1d212c" stroke-width="3" />';
                     svg += '<line x1="' + rightX + '" y1="' + y + '" x2="' + leftX + '" y2="' + (y + 25) + '" stroke="#1d212c" stroke-width="3" />';
                 }
             } else if (type === 'gantry') {
                 svg += '<line x1="' + (cx - 120) + '" y1="' + (mast.y || 0) + '" x2="' + (cx + 80) + '" y2="' + (mast.y || 0) + '" stroke="#2a3040" stroke-width="16" />';
-                svg += '<line x1="' + (cx - 120) + '" y1="' + (mast.y || 0) + '" x2="' + (cx - 120) + '" y2="' + baseCy + '" stroke="#2a3040" stroke-width="16" />';
+                svg += '<line x1="' + (cx - 120) + '" y1="' + (mast.y || 0) + '" x2="' + (cx - 120) + '" y2="' + baseCy + '" stroke="#2a3040" stroke-width="16" stroke-linecap="butt" />';
             }
 
             if (mast.platform) {
@@ -64,10 +105,8 @@
                 var ph = mast.platformHeight !== undefined ? mast.platformHeight : 6;
                 var px = (mast.platformX !== null && mast.platformX !== undefined) ? mast.platformX : (cx - pw / 2);
 
-                if (type === 'tubular') {
-                    svg += '<rect x="' + px.toFixed(1) + '" y="' + py.toFixed(1) + '" width="' + pw + '" height="' + ph + '" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" class="mast-platform" />';
-                } else {
-                    svg += '<rect x="' + px.toFixed(1) + '" y="' + py.toFixed(1) + '" width="' + pw + '" height="' + ph + '" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" class="mast-platform" />';
+                svg += '<rect x="' + px.toFixed(1) + '" y="' + py.toFixed(1) + '" width="' + pw + '" height="' + ph + '" rx="2" fill="#141720" stroke="#394154" stroke-width="1.5" class="mast-platform" />';
+                if (type !== 'tubular') {
                     svg += '<line x1="' + px.toFixed(1) + '" y1="' + (py - 22) + '" x2="' + (px + pw).toFixed(1) + '" y2="' + (py - 22) + '" stroke="#2a3040" stroke-width="2.5" />';
                     svg += '<line x1="' + px.toFixed(1) + '" y1="' + (py - 22) + '" x2="' + px.toFixed(1) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
                     svg += '<line x1="' + (px + pw).toFixed(1) + '" y1="' + (py - 22) + '" x2="' + (px + pw).toFixed(1) + '" y2="' + py + '" stroke="#2a3040" stroke-width="2" />';
@@ -83,7 +122,7 @@
                 }
             }
 
-            svg += '<rect x="' + (cx - 30) + '" y="' + (baseCy - 12) + '" width="60" height="12" rx="2" fill="#0f1117" stroke="#252a38" stroke-width="2" />';
+            svg += this.renderFooting(cx, baseCy, mast);
             svg += '</g>';
             return svg;
         }
