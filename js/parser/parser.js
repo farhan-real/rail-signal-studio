@@ -8,7 +8,14 @@
 
             function peek() { return tokens[pos] || { type: 'EOF', line: 0 }; }
             function next() { return tokens[pos++]; }
-            function match(type) { return peek().type === type ? next() : null; }
+            function match(type) {
+                if (peek().type === type) return next();
+                if (type === 'SEMI') {
+                    var pt = peek().type;
+                    if (pt === 'RBRACE' || pt === 'EOF' || pt === 'ELIF' || pt === 'ELSE' || pt === 'SECTION') return null;
+                }
+                return null;
+            }
 
             function parsePrimary() {
                 if (peek().type === 'LPAREN') { next(); var expr = parseOr(); match('RPAREN'); return expr; }
@@ -118,7 +125,7 @@
                     var ifTok = next(), expr = parseOr();
                     var actions = parseBlockOrSingle();
                     var elifs = [];
-                    var elseActions = null;
+                    var elseActions = null, elseLine = null;
 
                     skipSemiBeforeBranch();
                     while (isElif()) {
@@ -130,12 +137,13 @@
                     }
 
                     if (peek().type === 'ELSE') {
-                        next();
+                        var elseTok = next();
+                        elseLine = elseTok.line;
                         elseActions = parseBlockOrSingle();
                     }
 
                     if (peek().type === 'SEMI') match('SEMI');
-                    return { op: 'if', expr: expr, actions: actions, elifs: elifs, elseActions: elseActions, line: ifTok.line };
+                    return { op: 'if', expr: expr, actions: actions, elifs: elifs, elseActions: elseActions, line: ifTok.line, elseLine: elseLine };
                 }
                 if (tok.type === 'DELAY') {
                     next(); var dTok = next();

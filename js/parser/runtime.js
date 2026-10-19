@@ -87,13 +87,13 @@
 
         getMatchingBranch: function(node) {
             if (!node) return null;
-            if (this.evalExpr(node.expr)) return { actions: node.actions, key: '_if' };
+            if (this.evalExpr(node.expr)) return { actions: node.actions, key: '_if', line: node.line };
             if (node.elifs && node.elifs.length) {
                 for (var i = 0; i < node.elifs.length; i++) {
-                    if (this.evalExpr(node.elifs[i].expr)) return { actions: node.elifs[i].actions, key: '_elif' + i };
+                    if (this.evalExpr(node.elifs[i].expr)) return { actions: node.elifs[i].actions, key: '_elif' + i, line: node.elifs[i].line };
                 }
             }
-            if (node.elseActions && node.elseActions.length) return { actions: node.elseActions, key: '_else' };
+            if (node.elseActions && node.elseActions.length) return { actions: node.elseActions, key: '_else', line: node.elseLine || node.line };
             return null;
         },
 
@@ -344,11 +344,13 @@
             if (!actions) return null;
             for (var a = 0; a < actions.length; a++) {
                 var act = actions[a];
+                if (act.line) this.highlightLine(act.line);
                 if (act.op === 'if') {
                     var branch = this.getMatchingBranch(act);
                     if (branch) {
-                        var nestedOutcome = this.runActionList(branch.actions, ruleKey + '_sub' + a + branch.key, now);
-                        if (nestedOutcome === 'end' || (nestedOutcome && nestedOutcome.op === 'jump')) return nestedOutcome;
+                        this.highlightLine(branch.line || act.line);
+                        var nested = this.runActionList(branch.actions, ruleKey + '_sub' + a + branch.key, now);
+                        if (nested === 'end' || (nested && nested.op === 'jump')) return nested;
                     }
                     continue;
                 }
@@ -430,6 +432,7 @@
                     if (stmt.op === 'if') {
                         var branch = this.getMatchingBranch(stmt);
                         if (branch) {
+                            this.highlightLine(branch.line || stmt.line);
                             var branchKey = ruleKey + branch.key;
                             if (this.delayedQueues[ruleKey] && this.delayedQueues[ruleKey].branchKey !== branchKey) delete this.delayedQueues[ruleKey];
                             var outcome;
@@ -449,6 +452,7 @@
                             delete this.delayedQueues[ruleKey];
                         }
                     } else {
+                        if (stmt.line) this.highlightLine(stmt.line);
                         this.executeAction(stmt);
                     }
                     idx++;
