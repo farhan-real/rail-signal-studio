@@ -18,6 +18,31 @@
                     self.exitMoveMode();
                 }
             });
+            window.addEventListener('resize', function() {
+                if (self.activeMenu && self.activeWrap) self.adjustMenuPosition(self.activeMenu, self.activeWrap);
+            });
+        },
+
+        adjustMenuPosition: function(menu, wrap) {
+            if (!menu || !wrap) return;
+            menu.classList.remove('align-left');
+            menu.style.transform = '';
+
+            var desk = document.getElementById('consoleDesk') || document.body;
+            var deskRect = desk.getBoundingClientRect();
+            var menuRect = menu.getBoundingClientRect();
+
+            if (menuRect.left < deskRect.left + 8) {
+                menu.classList.add('align-left');
+                menuRect = menu.getBoundingClientRect();
+                if (menuRect.left < deskRect.left + 8) {
+                    var shift = Math.round((deskRect.left + 8) - menuRect.left);
+                    menu.style.transform = 'translateX(' + shift + 'px)';
+                }
+            } else if (menuRect.right > deskRect.right - 8) {
+                var shiftR = Math.round((deskRect.right - 8) - menuRect.right);
+                menu.style.transform = 'translateX(' + shiftR + 'px)';
+            }
         },
 
         attachDot: function(wrap, targetId, isCtrl) {
@@ -76,7 +101,7 @@
             var btnResize = document.createElement('button');
             btnResize.className = 'cmenu-btn';
             btnResize.textContent = 'Resize';
-            btnResize.addEventListener('click', function(e) { e.stopPropagation(); self.togglePanel(menu, 'resize', ctrl || textObj); });
+            btnResize.addEventListener('click', function(e) { e.stopPropagation(); self.togglePanel(menu, 'resize', ctrl || textObj, isCtrl, wrap); });
 
             var btnModify = document.createElement('button');
             btnModify.className = 'cmenu-btn';
@@ -101,6 +126,7 @@
 
             wrap.appendChild(menu);
             this.activeMenu = menu;
+            this.adjustMenuPosition(menu, wrap);
         },
 
         closeMenu: function() {
@@ -117,7 +143,10 @@
             if (existing) {
                 var curType = existing.getAttribute('data-panel-type');
                 existing.parentNode.removeChild(existing);
-                if (curType === type) return;
+                if (curType === type) {
+                    this.adjustMenuPosition(menu, wrap);
+                    return;
+                }
             }
 
             var panel = document.createElement('div');
@@ -127,6 +156,7 @@
             if (type === 'resize') this.buildResizePanel(panel, target);
             else if (type === 'modify') this.buildModifyPanel(panel, target, isCtrl, wrap);
             menu.appendChild(panel);
+            this.adjustMenuPosition(menu, wrap);
         },
 
         buildResizePanel: function(panel, target) {
@@ -155,7 +185,6 @@
         },
 
         buildModifyPanel: function(panel, target, isCtrl, wrap) {
-            var self = this;
             if (!isCtrl) {
                 var lbl = document.createElement('span');
                 lbl.className = 'cmenu-label';
