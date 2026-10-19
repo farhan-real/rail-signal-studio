@@ -7,6 +7,7 @@
         init: function() {
             this.desk = document.getElementById('consoleDesk');
             this.bindButtons();
+            this.bindResizer();
 
             SignalEvents.on('state:loaded', this.render.bind(this));
             SignalEvents.on('control:changed', this.updateControlStates.bind(this));
@@ -74,6 +75,61 @@
                 });
                 self.render();
             });
+        },
+
+        bindResizer: function() {
+            var container = document.getElementById('controlConsole');
+            var handle = document.getElementById('consoleResizeHandle');
+            var toggleBtn = document.getElementById('btnToggleCollapseConsole');
+            var isDragging = false;
+            var startY = 0;
+            var startH = 0;
+            var lastExpandedHeight = 210;
+
+            var doToggle = function() {
+                var isCollapsed = container.classList.contains('is-collapsed');
+                if (isCollapsed) {
+                    container.classList.remove('is-collapsed');
+                    container.style.height = lastExpandedHeight + 'px';
+                } else {
+                    lastExpandedHeight = Math.max(100, container.getBoundingClientRect().height);
+                    container.classList.add('is-collapsed');
+                }
+            };
+
+            if (toggleBtn) toggleBtn.addEventListener('click', doToggle);
+            if (handle) {
+                handle.addEventListener('dblclick', doToggle);
+
+                handle.addEventListener('pointerdown', function(e) {
+                    if (e.pointerType === 'touch' && !e.isPrimary) return;
+                    isDragging = true;
+                    startY = e.clientY;
+                    startH = container.getBoundingClientRect().height;
+                    container.classList.add('is-resizing');
+                    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+                });
+
+                handle.addEventListener('pointermove', function(e) {
+                    if (!isDragging) return;
+                    var deltaY = startY - e.clientY;
+                    var maxH = Math.max(200, window.innerHeight * 0.75);
+                    var newH = Math.max(80, Math.min(maxH, startH + deltaY));
+                    container.classList.remove('is-collapsed');
+                    container.style.height = newH + 'px';
+                    lastExpandedHeight = newH;
+                });
+
+                var endDrag = function(e) {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    container.classList.remove('is-resizing');
+                    try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
+                };
+
+                handle.addEventListener('pointerup', endDrag);
+                handle.addEventListener('pointercancel', endDrag);
+            }
         },
 
         render: function() {

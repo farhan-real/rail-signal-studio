@@ -32,8 +32,23 @@
 .script-editor { width: 100%; height: 100%; background: transparent; border: none; padding: 8px 10px; font-family: var(--font-mono); font-size: 12px; line-height: 20px; color: #d8e0f0; outline: none; resize: none; white-space: pre; overflow: auto; user-select: text; -webkit-user-select: text; tab-size: 4; box-sizing: border-box; }
 .editor-status { height: 26px; padding: 0 12px; background: #11141c; border-top: 1px solid var(--border-color); font-size: 11px; line-height: 26px; color: var(--text-secondary); flex-shrink: 0; }
 
-.console-section { height: 210px; background: var(--bg-desk); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 10; }
-.console-header { height: 32px; background: #121520; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; }
+/* Collapsible and Resizable Console Desk */
+.console-section { position: relative; height: 210px; min-height: 36px; background: var(--bg-desk); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 10; transition: height 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.console-section.is-resizing { transition: none; }
+.console-section.is-collapsed { height: 36px !important; }
+.console-section.is-collapsed .console-desk { display: none; }
+
+.console-resize-handle { position: absolute; top: -5px; left: 0; right: 0; height: 10px; cursor: row-resize; z-index: 25; display: flex; align-items: center; justify-content: center; touch-action: none; }
+.resize-handle-grip { width: 36px; height: 3px; background: var(--border-color); border-radius: 2px; transition: background 0.15s, width 0.15s; }
+.console-resize-handle:hover .resize-handle-grip,
+.console-section.is-resizing .resize-handle-grip { background: var(--accent); width: 54px; }
+
+.console-collapse-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 3px; font-size: 10px; padding: 0; transition: color 0.15s, background 0.15s; }
+.console-collapse-btn:hover { color: var(--text-primary); background: #1c2130; }
+.collapse-icon { display: inline-block; transition: transform 0.2s ease; }
+.console-section.is-collapsed .collapse-icon { transform: rotate(-90deg); }
+
+.console-header { height: 36px; background: #121520; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0; }
 .console-title-group { display: flex; align-items: center; gap: 8px; }
 .console-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px; }
 .console-actions { display: flex; gap: 6px; }
