@@ -54,7 +54,7 @@
                     html += '<option value="' + s + '"' + ((fb.sides || 8) === s ? ' selected' : '') + '>' + s + ' Sides' + (s === 8 ? ' (Octagon)' : (s === 6 ? ' (Hexagon)' : '')) + '</option>';
                 });
                 html += '    </select></div>';
-                html += '    <div><label class="form-label">Base Angle Rotation (°)</label><input type="number" min="-180" max="180" id="fbAngle" class="form-input" value="' + (fb.baseAngle || 0) + '"/></div>';
+                html += '    <div><label class="form-label">Base Angle Rotation (Â°)</label><input type="number" min="-180" max="180" id="fbAngle" class="form-input" value="' + (fb.baseAngle || 0) + '"/></div>';
                 html += '  </div>';
 
                 html += '  <div><label class="form-label">Hub Radius (px)</label><input type="number" min="16" max="70" id="fbRadius" class="form-input" value="' + (fb.radius || 35.5) + '"/></div>';
@@ -110,7 +110,7 @@
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
-            html += '    <span class="card-badge">5x7 Theatre Route Matrix Box</span>';
+            html += '    <span class="card-badge">5x7 Route Matrix Box</span>';
             html += '    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="chkMatrixEnabled" ' + (mat.enabled ? 'checked' : '') + '/><span style="font-size:11px; font-weight:700;">Enabled</span></label>';
             html += '  </div>';
 

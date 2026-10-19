@@ -70,9 +70,9 @@
 .feather-lamp-bezel { fill: #0a0d16; stroke: #262d3e; stroke-width: 1.2; }
 .feather-visor { fill: #07080b; stroke: #181c25; stroke-width: 0.9; }
 
-.theatre-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
-.theatre-pixel-off { fill: #151820; }
-.theatre-pixel-on { fill: #ffffff; }
+.route-matrix-box, .matrix-box { fill: #090b0e; stroke: #313747; stroke-width: 2.5; }
+.route-matrix-pixel-off, .matrix-pixel-off { fill: #151820; }
+.route-matrix-pixel-on, .matrix-pixel-on { fill: #ffffff; }
 
 @media (max-width: 600px) {
     .viewport-toolbar {

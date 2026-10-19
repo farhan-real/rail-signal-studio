@@ -292,7 +292,7 @@
         },
 
         updateMatrixFast: function() {
-            var mContainer = this.sceneRoot.querySelector('.theatre-matrix-unit');
+            var mContainer = this.sceneRoot.querySelector('.route-matrix-unit, .matrix-unit');
             if (SignalState.matrix && SignalState.matrix.enabled) {
                 var svgStr = MatrixRenderer.render(SignalState.matrix, SignalState.matrix.text);
                 try {

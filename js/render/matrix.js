@@ -85,14 +85,14 @@
             var boxBottomY = by + boxHeight;
 
             var bracketHeight = hasH ? Math.max(2, parseFloat(matrixConf.connectorHeight)) : Math.max(4, topAssemblyY - boxBottomY);
-            var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
+            var svg = '<g class="route-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
             if (matrixConf && matrixConf.showBase !== false) {
                 svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';
                 svg += '<line x1="' + (cx - 13) + '" y1="' + (boxBottomY + bracketHeight).toFixed(1) + '" x2="' + (cx + 13) + '" y2="' + (boxBottomY + bracketHeight).toFixed(1) + '" stroke="#384256" stroke-width="2" />';
             }
 
-            svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
+            svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="route-matrix-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
             svg += '<rect x="' + (bx - 1).toFixed(1) + '" y="' + (by - 2).toFixed(1) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 
             if (is2x) {
@@ -112,8 +112,8 @@
                         var bit = (mask >> (4 - c)) & 1;
                         var px = startX + c * spacing, py = startY + r * spacing;
                         svg += (bit === 1 && isLit) ?
-                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
-                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
+                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="route-matrix-pixel-on" />' :
+                            '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="route-matrix-pixel-off" />';
                     }
                 }
             } else {
@@ -132,8 +132,8 @@
                             var b2 = (msk >> (4 - c2)) & 1;
                             var pX = cStartX + c2 * spacing, pY = cStartY + r2 * spacing;
                             svg += (b2 === 1 && isLit) ?
-                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
-                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="route-matrix-pixel-on" />' :
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="route-matrix-pixel-off" />';
                         }
                     }
                 }
