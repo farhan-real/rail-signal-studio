@@ -14,10 +14,11 @@
         render: function(container) {
             var fb = SignalState.featherBase || {
                 enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
-                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+                sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             var isDirect = (fb.posMode === 'direct');
             var hubYVal = isDirect ? (fb.y !== undefined ? fb.y : -190) : (fb.yOffset !== undefined ? fb.yOffset : 0);
+            var showConn = (fb.showConnector !== false);
             var html = '';
 
             html += '<div class="builder-card">';
@@ -49,11 +50,15 @@
                 html += '    <div><label class="form-label">Hub Radius (px)</label><input type="number" min="16" max="70" id="fbRadius" class="form-input" value="' + (fb.radius || 35.5) + '"/></div>';
                 html += '  </div>';
 
-                html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
-                html += '    <div><label class="form-label">Collar Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
-                html += '  </div>';
-                html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbAutoConnect" ' + (fb.autoConnect !== false ? 'checked' : '') + '/><span>Auto-connect collar to shape boundary</span></label></div>';
+                html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbShowConnector" ' + (showConn ? 'checked' : '') + '/><span>Show bottom mount connector (collar & bolts)</span></label></div>';
+
+                if (showConn) {
+                    html += '  <div class="form-row-2" style="margin-top:4px;">';
+                    html += '    <div><label class="form-label">Collar Width</label><input type="number" id="fbCollarWidth" class="form-input" value="' + (fb.collarWidth || 32) + '"/></div>';
+                    html += '    <div><label class="form-label">Collar Height</label><input type="number" id="fbCollarHeight" class="form-input" placeholder="Auto" value="' + (fb.collarHeight !== null && fb.collarHeight !== undefined ? fb.collarHeight : '') + '"/></div>';
+                    html += '  </div>';
+                    html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbAutoConnect" ' + (fb.autoConnect !== false ? 'checked' : '') + '/><span>Auto-connect collar to shape boundary</span></label></div>';
+                }
             }
             html += '</div>';
 
@@ -90,8 +95,9 @@
             }
             html += '</div>';
 
-            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
-            var matYOffset = mat.yOffset !== undefined ? mat.yOffset : 0;
+            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
+            var matIsDirect = (mat.posMode === 'direct');
+            var matYVal = matIsDirect ? (mat.y !== undefined ? mat.y : -240) : (mat.yOffset !== undefined ? mat.yOffset : 0);
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
@@ -102,16 +108,20 @@
             if (mat.enabled) {
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Box ID</label><input type="text" id="matId" class="form-input" value="' + (mat.id || 'ROUTE_BOX') + '"/></div>';
-                html += '    <div><label class="form-label">Stencil Text (e.g. M, 1, 2)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M" value="' + (mat.text || '') + '"/></div>';
+                html += '    <div><label class="form-label">Stencil Text (0-9, A-Z)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M, 1" value="' + (mat.text || '') + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Placement Mode</label><select id="matPosMode" class="form-select">';
+                html += '      <option value="relative"' + (!matIsDirect ? ' selected' : '') + '>1: Offset Above Assembly</option>';
+                html += '      <option value="direct"' + (matIsDirect ? ' selected' : '') + '>2: Direct Coordinates (Fixed Y)</option>';
+                html += '    </select></div>';
                 html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">Matrix Y Offset (0 = Top)</label><input type="number" id="matYOffset" class="form-input" value="' + matYOffset + '"/></div>';
                 html += '  </div>';
-                html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
-                html += '    <span style="font-size:10px; color:var(--text-secondary);">0 sits on top of assembly; +ve moves up</span>';
-                html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix">Preview Lit</button>';
+                html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">' + (matIsDirect ? 'Direct Y (px)' : 'Y Offset (px above top)') + '</label><input type="number" id="matYInput" class="form-input" value="' + matYVal + '"/></div>';
+                html += '    <div style="display:flex; align-items:flex-end; padding-bottom:1px;"><button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="width:100%; height:26px;">Preview Lit</button></div>';
                 html += '  </div>';
+                html += '  <div style="margin-top:4px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label></div>';
             }
             html += '</div>';
 
@@ -120,12 +130,19 @@
         },
 
         bindEvents: function(container) {
+            var bindInp = function(id, onVal) {
+                var el = document.getElementById(id);
+                if (el) {
+                    var h = function() { var r = el.value.trim(); if (r !== '' && r !== '-') onVal(parseFloat(r) || 0); };
+                    el.addEventListener('input', h); el.addEventListener('change', h);
+                }
+            };
+
             var chkFb = document.getElementById('chkFeatherBaseEnabled');
             if (chkFb) {
                 chkFb.addEventListener('change', function() {
                     SignalState.featherBase.enabled = this.checked;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
@@ -137,102 +154,35 @@
                     if (this.value === 'direct' && SignalState.featherBase.y === undefined) {
                         SignalState.featherBase.y = Math.round(window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(SignalState.featherBase).y : -190);
                     }
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
-            var fbX = document.getElementById('fbX');
-            if (fbX) {
-                var onFbX = function() {
-                    var raw = fbX.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.featherBase.x = parseFloat(raw) || 0;
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
-            }
-
-            var fbYInput = document.getElementById('fbYInput');
-            if (fbYInput) {
-                var onFbY = function() {
-                    var raw = fbYInput.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        var val = parseFloat(raw) || 0;
-                        if (SignalState.featherBase.posMode === 'direct') {
-                            SignalState.featherBase.y = val;
-                        } else {
-                            SignalState.featherBase.yOffset = val;
-                            delete SignalState.featherBase.y;
-                        }
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                fbYInput.addEventListener('input', onFbY); fbYInput.addEventListener('change', onFbY);
-            }
+            bindInp('fbX', function(v) { SignalState.featherBase.x = v; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            bindInp('fbYInput', function(v) {
+                if (SignalState.featherBase.posMode === 'direct') SignalState.featherBase.y = v;
+                else { SignalState.featherBase.yOffset = v; delete SignalState.featherBase.y; }
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+            });
 
             var fbSides = document.getElementById('fbSides');
-            if (fbSides) {
-                fbSides.addEventListener('change', function() {
-                    SignalState.featherBase.sides = parseInt(this.value, 10) || 8;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+            if (fbSides) fbSides.addEventListener('change', function() { SignalState.featherBase.sides = parseInt(this.value, 10) || 8; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            bindInp('fbAngle', function(v) { SignalState.featherBase.baseAngle = v; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            bindInp('fbRadius', function(v) { SignalState.featherBase.radius = Math.max(16, Math.min(80, v)); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+
+            var chkConn = document.getElementById('chkFbShowConnector');
+            if (chkConn) {
+                chkConn.addEventListener('change', function() {
+                    SignalState.featherBase.showConnector = this.checked;
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
-            var fbAngle = document.getElementById('fbAngle');
-            if (fbAngle) {
-                var onAngle = function() {
-                    var raw = fbAngle.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.featherBase.baseAngle = parseFloat(raw) || 0;
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                fbAngle.addEventListener('input', onAngle); fbAngle.addEventListener('change', onAngle);
-            }
-
-            var fbRadius = document.getElementById('fbRadius');
-            if (fbRadius) {
-                var onRad = function() {
-                    var raw = fbRadius.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.featherBase.radius = Math.max(16, Math.min(80, parseFloat(raw) || 35.5));
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                fbRadius.addEventListener('input', onRad); fbRadius.addEventListener('change', onRad);
-            }
-
-            var fbCW = document.getElementById('fbCollarWidth');
-            if (fbCW) {
-                var onCW = function() {
-                    var raw = fbCW.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.featherBase.collarWidth = Math.max(10, parseFloat(raw) || 32);
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                fbCW.addEventListener('input', onCW); fbCW.addEventListener('change', onCW);
-            }
-
+            bindInp('fbCollarWidth', function(v) { SignalState.featherBase.collarWidth = Math.max(10, v); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             var fbCH = document.getElementById('fbCollarHeight');
-            if (fbCH) {
-                var onCH = function() {
-                    var v = fbCH.value.trim();
-                    SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v));
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
-                };
-                fbCH.addEventListener('input', onCH); fbCH.addEventListener('change', onCH);
-            }
+            if (fbCH) fbCH.addEventListener('input', function() { var v = this.value.trim(); SignalState.featherBase.collarHeight = (v === '' ? null : parseFloat(v)); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
 
             var chkAuto = document.getElementById('chkFbAutoConnect');
             if (chkAuto) chkAuto.addEventListener('change', function() { SignalState.featherBase.autoConnect = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
@@ -243,12 +193,10 @@
                     if (!SignalState.feathers) SignalState.feathers = [];
                     SignalState.featherBase.enabled = true;
                     var num = SignalState.feathers.length + 1;
-                    var pos = (num % 2 === 1) ? 'left1' : 'right1';
                     var id = 'FEATHER_' + (num % 2 === 1 ? 'L' : 'R') + Math.ceil(num / 2);
-                    SignalState.feathers.push({ id: id, position: pos, lamps: 5 });
+                    SignalState.feathers.push({ id: id, position: (num % 2 === 1 ? 'left1' : 'right1'), lamps: 5 });
                     SignalState.lampStates[id] = false;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
@@ -256,26 +204,15 @@
             var cards = container.querySelectorAll('.builder-card[data-feather-index]');
             for (var c = 0; c < cards.length; c++) {
                 (function(card) {
-                    var idx = parseInt(card.getAttribute('data-feather-index'), 10);
-                    var fth = SignalState.feathers[idx];
+                    var idx = parseInt(card.getAttribute('data-feather-index'), 10), fth = SignalState.feathers[idx];
                     if (!fth) return;
-
                     var props = card.querySelectorAll('.ft-prop');
                     for (var p = 0; p < props.length; p++) {
-                        props[p].addEventListener('change', function() {
-                            fth[this.getAttribute('data-prop')] = this.value;
-                            SignalEvents.emit('state:changed');
-                            SignalEvents.emit('state:persist');
-                        });
+                        props[p].addEventListener('change', function() { fth[this.getAttribute('data-prop')] = this.value; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
                     }
-
                     var btnLit = card.querySelector('.btn-preview-lit');
                     if (btnLit) {
-                        btnLit.addEventListener('click', function() {
-                            var cur = SignalState.getLamp(fth.id);
-                            SignalState.setLamp(fth.id, !cur);
-                            this.classList.toggle('active', !cur);
-                        });
+                        btnLit.addEventListener('click', function() { var cur = SignalState.getLamp(fth.id); SignalState.setLamp(fth.id, !cur); this.classList.toggle('active', !cur); });
                     }
                 })(cards[c]);
             }
@@ -284,11 +221,9 @@
             for (var d = 0; d < dels.length; d++) {
                 dels[d].addEventListener('click', function() {
                     var idx = parseInt(this.getAttribute('data-index'), 10);
-                    var id = SignalState.feathers[idx] ? SignalState.feathers[idx].id : null;
-                    if (id) delete SignalState.lampStates[id];
+                    if (SignalState.feathers[idx]) delete SignalState.lampStates[SignalState.feathers[idx].id];
                     SignalState.feathers.splice(idx, 1);
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
@@ -297,8 +232,7 @@
             if (chkMat) {
                 chkMat.addEventListener('change', function() {
                     SignalState.matrix.enabled = this.checked;
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
@@ -306,44 +240,40 @@
             var mText = document.getElementById('matText');
             if (mText) {
                 mText.addEventListener('input', function() {
-                    SignalState.matrix.enabled = true;
-                    SignalState.matrix.text = this.value.toUpperCase();
-                    SignalState.matrix.lit = true;
-                    var btn = document.getElementById('btnPreviewMatrix');
-                    if (btn) btn.classList.add('active');
-                    SignalEvents.emit('matrix:updated', SignalState.matrix.text);
-                    SignalEvents.emit('state:persist');
+                    SignalState.matrix.enabled = true; SignalState.matrix.text = this.value.toUpperCase(); SignalState.matrix.lit = true;
+                    var btn = document.getElementById('btnPreviewMatrix'); if (btn) btn.classList.add('active');
+                    SignalEvents.emit('matrix:updated', SignalState.matrix.text); SignalEvents.emit('state:persist');
                 });
             }
 
             var mId = document.getElementById('matId');
             if (mId) mId.addEventListener('change', function() { SignalState.matrix.id = this.value; SignalEvents.emit('state:persist'); });
 
-            var mX = document.getElementById('matX');
-            if (mX) {
-                var onMx = function() {
-                    var raw = mX.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.matrix.x = parseFloat(raw) || 0;
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
+            var matPosMode = document.getElementById('matPosMode');
+            if (matPosMode) {
+                matPosMode.addEventListener('change', function() {
+                    SignalState.matrix.posMode = this.value;
+                    if (this.value === 'direct' && SignalState.matrix.y === undefined) {
+                        SignalState.matrix.y = -240;
                     }
-                };
-                mX.addEventListener('input', onMx); mX.addEventListener('change', onMx);
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
+                });
             }
 
-            var mYOff = document.getElementById('matYOffset');
-            if (mYOff) {
-                var onMy = function() {
-                    var raw = mYOff.value.trim();
-                    if (raw !== '' && raw !== '-') {
-                        SignalState.matrix.yOffset = parseFloat(raw) || 0;
-                        delete SignalState.matrix.y;
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
-                    }
-                };
-                mYOff.addEventListener('input', onMy); mYOff.addEventListener('change', onMy);
+            bindInp('matX', function(v) { SignalState.matrix.x = v; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            bindInp('matYInput', function(v) {
+                if (SignalState.matrix.posMode === 'direct') SignalState.matrix.y = v;
+                else { SignalState.matrix.yOffset = v; delete SignalState.matrix.y; }
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+            });
+
+            var chkMatBase = document.getElementById('chkMatrixShowBase');
+            if (chkMatBase) {
+                chkMatBase.addEventListener('change', function() {
+                    SignalState.matrix.showBase = this.checked;
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                });
             }
 
             var btnMatLit = document.getElementById('btnPreviewMatrix');
@@ -352,12 +282,10 @@
                     SignalState.matrix.lit = !SignalState.matrix.lit;
                     if (SignalState.matrix.lit && !SignalState.matrix.text) {
                         SignalState.matrix.text = 'M';
-                        var txtInp = document.getElementById('matText');
-                        if (txtInp) txtInp.value = 'M';
+                        var txtInp = document.getElementById('matText'); if (txtInp) txtInp.value = 'M';
                     }
                     SignalEvents.emit('matrix:updated', SignalState.matrix.lit ? SignalState.matrix.text : '');
-                    this.classList.toggle('active', !!SignalState.matrix.lit);
-                    SignalEvents.emit('state:persist');
+                    this.classList.toggle('active', !!SignalState.matrix.lit); SignalEvents.emit('state:persist');
                 });
             }
         }

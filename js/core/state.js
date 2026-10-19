@@ -16,9 +16,9 @@
         feathers: [],
         featherBase: {
             enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
-            sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+            sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
         },
-        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false },
+        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false },
         controls: [],
         texts: [],
         groups: {},
@@ -37,9 +37,9 @@
             this.feathers = [];
             this.featherBase = {
                 enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
-                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+                sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
-            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             this.controls = [];
             this.texts = [];
             this.groups = {};
@@ -71,9 +71,9 @@
             this.feathers = [];
             this.featherBase = {
                 enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
-                sides: 8, baseAngle: 0, radius: 35.5, collarWidth: 32, collarHeight: null, autoConnect: true
+                sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
-            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             this.controls = [
                 { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 0, x: 20, y: 20 }
             ];
@@ -144,13 +144,25 @@
                 sides: (fb.sides && fb.sides >= 3 && fb.sides <= 16) ? parseInt(fb.sides, 10) : 8,
                 baseAngle: fb.baseAngle !== undefined ? parseFloat(fb.baseAngle) || 0 : 0,
                 radius: fb.radius !== undefined ? parseFloat(fb.radius) || 35.5 : 35.5,
+                showConnector: fb.showConnector !== undefined ? fb.showConnector : true,
                 collarWidth: fb.collarWidth !== undefined ? fb.collarWidth : 32,
                 collarHeight: fb.collarHeight !== undefined ? fb.collarHeight : null,
                 autoConnect: fb.autoConnect !== undefined ? fb.autoConnect : true
             };
 
-            this.matrix = data.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, yOffset: 0, text: '', lit: false };
-            if (this.matrix.lit === undefined) this.matrix.lit = !!(this.matrix.text);
+            var mat = data.matrix || {};
+            this.matrix = {
+                enabled: mat.enabled !== undefined ? mat.enabled : false,
+                id: mat.id || 'ROUTE_BOX',
+                x: mat.x !== undefined ? mat.x : 0,
+                y: mat.y !== undefined ? mat.y : undefined,
+                yOffset: mat.yOffset !== undefined ? mat.yOffset : 0,
+                posMode: mat.posMode || (mat.y !== undefined && mat.yOffset === undefined ? 'direct' : 'relative'),
+                showBase: mat.showBase !== undefined ? mat.showBase : true,
+                text: mat.text || '',
+                lit: mat.lit !== undefined ? mat.lit : !!(mat.text)
+            };
+
             this.controls = data.controls || [];
             this.texts = data.texts || [];
             this.groups = data.groups || {};

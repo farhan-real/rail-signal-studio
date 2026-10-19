@@ -79,10 +79,11 @@
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
             var boxHeight = 52;
             var topAssemblyY = this.getSignalAssemblyTopY();
-            var restingCenterY = topAssemblyY - 8 - (boxHeight / 2);
+            var restingCenterY = topAssemblyY - (matrixConf.showBase === false ? 2 : 8) - (boxHeight / 2);
 
-            var cy = (matrixConf.yOffset !== undefined) ? (restingCenterY - matrixConf.yOffset) :
-                (matrixConf.y !== undefined ? matrixConf.y : restingCenterY);
+            var posMode = (matrixConf && matrixConf.posMode) || (matrixConf && matrixConf.y !== undefined && matrixConf.yOffset === undefined ? 'direct' : 'relative');
+            var cy = (posMode === 'direct' && matrixConf.y !== undefined) ? matrixConf.y :
+                ((matrixConf.yOffset !== undefined) ? (restingCenterY - matrixConf.yOffset) : restingCenterY);
 
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
             var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
@@ -96,8 +97,11 @@
             var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
-            svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';
-            svg += '<line x1="' + (cx - 13) + '" y1="' + (boxBottomY + bracketHeight).toFixed(1) + '" x2="' + (cx + 13) + '" y2="' + (boxBottomY + bracketHeight).toFixed(1) + '" stroke="#384256" stroke-width="2" />';
+            if (matrixConf && matrixConf.showBase !== false) {
+                svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';
+                svg += '<line x1="' + (cx - 13) + '" y1="' + (boxBottomY + bracketHeight).toFixed(1) + '" x2="' + (cx + 13) + '" y2="' + (boxBottomY + bracketHeight).toFixed(1) + '" stroke="#384256" stroke-width="2" />';
+            }
+
             svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
             svg += '<rect x="' + (bx - 1).toFixed(1) + '" y="' + (by - 2).toFixed(1) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 

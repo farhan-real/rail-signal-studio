@@ -31,11 +31,12 @@
             sides: 8,
             baseAngle: 0,
             radius: 35.5,
+            showConnector: true,
             collarWidth: 32,
             collarHeight: null,
             autoConnect: true
         },
-        matrix: { enabled: false },
+        matrix: { enabled: false, showBase: true },
         controls: [
             { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 20 },
             { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], mode: 'half', defaultValue: 0, x: 140, y: 20 },

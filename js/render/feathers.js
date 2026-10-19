@@ -84,8 +84,8 @@
             }
 
             var topY = this.detectHeadTopSurface(hx);
-            var colH = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) ? fb.collarHeight : 24;
-            var restingHubY = topY - r - colH;
+            var colH = (fb && fb.showConnector !== false && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) ? fb.collarHeight : 24;
+            var restingHubY = topY - r - (fb && fb.showConnector === false ? 0 : colH);
             var yOff = (fb && fb.yOffset !== undefined) ? fb.yOffset : 0;
             return { x: hx, y: restingHubY - yOff };
         },
@@ -110,6 +110,7 @@
         },
 
         renderTrunnionMount: function(hub, fb) {
+            if (fb && fb.showConnector === false) return '';
             var hx = hub.x;
             var sides = (fb && fb.sides) ? fb.sides : 8;
             var bAngle = (fb && fb.baseAngle) ? fb.baseAngle : 0;
