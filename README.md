@@ -42,7 +42,6 @@ A standalone, offline 2D railway signal designer, visual layout creator, and int
 - **Customizable Pushbuttons:** Momentary pushbuttons and latching toggle buttons featuring quick-select color swatches (Red, Yellow, Green, Blue, White, Dark), full custom hex color picker, and configurable operating modes.
 - **Panel LEDs:** Independent, multi-color optical indicator LEDs (Red, Yellow, Green, White, Blue) on the desk with scriptable steady and blinking states.
 - **Track Markers:** Movable text labels and notes for control desk organization.
-- 
 ---
 
 ## Running the Simulator
