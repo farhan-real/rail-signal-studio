@@ -153,6 +153,8 @@
     width: 2px;
     height: 44px;
     transform-origin: 50% 50%;
+    cursor: pointer;
+    pointer-events: auto;
 }
 .knob-tick::before {
     content: '';
@@ -176,8 +178,10 @@
     pointer-events: auto;
     z-index: 10;
     letter-spacing: 0.2px;
+    padding: 3px 5px;
+    border-radius: 3px;
 }
-.knob-dial-label:hover { color: #d0d7e5; }
+.knob-dial-label:hover { color: #d0d7e5; background: rgba(255, 255, 255, 0.05); }
 .knob-dial-label.active {
     color: #ffffff;
     font-weight: 700;

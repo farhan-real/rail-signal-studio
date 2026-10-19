@@ -25,17 +25,11 @@
         },
 
         getShortestAngle: function(currentAngle, targetAngle) {
-            if (currentAngle === undefined || isNaN(currentAngle)) {
-                return targetAngle;
-            }
+            if (currentAngle === undefined || isNaN(currentAngle)) return targetAngle;
             var diff = (targetAngle - currentAngle) % 360;
             if (diff < 0) diff += 360;
-
-            if (diff > 180) {
-                diff -= 360;
-            } else if (diff === 180) {
-                diff = 180;
-            }
+            if (diff > 180) diff -= 360;
+            else if (diff === 180) diff = 180;
             return currentAngle + diff;
         },
 
@@ -50,8 +44,7 @@
             ctrl._currentAngle = angle;
 
             var cx = 70, cy = cfg.isHalf ? 48 : 48;
-            var labelsHtml = '';
-            var ticksHtml = '';
+            var labelsHtml = '', ticksHtml = '';
 
             for (var i = 0; i < states.length; i++) {
                 var itemAngle = cfg.minAngle + i * cfg.stepAngle;
@@ -63,11 +56,8 @@
                 var ly = cy - Math.cos(rad) * dist;
 
                 var transform = 'translate(-50%, -100%)';
-                if (itemAngle <= -45) {
-                    transform = 'translate(-100%, -50%)';
-                } else if (itemAngle >= 45) {
-                    transform = 'translate(0%, -50%)';
-                }
+                if (itemAngle <= -45) transform = 'translate(-100%, -50%)';
+                else if (itemAngle >= 45) transform = 'translate(0%, -50%)';
 
                 var stateText = states[i];
                 labelsHtml += '<span class="knob-dial-label ' + isActive + '" style="left:' + lx.toFixed(1) + 'px; top:' + ly.toFixed(1) + 'px; transform:' + transform + ';" data-knob-id="' + id + '" data-pos-idx="' + i + '">' + stateText + '</span>';
@@ -75,7 +65,7 @@
             }
 
             var assemblyClass = 'knob-assembly' + (cfg.isHalf ? ' mode-half' : '');
-            var html = [
+            return [
                 '<div class="console-item knob-item" data-control-id="' + id + '">',
                 '  <div class="' + assemblyClass + '">',
                 labelsHtml,
@@ -92,8 +82,6 @@
                 '  </div>',
                 '</div>'
             ].join('');
-
-            return html;
         },
 
         bindEvents: function(container) {
@@ -105,9 +93,9 @@
                     var bezel = item.querySelector('.knob-bezel');
                     if (!bezel) return;
 
-                    var isPointerDown = false;
-                    var hasDragged = false;
+                    var isPointerDown = false, hasDragged = false;
                     var startX = 0, startY = 0;
+                    var downLabelIdx = null, downTickIdx = null;
 
                     var advanceNext = function() {
                         var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
@@ -115,8 +103,7 @@
                         var states = self.getStates(ctrl);
                         if (states.length <= 1) return;
                         var cur = SignalState.getControlValue(id) || 0;
-                        var nextVal = (cur + 1) % states.length;
-                        SignalState.setControlValue(id, nextVal);
+                        SignalState.setControlValue(id, (cur + 1) % states.length);
                     };
 
                     var selectAnglePosition = function(e) {
@@ -142,6 +129,12 @@
                     var onPointerDown = function(e) {
                         if (e.target.closest('.control-dot') || e.target.closest('.control-dot-menu')) return;
                         e.stopPropagation();
+
+                        var lbl = e.target.closest('.knob-dial-label');
+                        downLabelIdx = lbl ? parseInt(lbl.getAttribute('data-pos-idx'), 10) : null;
+                        var tck = e.target.closest('.knob-tick');
+                        downTickIdx = tck ? parseInt(tck.getAttribute('data-tick-idx'), 10) : null;
+
                         isPointerDown = true;
                         hasDragged = false;
                         startX = e.clientX;
@@ -151,8 +144,7 @@
 
                     var onPointerMove = function(e) {
                         if (!isPointerDown) return;
-                        var dist = Math.hypot(e.clientX - startX, e.clientY - startY);
-                        if (dist > 8) {
+                        if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
                             hasDragged = true;
                             selectAnglePosition(e);
                         }
@@ -165,39 +157,33 @@
 
                         if (hasDragged) return;
 
-                        if (e.target.closest('.knob-dial-label')) {
-                            var posIdx = parseInt(e.target.closest('.knob-dial-label').getAttribute('data-pos-idx'), 10);
-                            if (!isNaN(posIdx)) {
-                                SignalState.setControlValue(id, posIdx);
-                                return;
-                            }
+                        if (downLabelIdx !== null && !isNaN(downLabelIdx)) {
+                            SignalState.setControlValue(id, downLabelIdx);
+                            return;
                         }
 
-                        if (e.target.closest('.knob-meta')) {
-                            advanceNext();
+                        if (downTickIdx !== null && !isNaN(downTickIdx)) {
+                            SignalState.setControlValue(id, downTickIdx);
                             return;
                         }
 
                         var rect = bezel.getBoundingClientRect();
                         var bcx = rect.left + rect.width / 2;
                         var bcy = rect.top + rect.height / 2;
-                        var dx = e.clientX - bcx;
-                        var dy = bcy - e.clientY;
-                        var distFromCenter = Math.hypot(dx, dy);
+                        var dist = Math.hypot(e.clientX - bcx, e.clientY - bcy);
 
-                        if (distFromCenter <= (rect.width / 2 + 4) || dy < -16) {
+                        if (dist <= (rect.width / 2 + 2)) {
                             advanceNext();
-                        } else {
-                            var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
-                            if (!ctrl) return;
-                            var states = self.getStates(ctrl);
-                            var cfg = self.getAngles(ctrl, states);
-                            if (cfg.isHalf && dy < -12) {
-                                advanceNext();
-                            } else {
-                                selectAnglePosition(e);
-                            }
+                            return;
                         }
+
+                        var meta = item.querySelector('.knob-meta');
+                        if (meta && meta.contains(document.elementFromPoint(e.clientX, e.clientY))) {
+                            advanceNext();
+                            return;
+                        }
+
+                        selectAnglePosition(e);
                     };
 
                     item.addEventListener('pointerdown', onPointerDown);
