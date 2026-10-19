@@ -17,7 +17,7 @@
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             var isDirect = (fb.posMode === 'direct');
-            var hubYVal = isDirect ? (fb.y !== undefined ? fb.y : -190) : (fb.yOffset !== undefined ? fb.yOffset : 0);
+            var hubYVal = isDirect ? Math.round(-(fb.y !== undefined ? fb.y : -190)) : (fb.yOffset !== undefined ? fb.yOffset : 0);
             var showConn = (fb.showConnector !== false);
             var html = '';
 
@@ -40,13 +40,13 @@
                 html += '    </select></div>';
                 html += '    <div><label class="form-label">Placement Mode</label><select id="fbPosMode" class="form-select">';
                 html += '      <option value="relative"' + (!isDirect ? ' selected' : '') + '>1: Offset Above Signal Box</option>';
-                html += '      <option value="direct"' + (isDirect ? ' selected' : '') + '>2: Direct Coordinates (Fixed Y)</option>';
+                html += '      <option value="direct"' + (isDirect ? ' selected' : '') + '>2: Direct Coordinates (+Y Up)</option>';
                 html += '    </select></div>';
                 html += '  </div>';
 
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Hub X (0 = Center)</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
-                html += '    <div><label class="form-label">' + (isDirect ? 'Direct Y (px)' : 'Y Offset (px above box)') + '</label><input type="number" id="fbYInput" class="form-input" value="' + hubYVal + '"/></div>';
+                html += '    <div><label class="form-label">' + (isDirect ? 'Direct Y (px, +Y Up)' : 'Y Offset (px above box)') + '</label><input type="number" id="fbYInput" class="form-input" value="' + hubYVal + '"/></div>';
                 html += '  </div>';
 
                 html += '  <div class="form-row-2">';
@@ -106,7 +106,7 @@
 
             var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             var matIsDirect = (mat.posMode === 'direct');
-            var matYVal = matIsDirect ? (mat.y !== undefined ? mat.y : -240) : (mat.yOffset !== undefined ? mat.yOffset : 0);
+            var matYVal = matIsDirect ? Math.round(-(mat.y !== undefined ? mat.y : -240)) : (mat.yOffset !== undefined ? mat.yOffset : 0);
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
@@ -122,12 +122,12 @@
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Placement Mode</label><select id="matPosMode" class="form-select">';
                 html += '      <option value="relative"' + (!matIsDirect ? ' selected' : '') + '>1: Offset Above Assembly</option>';
-                html += '      <option value="direct"' + (matIsDirect ? ' selected' : '') + '>2: Direct Coordinates (Fixed Y)</option>';
+                html += '      <option value="direct"' + (matIsDirect ? ' selected' : '') + '>2: Direct Coordinates (+Y Up)</option>';
                 html += '    </select></div>';
                 html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">' + (matIsDirect ? 'Direct Y (px)' : 'Y Offset (px above top)') + '</label><input type="number" id="matYInput" class="form-input" value="' + matYVal + '"/></div>';
+                html += '    <div><label class="form-label">' + (matIsDirect ? 'Direct Y (px, +Y Up)' : 'Y Offset (px above top)') + '</label><input type="number" id="matYInput" class="form-input" value="' + matYVal + '"/></div>';
                 html += '    <div style="display:flex; align-items:flex-end; padding-bottom:1px;"><button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="width:100%; height:26px;">Preview Lit</button></div>';
                 html += '  </div>';
                 html += '  <div style="margin-top:4px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label></div>';
@@ -178,7 +178,7 @@
 
             bindInp('fbX', function(v) { SignalState.featherBase.x = v; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             bindInp('fbYInput', function(v) {
-                if (SignalState.featherBase.posMode === 'direct') SignalState.featherBase.y = v;
+                if (SignalState.featherBase.posMode === 'direct') SignalState.featherBase.y = -v;
                 else { SignalState.featherBase.yOffset = v; delete SignalState.featherBase.y; }
                 SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
             });
@@ -278,7 +278,7 @@
 
             bindInp('matX', function(v) { SignalState.matrix.x = v; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
             bindInp('matYInput', function(v) {
-                if (SignalState.matrix.posMode === 'direct') SignalState.matrix.y = v;
+                if (SignalState.matrix.posMode === 'direct') SignalState.matrix.y = -v;
                 else { SignalState.matrix.yOffset = v; delete SignalState.matrix.y; }
                 SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
             });

@@ -26,6 +26,7 @@
                 var displayName = s.name || (s.text ? ('Label: ' + s.text.replace(/\n/g, ' ')) : ('Plate ' + (i + 1)));
                 var isMain = !!s.isMain;
                 var mainBadge = isMain ? '<span style="background:var(--accent); color:#ffffff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:6px;">MAIN BOX</span>' : '';
+                var userY = Math.round(-(s.y !== undefined ? s.y : 0));
 
                 html += '<div class="builder-card" data-shape-index="' + i + '">';
                 html += '  <div class="builder-card-header">';
@@ -47,8 +48,8 @@
                 if (s.type === 'rounded-rect' || s.type === 'rect' || !s.type) {
                     var corners = s.corners || (s.type === 'rect' ? [0, 0, 0, 0] : [8, 8, 8, 8]);
                     html += '  <div class="form-row-2">';
-                    html += '    <div><label class="form-label">X Pos</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x !== undefined ? s.x : 0) + '"/></div>';
-                    html += '    <div><label class="form-label">Y Pos</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y !== undefined ? s.y : 0) + '"/></div>';
+                    html += '    <div><label class="form-label">X Pos (0 = Center)</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x !== undefined ? s.x : 0) + '"/></div>';
+                    html += '    <div><label class="form-label">Y Pos (+Y Up)</label><input type="number" class="form-input sh-y-cartesian" data-shape-index="' + i + '" value="' + userY + '"/></div>';
                     html += '  </div>';
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Width</label><input type="number" class="form-input sh-prop" data-prop="width" value="' + (s.width || 60) + '"/></div>';
@@ -68,7 +69,7 @@
                 } else if (s.type === 'circle-sector') {
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Center X</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x || 0) + '"/></div>';
-                    html += '    <div><label class="form-label">Center Y</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y || 0) + '"/></div>';
+                    html += '    <div><label class="form-label">Center Y (+Y Up)</label><input type="number" class="form-input sh-y-cartesian" data-shape-index="' + i + '" value="' + userY + '"/></div>';
                     html += '  </div>';
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Radius (px)</label><input type="number" class="form-input sh-prop" data-prop="radius" value="' + (s.radius || 30) + '"/></div>';
@@ -76,9 +77,10 @@
                     html += '  </div>';
                     html += '  <div><label class="form-label">Start Angle (0=Top, 90=Right, 180=Bottom)</label><input type="number" class="form-input sh-prop" data-prop="startAngle" value="' + (s.startAngle || 0) + '"/></div>';
                 } else if (s.type === 'triangle') {
+                    var userTy = Math.round(-(s.y !== undefined ? s.y : -20));
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">X Pos</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x !== undefined ? s.x : -20) + '"/></div>';
-                    html += '    <div><label class="form-label">Y Pos</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y !== undefined ? s.y : -20) + '"/></div>';
+                    html += '    <div><label class="form-label">Y Pos (+Y Up)</label><input type="number" class="form-input sh-y-cartesian" data-shape-index="' + i + '" value="' + userTy + '"/></div>';
                     html += '  </div>';
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Width</label><input type="number" class="form-input sh-prop" data-prop="width" value="' + (s.width || 40) + '"/></div>';
@@ -160,6 +162,22 @@
                             SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                             if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                         });
+                    }
+
+                    var yInp = card.querySelector('.sh-y-cartesian');
+                    if (yInp) {
+                        var updateY = function() {
+                            var raw = yInp.value.trim();
+                            if (raw === '' || raw === '-' || raw === '+') return;
+                            var val = parseFloat(raw);
+                            if (!isNaN(val)) {
+                                shape.y = -val;
+                                SignalEvents.emit('state:changed');
+                                SignalEvents.emit('state:persist');
+                            }
+                        };
+                        yInp.addEventListener('input', updateY);
+                        yInp.addEventListener('change', updateY);
                     }
 
                     var props = card.querySelectorAll('.sh-prop');
