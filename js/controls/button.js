@@ -12,9 +12,7 @@
             return [
                 '<div class="console-item button-item ' + activeClass + '" data-control-id="' + id + '">',
                 '  <div class="button-bezel">',
-                '    <div class="button-cap" style="background-color: ' + color + ';">',
-                '      <div class="button-light"></div>',
-                '    </div>',
+                '    <div class="button-cap" style="background-color: ' + color + ';"></div>',
                 '  </div>',
                 '  <div class="button-meta">',
                 '    <span class="button-label" data-edit-label="' + id + '">' + label + '</span>',
