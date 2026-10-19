@@ -11,63 +11,62 @@
             right3: { angle: -45 }
         },
 
-        detectHeadTopSurface: function(targetX) {
+        getMainShape: function() {
             var shapes = (window.SignalState && window.SignalState.shapes) || [];
-            var highestY = null;
+            if (!shapes.length) return null;
+            var fb = window.SignalState && window.SignalState.featherBase;
+            if (fb && fb.anchorShapeId) {
+                var found = shapes.filter(function(s) { return s.id === fb.anchorShapeId; })[0];
+                if (found) return found;
+            }
+            var main = shapes.filter(function(s) { return !!s.isMain; })[0];
+            if (main) return main;
+            var byId = shapes.filter(function(s) {
+                return (s.id && s.id.toLowerCase().indexOf('main') !== -1) || (s.name && s.name.toLowerCase().indexOf('main') !== -1);
+            })[0];
+            return byId || shapes[0];
+        },
 
-            for (var i = 0; i < shapes.length; i++) {
-                var s = shapes[i];
-                var yAtX = null;
-
-                if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) {
-                    var sx = s.x || 0, sw = s.width || 60, sy = s.y || 0;
-                    if (targetX >= sx - 4 && targetX <= (sx + sw + 4)) yAtX = sy;
-                } else if (s.type === 'triangle') {
-                    var tx = s.x || 0, tw = s.width || 40, ty = s.y || 0, th = s.height || 40;
-                    var dir = (s.direction || 'up').toLowerCase();
-                    if (targetX >= tx && targetX <= (tx + tw)) {
-                        yAtX = (dir === 'up') ? ty + (Math.abs(targetX - (tx + tw / 2)) / (tw / 2)) * th : ty;
-                    }
-                } else if (s.type === 'circle-sector') {
-                    var cx = s.x || 0, cy = s.y || 0, r = s.radius || 30;
-                    if (Math.abs(targetX - cx) <= r) {
-                        yAtX = cy - Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2)));
-                    }
+        getShapeTopAtX: function(s, targetX) {
+            if (!s) return null;
+            if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) {
+                return s.y !== undefined ? s.y : 0;
+            }
+            if (s.type === 'triangle') {
+                var tx = s.x || 0, tw = s.width || 40, ty = s.y || 0, th = s.height || 40;
+                var dir = (s.direction || 'up').toLowerCase();
+                if (targetX >= tx && targetX <= (tx + tw)) {
+                    return (dir === 'up') ? ty + (Math.abs(targetX - (tx + tw / 2)) / (tw / 2)) * th : ty;
                 }
+                return ty;
+            }
+            if (s.type === 'circle-sector') {
+                var cx = s.x || 0, cy = s.y || 0, r = s.radius || 30;
+                if (Math.abs(targetX - cx) <= r) {
+                    return cy - Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2)));
+                }
+                return cy - r;
+            }
+            return s.y !== undefined ? s.y : null;
+        },
 
-                if (yAtX !== null && (highestY === null || yAtX < highestY)) highestY = yAtX;
+        detectHeadTopSurface: function(targetX) {
+            var mainShape = this.getMainShape();
+            if (mainShape) {
+                var y = this.getShapeTopAtX(mainShape, targetX);
+                if (y !== null) return y;
+                return mainShape.y !== undefined ? mainShape.y : -160;
             }
-            if (highestY !== null) return highestY;
-            for (var j = 0; j < shapes.length; j++) {
-                var sy2 = shapes[j].y || 0;
-                if (highestY === null || sy2 < highestY) highestY = sy2;
-            }
-            return highestY !== null ? highestY : -160;
+            return -160;
         },
 
         detectShapeSurfaceBelow: function(targetX, minY) {
-            var shapes = (window.SignalState && window.SignalState.shapes) || [];
-            var closestBelow = null;
-
-            for (var i = 0; i < shapes.length; i++) {
-                var s = shapes[i];
-                var yAtX = null;
-
-                if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) {
-                    var sx = s.x || 0, sw = s.width || 60, sy = s.y || 0;
-                    if (targetX >= sx - 4 && targetX <= (sx + sw + 4)) yAtX = sy;
-                } else if (s.type === 'circle-sector') {
-                    var cx = s.x || 0, cy = s.y || 0, r = s.radius || 30;
-                    if (Math.abs(targetX - cx) <= r) {
-                        yAtX = cy - Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2)));
-                    }
-                }
-
-                if (yAtX !== null && yAtX >= (minY - 2)) {
-                    if (closestBelow === null || yAtX < closestBelow) closestBelow = yAtX;
-                }
+            var mainShape = this.getMainShape();
+            if (mainShape) {
+                var y = this.getShapeTopAtX(mainShape, targetX);
+                if (y !== null && y >= (minY - 2)) return y;
             }
-            return closestBelow !== null ? closestBelow : this.detectHeadTopSurface(targetX);
+            return this.detectHeadTopSurface(targetX);
         },
 
         detectShapeTopSurface: function(targetX, minY) {

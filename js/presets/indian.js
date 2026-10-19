@@ -5,7 +5,7 @@
         name: 'Indian Railways 4-Aspect MACLS',
         mast: { type: 'tubular', height: 480, x: 0, y: -40, platform: false, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 205, corners: [28, 28, 4, 4], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 },
+            { id: 'plate_main', name: 'Main Head Plate', isMain: true, type: 'rounded-rect', x: -28, y: -160, width: 56, height: 205, corners: [28, 28, 4, 4], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 },
             { type: 'rounded-rect', x: -16, y: 45, width: 32, height: 24, corners: [2, 2, 2, 2], fill: '#121622', stroke: '#262d3e', strokeWidth: 1.8 },
             { type: 'rounded-rect', x: -18, y: 77, width: 36, height: 28, corners: [2, 2, 2, 2], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 1.8, text: 'PWS\nS-8', fontSize: 9, textColor: '#ffffff' },
             { type: 'rounded-rect', x: -22, y: 115, width: 44, height: 42, corners: [6, 6, 6, 6], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2 }
@@ -28,6 +28,7 @@
             x: 0,
             yOffset: 0,
             posMode: 'relative',
+            anchorShapeId: 'plate_main',
             sides: 8,
             baseAngle: 0,
             radius: 35.5,

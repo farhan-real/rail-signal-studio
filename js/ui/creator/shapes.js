@@ -24,15 +24,22 @@
                 var sStroke = s.stroke || '#262d3e';
                 var sSw = s.strokeWidth !== undefined ? s.strokeWidth : 2;
                 var displayName = s.name || (s.text ? ('Label: ' + s.text.replace(/\n/g, ' ')) : ('Plate ' + (i + 1)));
+                var isMain = !!s.isMain;
+                var mainBadge = isMain ? '<span style="background:var(--accent); color:#ffffff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:6px;">MAIN BOX</span>' : '';
 
                 html += '<div class="builder-card" data-shape-index="' + i + '">';
                 html += '  <div class="builder-card-header">';
-                html += '    <span class="card-badge">' + displayName + ' <small style="color:var(--text-secondary)">(' + (s.type || 'rect') + ')</small></span>';
+                html += '    <span class="card-badge">' + displayName + ' ' + mainBadge + ' <small style="color:var(--text-secondary)">(' + (s.type || 'rect') + ')</small></span>';
                 html += '    <div class="card-actions">';
                 if (i > 0) html += '      <button class="tool-btn btn-move-shape" data-dir="-1" data-index="' + i + '" title="Send Backward">&uarr;</button>';
                 if (i < SignalState.shapes.length - 1) html += '      <button class="tool-btn btn-move-shape" data-dir="1" data-index="' + i + '" title="Bring Forward">&darr;</button>';
                 html += '      <button class="tool-btn btn-del-shape" data-index="' + i + '" title="Delete Plate">&times;</button>';
                 html += '    </div>';
+                html += '  </div>';
+
+                html += '  <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.22); padding:5px 8px; border-radius:4px; margin-top:2px;">';
+                html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer; font-weight:600;"><input type="checkbox" class="chk-main-box" data-index="' + i + '" ' + (isMain ? 'checked' : '') + '/><span>Make Main Signal Box</span></label>';
+                html += '    <span style="font-size:10px; color:var(--text-secondary);">' + (isMain ? 'Feather Anchor' : 'Secondary Plate') + '</span>';
                 html += '  </div>';
 
                 html += '  <div><label class="form-label">Plate Name / Description</label><input type="text" class="form-input sh-prop" data-prop="name" placeholder="e.g. ID Plate, Spacer Box" value="' + (s.name || '') + '"/></div>';
@@ -100,41 +107,38 @@
         bindAddButtons: function(container) {
             document.getElementById('btnAddRectPlate').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    name: 'Spacer Rectangle', type: 'rect', x: -16, y: 45, width: 32, height: 24,
+                    name: 'Spacer Rectangle', type: 'rect', isMain: false, x: -16, y: 45, width: 32, height: 24,
                     corners: [0, 0, 0, 0], fill: '#121622', stroke: '#262d3e', strokeWidth: 1.8
                 });
-                SignalEvents.emit('state:changed');
-                SignalEvents.emit('state:persist');
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                 if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddRoundedRect').addEventListener('click', function() {
+                var isFirst = !SignalState.shapes.length;
                 SignalState.shapes.push({
-                    name: 'Rounded Target Plate', type: 'rounded-rect', x: -28, y: -160, width: 56, height: 160,
-                    corners: [28, 28, 28, 28], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
+                    name: isFirst ? 'Main Head Plate' : 'Rounded Target Plate', type: 'rounded-rect', isMain: isFirst,
+                    x: -28, y: -160, width: 56, height: 160, corners: [28, 28, 28, 28], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
-                SignalEvents.emit('state:changed');
-                SignalEvents.emit('state:persist');
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                 if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddCircleSector').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    name: 'Semicircle Cap', type: 'circle-sector', x: 0, y: -50, radius: 36, percent: 50,
+                    name: 'Semicircle Cap', type: 'circle-sector', isMain: false, x: 0, y: -50, radius: 36, percent: 50,
                     startAngle: 180, fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
-                SignalEvents.emit('state:changed');
-                SignalEvents.emit('state:persist');
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                 if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddTriangle').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    name: 'Triangle Bracket', type: 'triangle', x: -25, y: -180, width: 50, height: 35,
+                    name: 'Triangle Bracket', type: 'triangle', isMain: false, x: -25, y: -180, width: 50, height: 35,
                     direction: 'up', fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
-                SignalEvents.emit('state:changed');
-                SignalEvents.emit('state:persist');
+                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                 if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
         },
@@ -146,6 +150,17 @@
                     var sIdx = parseInt(card.getAttribute('data-shape-index'), 10);
                     var shape = SignalState.shapes[sIdx];
                     if (!shape) return;
+
+                    var mainChk = card.querySelector('.chk-main-box');
+                    if (mainChk) {
+                        mainChk.addEventListener('change', function() {
+                            for (var k = 0; k < SignalState.shapes.length; k++) {
+                                SignalState.shapes[k].isMain = (k === sIdx && this.checked);
+                            }
+                            SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                            if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
+                        });
+                    }
 
                     var props = card.querySelectorAll('.sh-prop');
                     for (var p = 0; p < props.length; p++) {
@@ -160,11 +175,9 @@
                                 } else {
                                     shape[pr] = inp.value;
                                 }
-                                SignalEvents.emit('state:changed');
-                                SignalEvents.emit('state:persist');
+                                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                             };
-                            inp.addEventListener('input', updateVal);
-                            inp.addEventListener('change', updateVal);
+                            inp.addEventListener('input', updateVal); inp.addEventListener('change', updateVal);
                         })(props[p]);
                     }
 
@@ -176,25 +189,20 @@
                                 if (raw === '' || raw === '-') return;
                                 var cPos = parseInt(cinp.getAttribute('data-c-idx'), 10);
                                 if (!shape.corners) shape.corners = [0, 0, 0, 0];
-                                var cVal = Math.max(0, parseFloat(raw) || 0);
-                                shape.corners[cPos] = cVal;
-                                SignalEvents.emit('state:changed');
-                                SignalEvents.emit('state:persist');
+                                shape.corners[cPos] = Math.max(0, parseFloat(raw) || 0);
+                                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                             };
-                            cinp.addEventListener('input', updateCorner);
-                            cinp.addEventListener('change', updateCorner);
+                            cinp.addEventListener('input', updateCorner); cinp.addEventListener('change', updateCorner);
                         })(corners[ci]);
                     }
 
                     var btnCenter = card.querySelector('.btn-center-x');
                     if (btnCenter) {
                         btnCenter.addEventListener('click', function() {
-                            var w = shape.width || 60;
-                            shape.x = -Math.round(w / 2);
+                            shape.x = -Math.round((shape.width || 60) / 2);
                             var xInp = card.querySelector('.sh-prop[data-prop="x"]');
                             if (xInp) xInp.value = shape.x;
-                            SignalEvents.emit('state:changed');
-                            SignalEvents.emit('state:persist');
+                            SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                         });
                     }
 
@@ -208,8 +216,7 @@
                                 shape.corners = [parsed, parsed, parsed, parsed];
                                 var cinps = card.querySelectorAll('.corner-input');
                                 for (var k = 0; k < cinps.length; k++) cinps[k].value = parsed;
-                                SignalEvents.emit('state:changed');
-                                SignalEvents.emit('state:persist');
+                                SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                             }
                         });
                     }
@@ -233,8 +240,7 @@
                 delBtns[d].addEventListener('click', function() {
                     var idx = parseInt(this.getAttribute('data-index'), 10);
                     SignalState.shapes.splice(idx, 1);
-                    SignalEvents.emit('state:changed');
-                    SignalEvents.emit('state:persist');
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
@@ -243,14 +249,12 @@
             for (var m = 0; m < moveBtns.length; m++) {
                 moveBtns[m].addEventListener('click', function() {
                     var idx = parseInt(this.getAttribute('data-index'), 10);
-                    var dir = parseInt(this.getAttribute('data-dir'), 10);
-                    var target = idx + dir;
+                    var target = idx + parseInt(this.getAttribute('data-dir'), 10);
                     if (target >= 0 && target < SignalState.shapes.length) {
                         var temp = SignalState.shapes[idx];
                         SignalState.shapes[idx] = SignalState.shapes[target];
                         SignalState.shapes[target] = temp;
-                        SignalEvents.emit('state:changed');
-                        SignalEvents.emit('state:persist');
+                        SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                         if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                     }
                 });

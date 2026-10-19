@@ -15,7 +15,7 @@
         lamps: [],
         feathers: [],
         featherBase: {
-            enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+            enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: null,
             sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
         },
         matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false },
@@ -36,7 +36,7 @@
             this.lamps = [];
             this.feathers = [];
             this.featherBase = {
-                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: null,
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
@@ -62,7 +62,7 @@
                 ladder: true, showFoot: true, footType: 'plate', footWidth: 64, footHeight: 14, footYOffset: 0
             };
             this.shapes = [
-                { id: 'plate_main', name: 'Main Head Plate', type: 'rounded-rect', x: -26, y: -130, width: 52, height: 110, corners: [26, 26, 26, 26], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 }
+                { id: 'plate_main', name: 'Main Head Plate', isMain: true, type: 'rounded-rect', x: -26, y: -130, width: 52, height: 110, corners: [26, 26, 26, 26], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5 }
             ];
             this.lamps = [
                 { id: 'RED', color: 'red', diameter: 34, x: 0, y: -95, hood: 'round', brightness: 1.0 },
@@ -70,7 +70,7 @@
             ];
             this.feathers = [];
             this.featherBase = {
-                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: 'plate_main',
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
@@ -141,6 +141,7 @@
                 y: fb.y !== undefined ? fb.y : undefined,
                 yOffset: fb.yOffset !== undefined ? fb.yOffset : 0,
                 posMode: fb.posMode || (fb.y !== undefined && fb.yOffset === undefined ? 'direct' : 'relative'),
+                anchorShapeId: fb.anchorShapeId !== undefined ? fb.anchorShapeId : null,
                 sides: (fb.sides && fb.sides >= 3 && fb.sides <= 16) ? parseInt(fb.sides, 10) : 8,
                 baseAngle: fb.baseAngle !== undefined ? parseFloat(fb.baseAngle) || 0 : 0,
                 radius: fb.radius !== undefined ? parseFloat(fb.radius) || 35.5 : 35.5,

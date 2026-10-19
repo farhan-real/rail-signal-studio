@@ -13,7 +13,7 @@
     var CreatorRoutes = {
         render: function(container) {
             var fb = SignalState.featherBase || {
-                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative',
+                enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: null,
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
             var isDirect = (fb.posMode === 'direct');
@@ -29,27 +29,36 @@
 
             if (fb.enabled) {
                 html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Anchor Reference Box</label><select id="fbAnchorShape" class="form-select">';
+                html += '      <option value="">Auto (Main Signal Box)</option>';
+                for (var sIdx = 0; sIdx < SignalState.shapes.length; sIdx++) {
+                    var shp = SignalState.shapes[sIdx];
+                    var sName = shp.name || ('Plate ' + (sIdx + 1));
+                    var sSel = (fb.anchorShapeId === shp.id) ? ' selected' : '';
+                    html += '<option value="' + (shp.id || '') + '"' + sSel + '>' + sName + (shp.isMain ? ' [Main]' : '') + '</option>';
+                }
+                html += '    </select></div>';
                 html += '    <div><label class="form-label">Placement Mode</label><select id="fbPosMode" class="form-select">';
-                html += '      <option value="relative"' + (!isDirect ? ' selected' : '') + '>1: Offset Above Signal Head</option>';
+                html += '      <option value="relative"' + (!isDirect ? ' selected' : '') + '>1: Offset Above Signal Box</option>';
                 html += '      <option value="direct"' + (isDirect ? ' selected' : '') + '>2: Direct Coordinates (Fixed Y)</option>';
                 html += '    </select></div>';
-                html += '    <div><label class="form-label">Hub X (0 = Center)</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
                 html += '  </div>';
 
                 html += '  <div class="form-row-2">';
-                html += '    <div><label class="form-label">' + (isDirect ? 'Direct Y (px)' : 'Y Offset (px above head)') + '</label><input type="number" id="fbYInput" class="form-input" value="' + hubYVal + '"/></div>';
+                html += '    <div><label class="form-label">Hub X (0 = Center)</label><input type="number" id="fbX" class="form-input" value="' + (fb.x !== undefined ? fb.x : 0) + '"/></div>';
+                html += '    <div><label class="form-label">' + (isDirect ? 'Direct Y (px)' : 'Y Offset (px above box)') + '</label><input type="number" id="fbYInput" class="form-input" value="' + hubYVal + '"/></div>';
+                html += '  </div>';
+
+                html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Base Sides (Facets)</label><select id="fbSides" class="form-select">';
                 [6, 8, 10, 12, 16].forEach(function(s) {
                     html += '<option value="' + s + '"' + ((fb.sides || 8) === s ? ' selected' : '') + '>' + s + ' Sides' + (s === 8 ? ' (Octagon)' : (s === 6 ? ' (Hexagon)' : '')) + '</option>';
                 });
                 html += '    </select></div>';
-                html += '  </div>';
-
-                html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Base Angle Rotation (°)</label><input type="number" min="-180" max="180" id="fbAngle" class="form-input" value="' + (fb.baseAngle || 0) + '"/></div>';
-                html += '    <div><label class="form-label">Hub Radius (px)</label><input type="number" min="16" max="70" id="fbRadius" class="form-input" value="' + (fb.radius || 35.5) + '"/></div>';
                 html += '  </div>';
 
+                html += '  <div><label class="form-label">Hub Radius (px)</label><input type="number" min="16" max="70" id="fbRadius" class="form-input" value="' + (fb.radius || 35.5) + '"/></div>';
                 html += '  <div style="margin-top:2px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkFbShowConnector" ' + (showConn ? 'checked' : '') + '/><span>Show bottom mount connector (collar & bolts)</span></label></div>';
 
                 if (showConn) {
@@ -144,6 +153,14 @@
                     SignalState.featherBase.enabled = this.checked;
                     SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
+                });
+            }
+
+            var anchorSel = document.getElementById('fbAnchorShape');
+            if (anchorSel) {
+                anchorSel.addEventListener('change', function() {
+                    SignalState.featherBase.anchorShapeId = this.value || null;
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                 });
             }
 
@@ -253,9 +270,7 @@
             if (matPosMode) {
                 matPosMode.addEventListener('change', function() {
                     SignalState.matrix.posMode = this.value;
-                    if (this.value === 'direct' && SignalState.matrix.y === undefined) {
-                        SignalState.matrix.y = -240;
-                    }
+                    if (this.value === 'direct' && SignalState.matrix.y === undefined) SignalState.matrix.y = -240;
                     SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
                     if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
