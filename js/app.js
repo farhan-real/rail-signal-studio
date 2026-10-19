@@ -200,6 +200,9 @@
             var draft = SignalStorage.loadDraft();
 
             if (draft) {
+                if (draft.name === 'Indian Railways 4-Aspect MACLS' && draft.feathers && draft.feathers.some(function(f) { return f.position === 'left1' || f.position === 'right1'; })) {
+                    draft.feathers = window.PresetIndian.feathers;
+                }
                 SignalState.load(draft);
                 this.updateHeaderTitle(draft.name || 'Saved Signal');
                 if (presetSelect) presetSelect.value = '';

@@ -56,6 +56,7 @@
                 if (SignalState.lamps.some(function(l) { return l.id.toUpperCase() === u; })) return true;
                 if (SignalState.feathers.some(function(f) { return f.id.toUpperCase() === u; })) return true;
                 if (SignalState.controls.some(function(c) {
+                    if (c.states && c.states.some(function(st) { return String(st).toUpperCase() === u; })) return true;
                     return c.id.toUpperCase() === u || (c.label && c.label.toUpperCase() === u);
                 })) return true;
                 for (var en in SignalState.enums) {
@@ -68,8 +69,19 @@
             for (var i = 0; i < tokens.length; i++) {
                 var tk = tokens[i];
                 if (tk.type === 'SET' || tk.type === 'UNSET') {
+                    var prev = i > 0 ? tokens[i - 1] : null;
+                    var prevPrev = i > 1 ? tokens[i - 2] : null;
+
+                    if (prev && (prev.type === 'IDENT' || (prev.type === 'IS' && prevPrev && prevPrev.type === 'IDENT'))) {
+                        var compTok = (prev.type === 'IS') ? prevPrev : prev;
+                        if (!isKnownComponent(compTok.value)) {
+                            errors.push({ line: compTok.line, message: 'Unknown component, group, or feather "' + compTok.value + '"' });
+                        }
+                        continue;
+                    }
+
                     var target = tokens[i + 1];
-                    if (target && target.type !== 'EOF' && target.type !== 'SEMI') {
+                    if (target && target.type !== 'EOF' && target.type !== 'SEMI' && target.type !== 'LBRACE' && target.type !== 'RBRACE' && target.type !== 'OR' && target.type !== 'AND') {
                         if (!isKnownComponent(target.value)) {
                             errors.push({ line: target.line, message: 'Unknown component, group, or feather "' + target.value + '"' });
                         }
