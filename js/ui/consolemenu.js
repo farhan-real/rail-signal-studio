@@ -47,12 +47,8 @@
                 shiftX = Math.round((deskRect.right - 8) - menuRect.right);
             }
 
-            if (menuRect.bottom > deskRect.bottom - 8) {
-                shiftY = Math.round((deskRect.bottom - 8) - menuRect.bottom);
-            }
-            if (menuRect.top + shiftY < deskRect.top + 8) {
-                shiftY = Math.round((deskRect.top + 8) - menuRect.top);
-            }
+            if (menuRect.bottom > deskRect.bottom - 8) shiftY = Math.round((deskRect.bottom - 8) - menuRect.bottom);
+            if (menuRect.top + shiftY < deskRect.top + 8) shiftY = Math.round((deskRect.top + 8) - menuRect.top);
 
             var t = [];
             if (shiftX !== 0) t.push('translateX(' + shiftX + 'px)');
@@ -70,9 +66,7 @@
             var startX = 0, startY = 0, moved = false;
             dot.addEventListener('pointerdown', function(e) {
                 e.stopPropagation();
-                startX = e.clientX;
-                startY = e.clientY;
-                moved = false;
+                startX = e.clientX; startY = e.clientY; moved = false;
 
                 var onMoveCheck = function(ev) {
                     if (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4) {
@@ -120,8 +114,7 @@
             addBtn('Resize', '', function(e) { e.stopPropagation(); self.togglePanel(menu, 'resize', ctrl || textObj, isCtrl, wrap); });
             addBtn('Modify', '', function(e) { e.stopPropagation(); self.togglePanel(menu, 'modify', ctrl || textObj, isCtrl, wrap); });
             addBtn('Delete', 'btn-danger', function(e) {
-                e.stopPropagation();
-                self.closeMenu();
+                e.stopPropagation(); self.closeMenu();
                 if (isCtrl) SignalState.removeControl(targetId);
                 else SignalState.removeText(targetId);
             });
@@ -218,7 +211,7 @@
             });
 
             if (target.type === 'knob' || target.type === 'lever') {
-                var defStates = target.type === 'lever' ? ['0', '1', '2'] : ['0', '1', '2'];
+                var defStates = ['0', '1', '2'];
                 var curStates = (target.states && target.states.length) ? target.states : defStates;
                 addField('States / Positions (comma separated)', curStates.join(', '), function(v) {
                     var parsed = v.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
@@ -229,6 +222,72 @@
                     SignalEvents.emit('state:persist');
                     if (window.ConsoleUI) window.ConsoleUI.render();
                 });
+            } else if (target.type === 'button') {
+                var bColorLbl = document.createElement('span'); bColorLbl.className = 'cmenu-label'; bColorLbl.textContent = 'Button Color';
+                var bColorRow = document.createElement('div'); bColorRow.className = 'cmenu-row';
+                var swatches = [
+                    { name: 'Red', hex: '#ff3333' },
+                    { name: 'Yellow', hex: '#f0a316' },
+                    { name: 'Green', hex: '#00cc44' },
+                    { name: 'Blue', hex: '#2e68f8' },
+                    { name: 'White', hex: '#e2e8f0' },
+                    { name: 'Dark', hex: '#22252c' }
+                ];
+                swatches.forEach(function(item) {
+                    var b = document.createElement('button');
+                    b.className = 'cmenu-btn' + ((target.color || '#2e68f8').toLowerCase() === item.hex.toLowerCase() ? ' active' : '');
+                    b.textContent = item.name;
+                    b.style.borderBottom = '3px solid ' + item.hex;
+                    b.addEventListener('click', function(e) {
+                        e.stopPropagation(); target.color = item.hex;
+                        if (colorPick) colorPick.value = item.hex;
+                        if (colorInp) colorInp.value = item.hex;
+                        SignalEvents.emit('state:persist');
+                        if (window.ConsoleUI) window.ConsoleUI.render();
+                    });
+                    bColorRow.appendChild(b);
+                });
+                panel.appendChild(bColorLbl); panel.appendChild(bColorRow);
+
+                var pickRow = document.createElement('div'); pickRow.className = 'cmenu-row'; pickRow.style.marginTop = '4px';
+                var colorPick = document.createElement('input'); colorPick.type = 'color'; colorPick.value = target.color || '#2e68f8';
+                colorPick.style.cssText = 'width:32px; height:24px; border:none; background:transparent; cursor:pointer; padding:0;';
+                var colorInp = document.createElement('input'); colorInp.type = 'text'; colorInp.className = 'cmenu-input';
+                colorInp.style.flex = '1'; colorInp.value = target.color || '#2e68f8';
+
+                colorPick.addEventListener('input', function() {
+                    colorInp.value = this.value; target.color = this.value;
+                    var cap = wrap ? wrap.querySelector('.button-cap') : null;
+                    if (cap) cap.style.backgroundColor = this.value;
+                    SignalEvents.emit('state:persist');
+                });
+                colorInp.addEventListener('change', function() {
+                    colorPick.value = this.value; target.color = this.value;
+                    SignalEvents.emit('state:persist');
+                    if (window.ConsoleUI) window.ConsoleUI.render();
+                });
+                pickRow.appendChild(colorPick); pickRow.appendChild(colorInp);
+                panel.appendChild(pickRow);
+
+                var modeRow = document.createElement('div'); modeRow.className = 'cmenu-row'; modeRow.style.marginTop = '6px';
+                var btnMom = document.createElement('button');
+                btnMom.className = 'cmenu-btn' + (!target.isToggle ? ' active' : '');
+                btnMom.textContent = 'Momentary';
+                btnMom.addEventListener('click', function(e) {
+                    e.stopPropagation(); target.isToggle = false;
+                    SignalEvents.emit('state:persist');
+                    if (window.ConsoleUI) window.ConsoleUI.render();
+                });
+                var btnTog = document.createElement('button');
+                btnTog.className = 'cmenu-btn' + (target.isToggle ? ' active' : '');
+                btnTog.textContent = 'Latching';
+                btnTog.addEventListener('click', function(e) {
+                    e.stopPropagation(); target.isToggle = true;
+                    SignalEvents.emit('state:persist');
+                    if (window.ConsoleUI) window.ConsoleUI.render();
+                });
+                modeRow.appendChild(btnMom); modeRow.appendChild(btnTog);
+                panel.appendChild(modeRow);
             } else if (target.type === 'switch') {
                 var sStates = (target.states && target.states.length === 2) ? target.states : ['OFF', 'ON'];
                 addField('Switch States (Off, On)', sStates.join(', '), function(v) {
