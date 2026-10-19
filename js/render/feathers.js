@@ -3,12 +3,18 @@
 
     var FeatherRenderer = {
         positions: {
-            left1: { angle: 135 },
+            left1: { angle: -135 },
             left2: { angle: 180 },
-            left3: { angle: -135 },
-            right1: { angle: 45 },
+            left3: { angle: 135 },
+            right1: { angle: -45 },
             right2: { angle: 0 },
-            right3: { angle: -45 }
+            right3: { angle: 45 },
+            pos1: { angle: -135 },
+            pos2: { angle: 180 },
+            pos3: { angle: 135 },
+            pos4: { angle: -45 },
+            pos5: { angle: 0 },
+            pos6: { angle: 45 }
         },
 
         getMainShape: function() {
@@ -72,7 +78,7 @@
 
             var topY = this.detectHeadTopSurface(hx);
             var hasH = (fb && fb.collarHeight !== null && fb.collarHeight !== undefined);
-            var colH = (fb && fb.showConnector !== false) ? (hasH ? Math.max(2, parseFloat(fb.collarHeight)) : 24) : 0;
+            var colH = (fb && fb.showConnector !== false) ? (hasH ? Math.max(2, parseFloat(fb.collarHeight)) : 10) : 0;
             var yOff = (fb && fb.yOffset !== undefined) ? fb.yOffset : 0;
             return { x: hx, y: topY - r - colH - yOff };
         },

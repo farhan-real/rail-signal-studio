@@ -2,12 +2,12 @@
     'use strict';
 
     var FeatherPositions = [
-        { key: 'left1', label: 'Left 1 (Low Left)' },
-        { key: 'left2', label: 'Left 2 (Med Left)' },
-        { key: 'left3', label: 'Left 3 (High Left)' },
-        { key: 'right1', label: 'Right 1 (Low Right)' },
-        { key: 'right2', label: 'Right 2 (Med Right)' },
-        { key: 'right3', label: 'Right 3 (High Right)' }
+        { key: 'left1', label: 'Left 1 (High Left, 45° Up)' },
+        { key: 'left2', label: 'Left 2 (Med Left, Horizontal)' },
+        { key: 'left3', label: 'Left 3 (Low Left, 45° Down)' },
+        { key: 'right1', label: 'Right 1 (High Right, 45° Up)' },
+        { key: 'right2', label: 'Right 2 (Med Right, Horizontal)' },
+        { key: 'right3', label: 'Right 3 (Low Right, 45° Down)' }
     ];
 
     var CreatorRoutes = {
@@ -91,7 +91,8 @@
                     html += '    <div><label class="form-label">Feather ID</label><input type="text" class="form-input ft-prop" data-prop="id" value="' + fth.id + '"/></div>';
                     html += '    <div><label class="form-label">Position / Direction</label><select class="form-select ft-prop" data-prop="position">';
                     for (var p = 0; p < FeatherPositions.length; p++) {
-                        html += '<option value="' + FeatherPositions[p].key + '" ' + ((fth.position || 'left1') === FeatherPositions[p].key ? 'selected' : '') + '>' + FeatherPositions[p].label + '</option>';
+                        var sel = (fth.position || 'left1') === FeatherPositions[p].key ? 'selected' : '';
+                        html += '<option value="' + FeatherPositions[p].key + '" ' + sel + '>' + FeatherPositions[p].label + '</option>';
                     }
                     html += '    </select></div>';
                     html += '  </div>';

@@ -5,7 +5,7 @@
         name: 'Example: Groups and Enum Variables',
         mast: { type: 'tubular', height: 450, x: 0, y: -30, platform: true, ladder: true },
         shapes: [
-            { type: 'rounded-rect', x: -28, y: -160, width: 56, height: 212, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3444', strokeWidth: 2.5 }
+            { id: 'plate_main', name: 'Main Head Plate', isMain: true, type: 'rounded-rect', x: -28, y: -160, width: 56, height: 212, corners: [28, 28, 28, 28], fill: '#0a0c10', stroke: '#2e3444', strokeWidth: 2.5 }
         ],
         lamps: [
             { id: 'RED', color: 'red', diameter: 36, x: 0, y: -125, hood: 'round', brightness: 1.0 },
@@ -13,11 +13,15 @@
             { id: 'GREEN', color: 'green', diameter: 36, x: 0, y: -25, hood: 'round', brightness: 1.0 },
             { id: 'YELLOW2', color: 'yellow', diameter: 36, x: 0, y: 25, hood: 'round', brightness: 1.0 }
         ],
+        featherBase: {
+            enabled: true, x: 0, yOffset: 0, posMode: 'relative', anchorShapeId: 'plate_main',
+            sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: 10, autoConnect: true
+        },
         feathers: [
-            { id: 'FEATHER_L1', position: 'left1', x: -28, y: -140, lamps: 5 },
-            { id: 'FEATHER_R1', position: 'right1', x: 28, y: -140, lamps: 5 }
+            { id: 'FEATHER_L1', position: 'left1', lamps: 5 },
+            { id: 'FEATHER_R1', position: 'right1', lamps: 5 }
         ],
-        matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
+        matrix: { enabled: true, id: 'ROUTE_BOX', size: '1x', x: 0, yOffset: 0, posMode: 'relative', showBase: true, connectorHeight: 8, text: '' },
         controls: [
             { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 20 },
             { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'DIVERGE_LEFT', 'DIVERGE_RIGHT'], mode: 'half', defaultValue: 0, x: 140, y: 20 }

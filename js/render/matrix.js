@@ -56,24 +56,9 @@
             var hasFeathers = feathers.length > 0;
 
             if (hasFeathers || (fb && fb.enabled)) {
-                var hub = window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(fb) : { x: 0, y: -196 };
+                var hub = window.FeatherRenderer ? window.FeatherRenderer.getHubCenter(fb) : { x: 0, y: -205 };
                 var r = (fb && fb.radius) ? fb.radius : 35.5;
-                var topY = hub.y - r;
-
-                if (window.FeatherRenderer && hasFeathers) {
-                    for (var i = 0; i < feathers.length; i++) {
-                        var rad = feathers[i]._renderedRad;
-                        if (rad === undefined) {
-                            var conf = window.FeatherRenderer.positions[(feathers[i].position || 'left1').toLowerCase()];
-                            if (conf) rad = conf.angle * Math.PI / 180;
-                        }
-                        if (rad !== undefined) {
-                            var armTipY = hub.y + Math.sin(rad) * 98.0 - 14.0;
-                            if (armTipY < topY) topY = armTipY;
-                        }
-                    }
-                }
-                return topY;
+                return hub.y - r;
             }
 
             return (window.FeatherRenderer && window.FeatherRenderer.detectHeadTopSurface) ?
