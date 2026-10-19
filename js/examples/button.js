@@ -17,12 +17,12 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'EStopBtn', type: 'button', label: 'E-Stop', color: '#ff3333', isToggle: false, defaultValue: 0, x: 20, y: 15 },
-            { id: 'OverrideBtn', type: 'button', label: 'Override', color: '#2e68f8', isToggle: false, defaultValue: 0, x: 100, y: 15 },
-            { id: 'RouteLatchBtn', type: 'button', label: 'Route Lock', color: '#00cc44', isToggle: true, defaultValue: 0, x: 180, y: 15 },
-            { id: 'AlarmLed', type: 'led', label: 'Alarm', colorKey: 'red', x: 260, y: 15 },
-            { id: 'OverrideLed', type: 'led', label: 'Call-On', colorKey: 'yellow', x: 320, y: 15 },
-            { id: 'RouteLed', type: 'led', label: 'Route', colorKey: 'green', x: 380, y: 15 }
+            { id: 'EStopBtn', type: 'button', label: 'E-Stop', color: '#ff3333', isToggle: false, defaultValue: 0, x: 20, y: 20 },
+            { id: 'OverrideBtn', type: 'button', label: 'Override', color: '#2e68f8', isToggle: false, defaultValue: 0, x: 120, y: 20 },
+            { id: 'RouteLatchBtn', type: 'button', label: 'Route Lock', color: '#00cc44', isToggle: true, defaultValue: 0, x: 220, y: 20 },
+            { id: 'AlarmLed', type: 'led', label: 'Alarm', colorKey: 'red', x: 320, y: 20 },
+            { id: 'OverrideLed', type: 'led', label: 'Call-On', colorKey: 'yellow', x: 400, y: 20 },
+            { id: 'RouteLed', type: 'led', label: 'Route', colorKey: 'green', x: 480, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

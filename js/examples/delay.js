@@ -15,8 +15,8 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
-            { id: 'SeqLed', type: 'led', label: 'Timer Active', colorKey: 'yellow', x: 110, y: 15 }
+            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 20 },
+            { id: 'SeqLed', type: 'led', label: 'Timer Active', colorKey: 'yellow', x: 140, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

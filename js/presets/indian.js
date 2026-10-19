@@ -25,9 +25,9 @@
         ],
         matrix: { enabled: false },
         controls: [
-            { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 15 },
-            { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], mode: 'half', defaultValue: 0, x: 110, y: 15 },
-            { id: 'ShuntSwitch', type: 'switch', label: 'Shunt', defaultValue: 0, x: 200, y: 15 }
+            { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 20 },
+            { id: 'RouteSelector', type: 'knob', label: 'Route', states: ['Main', 'Left 1', 'Left 2', 'Right'], mode: 'half', defaultValue: 0, x: 140, y: 20 },
+            { id: 'ShuntSwitch', type: 'switch', label: 'Shunt', defaultValue: 0, x: 320, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

@@ -1,6 +1,8 @@
 (function(window) {
     'use strict';
 
+    var GRID = 20;
+
     var SignalState = {
         id: null,
         name: 'New Signal',
@@ -38,6 +40,13 @@
             SignalEvents.emit('state:changed');
         },
 
+        getControlWidth: function(c) {
+            if (!c) return 100;
+            if (c.type === 'knob') return 160;
+            if (c.type === 'led') return 80;
+            return 100;
+        },
+
         load: function(data) {
             if (!data) return;
             this.id = data.id || null;
@@ -62,11 +71,28 @@
 
             for (var i = 0; i < this.lamps.length; i++) this.lampStates[this.lamps[i].id] = false;
             for (var f = 0; f < this.feathers.length; f++) this.lampStates[this.feathers[f].id] = false;
+
+            var placedBoxes = [];
             for (var j = 0; j < this.controls.length; j++) {
                 var ctrl = this.controls[j];
                 this.controlValues[ctrl.id] = ctrl.defaultValue !== undefined ? ctrl.defaultValue : 0;
-                if (ctrl.x === undefined) ctrl.x = 20 + j * 90;
-                if (ctrl.y === undefined) ctrl.y = 20;
+                var cx = ctrl.x !== undefined ? ctrl.x : (20 + j * 120);
+                var cy = ctrl.y !== undefined ? ctrl.y : 20;
+                cx = Math.round(cx / GRID) * GRID;
+                cy = Math.round(cy / GRID) * GRID;
+                var cw = this.getControlWidth(ctrl);
+
+                for (var p = 0; p < placedBoxes.length; p++) {
+                    var b = placedBoxes[p];
+                    if (Math.abs(cy - b.y) < 60) {
+                        if (cx < b.right) {
+                            cx = b.right;
+                        }
+                    }
+                }
+                ctrl.x = cx;
+                ctrl.y = cy;
+                placedBoxes.push({ x: cx, y: cy, right: cx + cw });
             }
             SignalEvents.emit('state:loaded');
         },

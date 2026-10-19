@@ -1,6 +1,8 @@
 (function(window) {
     'use strict';
 
+    var GRID_SNAP = 20;
+
     var ConsoleMenu = {
         activeMenu: null,
         activeWrap: null,
@@ -25,13 +27,31 @@
             dot.title = 'Options';
             wrap.appendChild(dot);
 
-            dot.addEventListener('click', function(e) {
+            var startX = 0, startY = 0, moved = false;
+            dot.addEventListener('pointerdown', function(e) {
                 e.stopPropagation();
-                if (self.activeMenu && self.activeWrap === wrap) {
-                    self.closeMenu();
-                    return;
-                }
-                self.openMenu(wrap, targetId, isCtrl);
+                startX = e.clientX;
+                startY = e.clientY;
+                moved = false;
+
+                var onMoveCheck = function(ev) {
+                    if (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4) {
+                        moved = true;
+                        window.removeEventListener('pointermove', onMoveCheck);
+                        self.closeMenu();
+                        self.enterMoveMode(wrap, ev);
+                    }
+                };
+                var onUpCheck = function() {
+                    window.removeEventListener('pointermove', onMoveCheck);
+                    window.removeEventListener('pointerup', onUpCheck);
+                    if (!moved) {
+                        if (self.activeMenu && self.activeWrap === wrap) self.closeMenu();
+                        else self.openMenu(wrap, targetId, isCtrl);
+                    }
+                };
+                window.addEventListener('pointermove', onMoveCheck);
+                window.addEventListener('pointerup', onUpCheck);
             });
         },
 
@@ -115,11 +135,8 @@
             panel.className = 'cmenu-panel';
             panel.setAttribute('data-panel-type', type);
 
-            if (type === 'resize') {
-                this.buildResizePanel(panel, target);
-            } else if (type === 'modify') {
-                this.buildModifyPanel(panel, target, isCtrl);
-            }
+            if (type === 'resize') this.buildResizePanel(panel, target);
+            else if (type === 'modify') this.buildModifyPanel(panel, target, isCtrl);
             menu.appendChild(panel);
         },
 
@@ -131,13 +148,10 @@
 
             var row = document.createElement('div');
             row.className = 'cmenu-row';
-            var scales = [0.8, 1.0, 1.2, 1.4];
-            var curScale = target.scale || 1.0;
-
             var self = this;
-            scales.forEach(function(s) {
+            [0.8, 1.0, 1.2, 1.4].forEach(function(s) {
                 var btn = document.createElement('button');
-                btn.className = 'cmenu-btn' + (Math.abs(curScale - s) < 0.05 ? ' active' : '');
+                btn.className = 'cmenu-btn' + (Math.abs((target.scale || 1.0) - s) < 0.05 ? ' active' : '');
                 btn.textContent = Math.round(s * 100) + '%';
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -212,8 +226,7 @@
                 stLbl.textContent = 'Positions (comma separated)';
                 var stInp = document.createElement('input');
                 stInp.className = 'cmenu-input';
-                var states = target.states || ['0', '1', '2'];
-                stInp.value = states.join(', ');
+                stInp.value = (target.states || ['0', '1', '2']).join(', ');
                 stInp.addEventListener('change', function() {
                     target.states = this.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
                     SignalEvents.emit('state:persist');
@@ -241,50 +254,58 @@
             }
         },
 
-        enterMoveMode: function(wrap) {
+        enterMoveMode: function(wrap, initialEvent) {
             this.exitMoveMode();
             wrap.classList.add('move-active');
             this.activeModeWrap = wrap;
 
             var targetId = wrap.getAttribute('data-id') || wrap.getAttribute('data-text-id');
             var isCtrl = wrap.hasAttribute('data-id');
-
-            var isPointerDown = false, startX = 0, startY = 0, initLeft = 0, initTop = 0;
-            var curDeltaX = 0, curDeltaY = 0;
+            var isDragging = false, startX = 0, startY = 0, initLeft = 0, initTop = 0;
+            var targetX = 0, targetY = 0;
+            var badge = null;
 
             var onPointerDown = function(e) {
-                if (e.target.closest('.control-dot') || e.target.closest('.control-dot-menu')) return;
-                isPointerDown = true;
+                if (e.target.closest('.control-dot-menu')) return;
+                isDragging = true;
                 wrap.classList.add('dragging');
-                wrap.setPointerCapture(e.pointerId);
+                try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
                 startX = e.clientX;
                 startY = e.clientY;
                 initLeft = parseInt(wrap.style.left, 10) || 0;
                 initTop = parseInt(wrap.style.top, 10) || 0;
-                curDeltaX = 0;
-                curDeltaY = 0;
+                targetX = initLeft;
+                targetY = initTop;
+
+                badge = document.createElement('div');
+                badge.className = 'snap-coord-badge';
+                badge.textContent = 'X: ' + targetX + '  Y: ' + targetY;
+                wrap.appendChild(badge);
             };
 
             var onPointerMove = function(e) {
-                if (!isPointerDown) return;
-                curDeltaX = e.clientX - startX;
-                curDeltaY = e.clientY - startY;
-                wrap.style.transform = 'translate3d(' + curDeltaX + 'px, ' + curDeltaY + 'px, 0)';
+                if (!isDragging) return;
+                var rawX = initLeft + (e.clientX - startX);
+                var rawY = initTop + (e.clientY - startY);
+                targetX = Math.max(GRID_SNAP, Math.round(rawX / GRID_SNAP) * GRID_SNAP);
+                targetY = Math.max(GRID_SNAP, Math.round(rawY / GRID_SNAP) * GRID_SNAP);
+
+                wrap.style.transform = 'translate3d(' + (targetX - initLeft) + 'px, ' + (targetY - initTop) + 'px, 0)';
+                if (badge) badge.textContent = 'X: ' + targetX + '  Y: ' + targetY;
             };
 
             var onPointerUp = function(e) {
-                if (!isPointerDown) return;
-                isPointerDown = false;
+                if (!isDragging) return;
+                isDragging = false;
                 wrap.classList.remove('dragging');
                 try { wrap.releasePointerCapture(e.pointerId); } catch (err) {}
                 wrap.style.transform = '';
-                var snap = 10;
-                var fX = Math.max(10, Math.round((initLeft + curDeltaX) / snap) * snap);
-                var fY = Math.max(10, Math.round((initTop + curDeltaY) / snap) * snap);
-                wrap.style.left = fX + 'px';
-                wrap.style.top = fY + 'px';
-                if (isCtrl) SignalState.updateControlPos(targetId, fX, fY);
-                else SignalState.updateTextPos(targetId, fX, fY);
+                wrap.style.left = targetX + 'px';
+                wrap.style.top = targetY + 'px';
+                if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
+
+                if (isCtrl) SignalState.updateControlPos(targetId, targetX, targetY);
+                else SignalState.updateTextPos(targetId, targetX, targetY);
             };
 
             wrap._moveDown = onPointerDown;
@@ -295,6 +316,8 @@
             wrap.addEventListener('pointermove', onPointerMove);
             wrap.addEventListener('pointerup', onPointerUp);
             wrap.addEventListener('pointercancel', onPointerUp);
+
+            if (initialEvent) onPointerDown(initialEvent);
         },
 
         exitMoveMode: function() {
@@ -307,6 +330,8 @@
                     wrap.removeEventListener('pointerup', wrap._moveUp);
                     wrap.removeEventListener('pointercancel', wrap._moveUp);
                 }
+                var badge = wrap.querySelector('.snap-coord-badge');
+                if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
                 this.activeModeWrap = null;
                 SignalEvents.emit('state:persist');
             }

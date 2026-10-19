@@ -17,8 +17,8 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'SNCFLever', type: 'lever', label: 'Signal Carré', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 15 },
-            { id: 'ManoeuvreKnob', type: 'knob', label: 'Voie', states: ['Normal', 'Manoeuvre'], defaultValue: 0, x: 110, y: 15 }
+            { id: 'SNCFLever', type: 'lever', label: 'Signal Carré', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 20 },
+            { id: 'ManoeuvreKnob', type: 'knob', label: 'Voie', states: ['Normal', 'Manoeuvre'], mode: 'half', defaultValue: 0, x: 140, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

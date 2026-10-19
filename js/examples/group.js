@@ -19,8 +19,8 @@
         ],
         matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
-            { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 15 },
-            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'DIVERGE_LEFT', 'DIVERGE_RIGHT'], defaultValue: 0, x: 110, y: 15 }
+            { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 20 },
+            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'DIVERGE_LEFT', 'DIVERGE_RIGHT'], mode: 'half', defaultValue: 0, x: 140, y: 20 }
         ],
         script: [
             '%% Route Type and Lamp Groups',

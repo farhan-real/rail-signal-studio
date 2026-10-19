@@ -1,6 +1,8 @@
 (function(window) {
     'use strict';
 
+    var GRID = 20;
+
     var ConsoleUI = {
         desk: null,
 
@@ -17,15 +19,34 @@
             SignalEvents.on('state:changed', this.render.bind(this));
         },
 
+        getNextPos: function(type) {
+            var w = (type === 'knob') ? 160 : ((type === 'led') ? 80 : 100);
+            var rightmost = 20;
+            var rowY = 20;
+            for (var i = 0; i < SignalState.controls.length; i++) {
+                var c = SignalState.controls[i];
+                var cy = c.y !== undefined ? c.y : 20;
+                if (Math.abs(cy - rowY) < 60) {
+                    var cw = (c.type === 'knob') ? 160 : ((c.type === 'led') ? 80 : 100);
+                    var cr = (c.x !== undefined ? c.x : 20) + cw;
+                    if (cr > rightmost) rightmost = cr;
+                }
+            }
+            var nextX = Math.ceil(rightmost / GRID) * GRID;
+            if (nextX + w > 860) {
+                return { x: 20, y: rowY + 140 };
+            }
+            return { x: nextX, y: rowY };
+        },
+
         bindButtons: function() {
             var self = this;
             document.getElementById('btnAddLever').addEventListener('click', function() {
                 var id = 'Lever' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 100 + 20;
-                var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
+                var pos = self.getNextPos('lever');
                 SignalState.controls.push({
                     id: id, type: 'lever', label: id, color: '#d92525', positions: 3, defaultValue: 0,
-                    x: col, y: row, scale: 1.0
+                    x: pos.x, y: pos.y, scale: 1.0
                 });
                 SignalState.setControlValue(id, 0);
                 self.render();
@@ -33,11 +54,10 @@
 
             document.getElementById('btnAddKnob').addEventListener('click', function() {
                 var id = 'Knob' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 150 + 20;
-                var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
+                var pos = self.getNextPos('knob');
                 SignalState.controls.push({
                     id: id, type: 'knob', label: id, states: ['0', '1', '2'], mode: 'half', defaultValue: 0,
-                    x: col, y: row, scale: 1.0
+                    x: pos.x, y: pos.y, scale: 1.0
                 });
                 SignalState.setControlValue(id, 0);
                 self.render();
@@ -45,11 +65,10 @@
 
             document.getElementById('btnAddButton').addEventListener('click', function() {
                 var id = 'Btn' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 90 + 20;
-                var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
+                var pos = self.getNextPos('button');
                 SignalState.controls.push({
                     id: id, type: 'button', label: id, color: '#2e68f8', isToggle: false, defaultValue: 0,
-                    x: col, y: row, scale: 1.0
+                    x: pos.x, y: pos.y, scale: 1.0
                 });
                 SignalState.setControlValue(id, 0);
                 self.render();
@@ -57,11 +76,10 @@
 
             document.getElementById('btnAddSwitch').addEventListener('click', function() {
                 var id = 'Switch' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 90 + 20;
-                var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
+                var pos = self.getNextPos('switch');
                 SignalState.controls.push({
                     id: id, type: 'switch', label: id, defaultValue: 0,
-                    x: col, y: row, scale: 1.0
+                    x: pos.x, y: pos.y, scale: 1.0
                 });
                 SignalState.setControlValue(id, 0);
                 self.render();
@@ -69,11 +87,10 @@
 
             document.getElementById('btnAddLed').addEventListener('click', function() {
                 var id = 'LED' + (SignalState.controls.length + 1);
-                var col = (SignalState.controls.length % 7) * 80 + 20;
-                var row = Math.floor(SignalState.controls.length / 7) * 140 + 20;
+                var pos = self.getNextPos('led');
                 SignalState.controls.push({
                     id: id, type: 'led', label: id, colorKey: 'red',
-                    x: col, y: row, scale: 1.0
+                    x: pos.x, y: pos.y, scale: 1.0
                 });
                 SignalState.setLamp(id, false);
                 self.render();
@@ -81,8 +98,9 @@
 
             document.getElementById('btnAddText').addEventListener('click', function() {
                 var id = 'text_' + Date.now();
+                var pos = self.getNextPos('text');
                 SignalState.texts.push({
-                    id: id, text: 'Track Marker', x: 20 + (SignalState.texts.length * 100), y: 140, scale: 1.0
+                    id: id, text: 'Track Marker', x: pos.x, y: 140, scale: 1.0
                 });
                 self.render();
             });
@@ -155,7 +173,9 @@
                 wrap.setAttribute('data-id', ctrl.id);
                 var scale = ctrl.scale || 1.0;
                 var scaleTransform = scale !== 1.0 ? ' scale(' + scale + ')' : '';
-                wrap.style.cssText = 'left:' + (ctrl.x || 20) + 'px; top:' + (ctrl.y || 15) + 'px; transform-origin: top left;' + (scaleTransform ? ' transform:' + scaleTransform + ';' : '');
+                var posX = Math.round((ctrl.x !== undefined ? ctrl.x : 20) / GRID) * GRID;
+                var posY = Math.round((ctrl.y !== undefined ? ctrl.y : 20) / GRID) * GRID;
+                wrap.style.cssText = 'left:' + posX + 'px; top:' + posY + 'px; transform-origin: top left;' + (scaleTransform ? ' transform:' + scaleTransform + ';' : '');
                 wrap.innerHTML = body;
 
                 if (window.ConsoleMenu) ConsoleMenu.attachDot(wrap, ctrl.id, true);
@@ -169,7 +189,9 @@
                 tWrap.setAttribute('data-text-id', txt.id);
                 var tScale = txt.scale || 1.0;
                 var tScaleTransform = tScale !== 1.0 ? ' scale(' + tScale + ')' : '';
-                tWrap.style.cssText = 'left:' + (txt.x || 20) + 'px; top:' + (txt.y || 140) + 'px; transform-origin: top left;' + (tScaleTransform ? ' transform:' + tScaleTransform + ';' : '');
+                var tX = Math.round((txt.x !== undefined ? txt.x : 20) / GRID) * GRID;
+                var tY = Math.round((txt.y !== undefined ? txt.y : 140) / GRID) * GRID;
+                tWrap.style.cssText = 'left:' + tX + 'px; top:' + tY + 'px; transform-origin: top left;' + (tScaleTransform ? ' transform:' + tScaleTransform + ';' : '');
                 tWrap.innerHTML = '<div class="console-item text-item"><input type="text" class="text-content" value="' + txt.text + '" data-input-text="' + txt.id + '"/></div>';
 
                 if (window.ConsoleMenu) ConsoleMenu.attachDot(tWrap, txt.id, false);

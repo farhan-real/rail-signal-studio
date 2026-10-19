@@ -15,8 +15,8 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 1, x: 20, y: 15 },
-            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'BRANCH', 'SIDING'], defaultValue: 0, x: 110, y: 15 }
+            { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 1, x: 20, y: 20 },
+            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'BRANCH', 'SIDING'], mode: 'half', defaultValue: 0, x: 140, y: 20 }
         ],
         script: [
             '%% Route Enumeration and Aspects',

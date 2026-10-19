@@ -16,8 +16,8 @@
         feathers: [],
         matrix: { enabled: true, id: 'THEATRE_BOX', x: 0, y: -192, text: '' },
         controls: [
-            { id: 'SignalLever', type: 'lever', label: 'Main Signal', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 15 },
-            { id: 'RouteThumb', type: 'knob', label: 'Route', states: ['Main', 'Loop', 'Siding'], defaultValue: 0, x: 110, y: 15 }
+            { id: 'SignalLever', type: 'lever', label: 'Main Signal', color: '#d92525', positions: 4, defaultValue: 0, x: 20, y: 20 },
+            { id: 'RouteThumb', type: 'knob', label: 'Route', states: ['Main', 'Loop', 'Siding'], mode: 'half', defaultValue: 0, x: 140, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

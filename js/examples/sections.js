@@ -18,10 +18,10 @@
         ],
         matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
-            { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
-            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'LOOP'], defaultValue: 0, x: 110, y: 15 },
-            { id: 'StopLed', type: 'led', label: 'Stop Rep', colorKey: 'red', x: 200, y: 15 },
-            { id: 'ClearLed', type: 'led', label: 'Clear Rep', colorKey: 'green', x: 270, y: 15 }
+            { id: 'Lever1', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 20 },
+            { id: 'RouteKnob', type: 'knob', label: 'Route', states: ['MAIN', 'LOOP'], mode: 'half', defaultValue: 0, x: 140, y: 20 },
+            { id: 'StopLed', type: 'led', label: 'Stop Rep', colorKey: 'red', x: 320, y: 20 },
+            { id: 'ClearLed', type: 'led', label: 'Clear Rep', colorKey: 'green', x: 420, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

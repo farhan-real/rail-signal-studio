@@ -31,12 +31,30 @@
 }
 .draggable-wrapper.move-active .console-item {
     border-color: var(--accent);
-    box-shadow: 0 0 12px rgba(46, 104, 248, 0.5), inset 0 0 6px rgba(46, 104, 248, 0.2);
+    box-shadow: 0 0 14px rgba(46, 104, 248, 0.55), inset 0 0 6px rgba(46, 104, 248, 0.25);
 }
 .draggable-wrapper.dragging {
     cursor: grabbing;
     z-index: 100;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+}
+
+/* 2D Live Grid Snap Coordinates Badge */
+.snap-coord-badge {
+    position: absolute;
+    bottom: -20px;
+    background: rgba(14, 18, 28, 0.95);
+    border: 1px solid var(--accent);
+    color: #93c5fd;
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
 }
 
 /* Tiny Anchor Dot */
@@ -405,4 +423,4 @@
 .led-item { min-width: 54px; }
 .text-item { min-width: 60px; padding: 4px 8px; }
 .text-content { font-size: 12px; font-weight: 700; color: #e6eaf2; pointer-events: auto; background: transparent; border: 1px solid transparent; border-radius: 2px; outline: none; text-align: center; }
-.text-content:focus { background: #1c2130; border-color: var(--border-highlight); } 
+.text-content:focus { background: #1c2130; border-color: var(--border-highlight); }

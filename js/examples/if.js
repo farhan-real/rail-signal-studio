@@ -15,9 +15,9 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 15 },
-            { id: 'TrackSwitch', type: 'switch', label: 'Track Clear', defaultValue: 1, x: 110, y: 15 },
-            { id: 'GateSwitch', type: 'switch', label: 'Gate Closed', defaultValue: 1, x: 195, y: 15 }
+            { id: 'MasterLever', type: 'lever', label: 'Signal Lever', color: '#d92525', positions: 3, defaultValue: 0, x: 20, y: 20 },
+            { id: 'TrackSwitch', type: 'switch', label: 'Track Clear', defaultValue: 1, x: 140, y: 20 },
+            { id: 'GateSwitch', type: 'switch', label: 'Gate Closed', defaultValue: 1, x: 260, y: 20 }
         ],
         script: [
             '%% Aspect Definitions',

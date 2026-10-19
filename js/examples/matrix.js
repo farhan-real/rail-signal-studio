@@ -18,8 +18,8 @@
         ],
         matrix: { enabled: true, id: 'ROUTE_BOX', x: 0, y: -258, text: '' },
         controls: [
-            { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 15 },
-            { id: 'TrackSelector', type: 'knob', label: 'Platform', states: ['MAIN', 'PLATFORM_1', 'PLATFORM_2'], defaultValue: 0, x: 110, y: 15 }
+            { id: 'MasterLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 3, defaultValue: 2, x: 20, y: 20 },
+            { id: 'TrackSelector', type: 'knob', label: 'Platform', states: ['MAIN', 'PLATFORM_1', 'PLATFORM_2'], mode: 'half', defaultValue: 0, x: 140, y: 20 }
         ],
         script: [
             '%% Route Enumeration and Aspects',

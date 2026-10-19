@@ -15,8 +15,8 @@
         feathers: [],
         matrix: { enabled: false },
         controls: [
-            { id: 'EmergencySwitch', type: 'switch', label: 'E-Stop', defaultValue: 0, x: 20, y: 15 },
-            { id: 'SpeedKnob', type: 'knob', label: 'Speed Limit', states: ['20', '45', '80'], defaultValue: 1, x: 110, y: 15 }
+            { id: 'EmergencySwitch', type: 'switch', label: 'E-Stop', defaultValue: 0, x: 20, y: 20 },
+            { id: 'SpeedKnob', type: 'knob', label: 'Speed Limit', states: ['20', '45', '80'], mode: 'half', defaultValue: 1, x: 140, y: 20 }
         ],
         script: [
             '%% Variables and Aspects',
