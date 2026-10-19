@@ -56,7 +56,7 @@
             '    } elif OverrideBtn is 1 {',
             '        aspect CALL_ON;',
             '        set OverrideLed;',
-            '        resume onnextaction;',
+            '        resume after nextaction;',
             '    } elif RouteLatchBtn is 1 {',
             '        aspect PROCEED;',
             '        set RouteLed;',

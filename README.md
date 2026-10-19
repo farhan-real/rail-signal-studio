@@ -13,7 +13,7 @@ A standalone, offline 2D railway signal designer, visual layout creator, and int
 - **Deterministic 20 TPS Engine:** 50ms fixed-rate execution decoupled from browser frame rates.
 - **Visual Code Sections:** Organize complex scripts into named sections (`%% Section Title`) with shared variables and state.
 - **Context-Aware Autocompletion:** Inline suggestions for keywords, aspect names, lamps, feathers, controls, and variables.
-- **State Latching and Timed Recovery:** `resume after <time>;` holds states non-blockingly and automatically restores aspect evaluation upon expiration. `resume onnextaction;` latches states until the next operator input.
+- **State Latching and Timed Recovery:** `resume after <time>;` holds states non-blockingly and automatically restores aspect evaluation upon expiration. `resume after nextaction;` latches states until the next operator input.
 - **Blinking Logic:** Millisecond-accurate pulsing that activates automatically and maintains phase across simulation ticks.
 
 ### 2. Modular Signal Geometry and Plates
@@ -166,7 +166,7 @@ mainloop {
 | `blink <ID> <TIME>ms;` | Pulses a lamp, LED, or group | `blink YELLOW1 400ms;` |
 | `delay <TIME>;` | Pauses sequence execution non-blockingly | `delay 2s;` |
 | `resume after <TIME>;` | Latches state for a duration, then resumes | `resume after 5s;` |
-| `resume onnextaction;` | Latches state until next control moves | `resume onnextaction;` |
+| `resume after nextaction;` | Latches state until next control moves | `resume after nextaction;` |
 | `label <NAME>;` | Marks a jump destination | `label StopPath;` |
 | `jump <NAME>;` | Branches execution to a label | `jump StopPath;` |
 | `end;` | Halts execution for the current 50ms tick | `end;` |

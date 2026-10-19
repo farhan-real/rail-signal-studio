@@ -12,7 +12,7 @@
         keywords: [
             'aspect', 'set', 'unset', 'matrix', 'mainloop', 'loop', 'if', 'elif',
             'else', 'is', 'blink', 'timer', 'next', 'prev', 'jump', 'label', 'int',
-            'enum', 'group', 'end', 'resume', 'after', 'onnextaction', 'delay', 'AND', 'OR', 'NOT'
+            'enum', 'group', 'end', 'resume', 'after', 'nextaction', 'delay', 'AND', 'OR', 'NOT'
         ],
 
         init: function(textarea) {

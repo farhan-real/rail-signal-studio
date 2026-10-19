@@ -6,7 +6,7 @@
             'ASPECT', 'MAINLOOP', 'LOOP', 'IF', 'ELIF', 'ELSE', 'TIMER', 'INT', 'ENUM', 'GROUP'
         ],
         commands: [
-            'SET', 'UNSET', 'BLINK', 'DELAY', 'RESUME', 'AFTER', 'ONNEXTACTION', 'JUMP', 'GOTO', 'LABEL', 'END', 'NEXT', 'PREV'
+            'SET', 'UNSET', 'BLINK', 'DELAY', 'RESUME', 'AFTER', 'NEXTACTION', 'ONNEXTACTION', 'JUMP', 'GOTO', 'LABEL', 'END', 'NEXT', 'PREV'
         ],
         logic: [
             'IS', 'AND', 'OR', 'NOT'

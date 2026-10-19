@@ -6,7 +6,7 @@
             'ASPECT', 'SET', 'UNSET', 'MATRIX', 'MAINLOOP', 'LOOP', 'IF', 'ELIF',
             'ELSE', 'IS', 'BLINK', 'TIMER', 'NEXT', 'PREV', 'JUMP', 'GOTO', 'LABEL',
             'INT', 'ENUM', 'GROUP', 'END', 'SECTION', 'RESUME', 'AFTER',
-            'ONNEXTACTION', 'DELAY', 'AND', 'OR', 'NOT'
+            'NEXTACTION', 'ONNEXTACTION', 'DELAY', 'AND', 'OR', 'NOT'
         ],
 
         lint: function(source) {
