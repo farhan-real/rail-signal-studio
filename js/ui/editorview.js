@@ -3,15 +3,20 @@
 
     var EditorUI = {
         drawer: null,
-        sectionsContainer: null,
+        textarea: null,
+        gutterNumbers: null,
+        gutterHighlight: null,
+        backdropContent: null,
         status: null,
         badge: null,
-        sections: [],
-        nextSectionId: 1,
+        activeLine: 1,
 
         init: function() {
             this.drawer = document.getElementById('editorDrawer');
-            this.sectionsContainer = document.getElementById('sectionsContainer');
+            this.textarea = document.getElementById('scriptTextarea');
+            this.gutterNumbers = document.getElementById('gutterNumbers');
+            this.gutterHighlight = document.getElementById('gutterLineHighlight');
+            this.backdropContent = document.getElementById('editorBackdropContent');
             this.status = document.getElementById('editorStatus');
             this.badge = document.getElementById('currentAspectBadge');
 
@@ -19,6 +24,10 @@
             document.getElementById('btnCloseEditor').addEventListener('click', this.close.bind(this));
             document.getElementById('btnCompileScript').addEventListener('click', this.compile.bind(this));
             document.getElementById('btnAddSection').addEventListener('click', this.onAddSectionClick.bind(this));
+
+            this.textarea.addEventListener('input', this.onInput.bind(this));
+            this.textarea.addEventListener('scroll', this.onScroll.bind(this));
+            this.setupQoL(this.textarea);
 
             SignalEvents.on('state:loaded', this.loadFromState.bind(this));
             SignalEvents.on('runtime:line', this.highlightLine.bind(this));
@@ -29,88 +38,77 @@
         toggle: function() { this.drawer.classList.toggle('open'); },
         close: function() { this.drawer.classList.remove('open'); },
 
-        onAddSectionClick: function() {
-            var newTitle = 'Section ' + (this.sections.length + 1);
-            this.sections.push({ id: this.nextSectionId++, title: newTitle, code: '' });
-            this.renderSections();
-        },
-
         loadFromState: function() {
             var raw = SignalState.script || '';
-            this.sections = [];
-            var lines = raw.split(/\r?\n/);
-            var curTitle = 'Main';
-            var curLines = [];
-
-            for (var i = 0; i < lines.length; i++) {
-                var m = lines[i].match(/^\s*section\s+(?:"([^"]*)"|([A-Za-z0-9_]+))\s*;?/i);
-                if (m) {
-                    if (curLines.length > 0 || this.sections.length > 0) {
-                        var codeStr = curLines.join('\n').trim();
-                        if (codeStr || this.sections.length > 0) {
-                            this.sections.push({ id: this.nextSectionId++, title: curTitle, code: codeStr });
-                        }
-                        curLines = [];
-                    }
-                    curTitle = m[1] || m[2] || 'Section';
-                } else {
-                    curLines.push(lines[i]);
-                }
-            }
-            var lastCode = curLines.join('\n').trim();
-            if (lastCode || this.sections.length === 0) {
-                this.sections.push({ id: this.nextSectionId++, title: curTitle, code: lastCode });
-            }
-            this.renderSections();
+            var converted = raw.replace(/^\s*section\s+(?:"([^"]*)"|([A-Za-z0-9_]+))\s*;?/gim, function(m, p1, p2) {
+                return '%% ' + (p1 || p2 || 'Section');
+            });
+            this.textarea.value = converted;
+            this.onInput();
             this.compile();
         },
 
-        renderSections: function() {
-            var self = this;
-            this.sectionsContainer.innerHTML = '';
+        onInput: function() {
+            this.syncState();
+            this.renderGutterAndSeparators();
+        },
 
-            for (var i = 0; i < this.sections.length; i++) {
-                (function(sec, idx) {
-                    var card = document.createElement('div');
-                    card.className = 'section-card';
-                    card.setAttribute('data-sec-id', sec.id);
-
-                    var head = document.createElement('div');
-                    head.className = 'section-card-head';
-                    head.innerHTML = [
-                        '<input type="text" class="section-title-input" value="' + sec.title + '" />',
-                        self.sections.length > 1 ? '<button class="btn-del-section" title="Remove Section">&times;</button>' : ''
-                    ].join('');
-
-                    var titleInp = head.querySelector('.section-title-input');
-                    titleInp.addEventListener('change', function() { sec.title = this.value; self.syncState(); });
-
-                    var delBtn = head.querySelector('.btn-del-section');
-                    if (delBtn) {
-                        delBtn.addEventListener('click', function() {
-                            self.sections.splice(idx, 1);
-                            self.renderSections();
-                            self.syncState();
-                        });
-                    }
-
-                    var body = document.createElement('div');
-                    body.className = 'section-body';
-                    body.innerHTML = [
-                        '<div class="line-tracker"></div>',
-                        '<textarea class="script-editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>'
-                    ].join('');
-
-                    var ta = body.querySelector('.script-editor');
-                    ta.value = sec.code;
-                    ta.addEventListener('input', function() { sec.code = this.value; self.syncState(); });
-                    self.setupQoL(ta);
-
-                    card.appendChild(head);
-                    card.appendChild(body);
-                    self.sectionsContainer.appendChild(card);
-                })(this.sections[i], i);
+        onScroll: function() {
+            var st = this.textarea.scrollTop;
+            var sl = this.textarea.scrollLeft;
+            this.gutterNumbers.style.transform = 'translateY(' + (-st) + 'px)';
+            this.backdropContent.style.transform = 'translate(' + (-sl) + 'px, ' + (-st) + 'px)';
+            if (this.gutterHighlight.style.display !== 'none') {
+                var top = (this.activeLine - 1) * 20 + 8 - st;
+                this.gutterHighlight.style.top = top + 'px';
             }
+        },
+
+        renderGutterAndSeparators: function() {
+            var val = this.textarea.value;
+            var lines = val.split(/\r?\n/);
+            var numHtml = '';
+            var sepHtml = '';
+            var sectionCount = 0;
+
+            for (var i = 0; i < lines.length; i++) {
+                var lNum = i + 1;
+                var lineText = lines[i];
+                var isSec = /^\s*%%/.test(lineText);
+                var numClass = isSec ? 'gutter-num is-section' : 'gutter-num';
+                numHtml += '<div class="' + numClass + '">' + lNum + '</div>';
+
+                if (isSec) {
+                    sectionCount++;
+                    var topY = i * 20;
+                    sepHtml += '<div class="section-separator-line" style="top:' + topY + 'px;"></div>';
+                }
+            }
+
+            this.gutterNumbers.innerHTML = numHtml;
+            this.backdropContent.innerHTML = sepHtml;
+            this.onScroll();
+        },
+
+        onAddSectionClick: function() {
+            var ta = this.textarea;
+            if (!ta) return;
+            var val = ta.value;
+            var selStart = ta.selectionStart;
+            var selEnd = ta.selectionEnd;
+
+            var existingMatches = val.match(/^\s*%%/gm) || [];
+            var secNum = existingMatches.length + 1;
+            var prefix = (selStart > 0 && val.charAt(selStart - 1) !== '\n') ? '\n\n' : (selStart > 0 ? '\n' : '');
+            var insertion = prefix + '%% Section ' + secNum + '\n';
+
+            ta.value = val.substring(0, selStart) + insertion + val.substring(selEnd);
+            var newPos = selStart + insertion.length;
+            ta.selectionStart = newPos;
+            ta.selectionEnd = newPos;
+            ta.focus();
+
+            this.onInput();
         },
 
         setupQoL: function(el) {
@@ -156,21 +154,8 @@
             });
         },
 
-        getCombinedScript: function() {
-            var parts = [];
-            for (var i = 0; i < this.sections.length; i++) {
-                var sec = this.sections[i];
-                if (this.sections.length === 1 && sec.title === 'Main') {
-                    parts.push(sec.code);
-                } else {
-                    parts.push('section "' + sec.title + '";\n' + sec.code);
-                }
-            }
-            return parts.join('\n\n');
-        },
-
         syncState: function() {
-            SignalState.script = this.getCombinedScript();
+            SignalState.script = this.textarea.value;
             SignalEvents.emit('state:persist');
         },
 
@@ -180,7 +165,8 @@
                 var tokens = SignalLexer.tokenize(SignalState.script);
                 var ast = SignalParser.parse(tokens);
                 SignalRuntime.loadAst(ast);
-                this.status.textContent = 'Syntax Valid. Sections: ' + this.sections.length + ' | Aspects: ' + ast.aspectList.length;
+                var secCount = (this.textarea.value.match(/^\s*%%/gm) || []).length;
+                this.status.textContent = 'Syntax Valid. Sections: ' + secCount + ' | Aspects: ' + ast.aspectList.length;
                 this.status.style.color = '#8c97ad';
             } catch (err) {
                 this.status.textContent = 'Error: ' + err.message;
@@ -188,21 +174,13 @@
             }
         },
 
-        highlightLine: function(globalLine) {
-            var accum = 0;
-            var cards = this.sectionsContainer.querySelectorAll('.section-card');
-            for (var i = 0; i < this.sections.length; i++) {
-                var secLines = ('section "' + this.sections[i].title + '";\n' + this.sections[i].code).split(/\r?\n/).length;
-                var tracker = cards[i] ? cards[i].querySelector('.line-tracker') : null;
-                if (!tracker) continue;
-                tracker.innerHTML = '';
-                if (globalLine > accum && globalLine <= accum + secLines) {
-                    var localLine = globalLine - accum - 1;
-                    var top = Math.max(0, (localLine - 1) * 20 + 8);
-                    tracker.innerHTML = '<div class="line-highlight-bar" style="top:' + top + 'px; height:20px"></div>';
-                }
-                accum += secLines + 1;
-            }
+        highlightLine: function(lineNum) {
+            this.activeLine = lineNum;
+            if (!this.gutterHighlight) return;
+            var st = this.textarea.scrollTop;
+            var top = (lineNum - 1) * 20 + 8 - st;
+            this.gutterHighlight.style.top = top + 'px';
+            this.gutterHighlight.style.display = 'block';
         },
 
         updateBadge: function(aspectName) {

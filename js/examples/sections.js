@@ -24,7 +24,7 @@
             { id: 'ClearLed', type: 'led', label: 'Clear Rep', colorKey: 'green', x: 270, y: 15 }
         ],
         script: [
-            'section "Aspect Definitions";',
+            '%% Aspect Definitions',
             'aspect DANGER {',
             '    unset ALL;',
             '    set RED;',
@@ -47,7 +47,7 @@
             '    set GREEN;',
             '}',
             '',
-            'section "Route Interlocking";',
+            '%% Route Interlocking',
             'enum RouteType { MAIN, LOOP };',
             '',
             'mainloop {',
@@ -75,7 +75,7 @@
             '    }',
             '}',
             '',
-            'section "Desk Indicator LEDs";',
+            '%% Desk Indicator LEDs',
             'mainloop {',
             '    if RED set {',
             '        set StopLed;',

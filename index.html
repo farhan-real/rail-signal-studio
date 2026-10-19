@@ -96,7 +96,18 @@
                         <button id="btnCloseEditor" class="drawer-close">&times;</button>
                     </div>
                 </div>
-                <div id="sectionsContainer" class="sections-scrollable"></div>
+                <div id="editorBlock" class="editor-block">
+                    <div id="editorGutter" class="editor-gutter">
+                        <div id="gutterLineHighlight" class="gutter-line-highlight"></div>
+                        <div id="gutterNumbers" class="gutter-numbers"></div>
+                    </div>
+                    <div id="editorArea" class="editor-area">
+                        <div id="editorBackdrop" class="editor-backdrop">
+                            <div id="editorBackdropContent" class="editor-backdrop-content"></div>
+                        </div>
+                        <textarea id="scriptTextarea" class="script-editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+                    </div>
+                </div>
                 <div id="editorStatus" class="editor-status">Ready</div>
             </aside>
         </main>

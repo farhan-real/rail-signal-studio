@@ -135,7 +135,9 @@
                 if (tok.type === 'SEMI') {
                     next();
                 } else if (tok.type === 'SECTION') {
-                    next(); if (peek().type === 'STRING' || peek().type === 'IDENT') next(); match('SEMI');
+                    next();
+                    if (peek().type === 'STRING' || peek().type === 'IDENT') next();
+                    if (peek().type === 'SEMI') match('SEMI');
                 } else if (tok.type === 'INT') {
                     next(); var iName = next(); match('EQUALS'); ast.variables[iName.value] = parseInt((next() || {}).value, 10) || 0; match('SEMI');
                 } else if (tok.type === 'ENUM') {

@@ -21,6 +21,12 @@
                 var cleanLine = rawLine.replace(/\/\/.*/g, '').trim();
                 if (!cleanLine) continue;
 
+                if (cleanLine.indexOf('%%') === 0) {
+                    var secTitle = cleanLine.substring(2).trim();
+                    tokens.push({ type: 'SECTION', value: secTitle, line: lineNum });
+                    continue;
+                }
+
                 var regex = /"([^"]*)"|([A-Za-z0-9_]+)|([{};=(),><+\-])|([^\s]+)/g;
                 var match;
 
