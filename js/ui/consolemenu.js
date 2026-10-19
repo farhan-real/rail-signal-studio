@@ -61,7 +61,6 @@
 
             var ctrl = isCtrl ? SignalState.controls.filter(function(c) { return c.id === targetId; })[0] : null;
             var textObj = !isCtrl ? SignalState.texts.filter(function(t) { return t.id === targetId; })[0] : null;
-
             var menu = document.createElement('div');
             menu.className = 'control-dot-menu';
 
@@ -72,27 +71,17 @@
             var btnMove = document.createElement('button');
             btnMove.className = 'cmenu-btn';
             btnMove.textContent = 'Move';
-            btnMove.addEventListener('click', function(e) {
-                e.stopPropagation();
-                self.enterMoveMode(wrap);
-                self.closeMenu();
-            });
+            btnMove.addEventListener('click', function(e) { e.stopPropagation(); self.enterMoveMode(wrap); self.closeMenu(); });
 
             var btnResize = document.createElement('button');
             btnResize.className = 'cmenu-btn';
             btnResize.textContent = 'Resize';
-            btnResize.addEventListener('click', function(e) {
-                e.stopPropagation();
-                self.togglePanel(menu, 'resize', ctrl || textObj);
-            });
+            btnResize.addEventListener('click', function(e) { e.stopPropagation(); self.togglePanel(menu, 'resize', ctrl || textObj); });
 
             var btnModify = document.createElement('button');
             btnModify.className = 'cmenu-btn';
             btnModify.textContent = 'Modify';
-            btnModify.addEventListener('click', function(e) {
-                e.stopPropagation();
-                self.togglePanel(menu, 'modify', ctrl || textObj, isCtrl);
-            });
+            btnModify.addEventListener('click', function(e) { e.stopPropagation(); self.togglePanel(menu, 'modify', ctrl || textObj, isCtrl, wrap); });
 
             var btnDel = document.createElement('button');
             btnDel.className = 'cmenu-btn btn-danger';
@@ -123,7 +112,7 @@
             SignalEvents.emit('state:persist');
         },
 
-        togglePanel: function(menu, type, target, isCtrl) {
+        togglePanel: function(menu, type, target, isCtrl, wrap) {
             var existing = menu.querySelector('.cmenu-panel');
             if (existing) {
                 var curType = existing.getAttribute('data-panel-type');
@@ -136,7 +125,7 @@
             panel.setAttribute('data-panel-type', type);
 
             if (type === 'resize') this.buildResizePanel(panel, target);
-            else if (type === 'modify') this.buildModifyPanel(panel, target, isCtrl);
+            else if (type === 'modify') this.buildModifyPanel(panel, target, isCtrl, wrap);
             menu.appendChild(panel);
         },
 
@@ -165,7 +154,8 @@
             panel.appendChild(row);
         },
 
-        buildModifyPanel: function(panel, target, isCtrl) {
+        buildModifyPanel: function(panel, target, isCtrl, wrap) {
+            var self = this;
             if (!isCtrl) {
                 var lbl = document.createElement('span');
                 lbl.className = 'cmenu-label';
@@ -173,21 +163,51 @@
                 var inp = document.createElement('input');
                 inp.className = 'cmenu-input';
                 inp.value = target.text || '';
-                inp.addEventListener('change', function() { target.text = this.value; SignalEvents.emit('state:persist'); });
+                inp.addEventListener('input', function() {
+                    target.text = this.value;
+                    var txtInp = wrap ? wrap.querySelector('.text-content') : null;
+                    if (txtInp) txtInp.value = target.text;
+                    SignalEvents.emit('state:persist');
+                });
                 panel.appendChild(lbl);
                 panel.appendChild(inp);
                 return;
             }
 
-            var nameLbl = document.createElement('span');
-            nameLbl.className = 'cmenu-label';
-            nameLbl.textContent = 'Label';
-            var nameInp = document.createElement('input');
-            nameInp.className = 'cmenu-input';
-            nameInp.value = target.label || target.id;
-            nameInp.addEventListener('change', function() { target.label = this.value; SignalEvents.emit('state:persist'); });
-            panel.appendChild(nameLbl);
-            panel.appendChild(nameInp);
+            var lblLabel = document.createElement('span');
+            lblLabel.className = 'cmenu-label';
+            lblLabel.textContent = 'Display Label';
+            var inpLabel = document.createElement('input');
+            inpLabel.className = 'cmenu-input';
+            inpLabel.value = target.label || target.id;
+            inpLabel.addEventListener('change', function() {
+                target.label = this.value.trim() || target.id;
+                SignalEvents.emit('state:persist');
+                if (window.ConsoleUI) window.ConsoleUI.render();
+            });
+            panel.appendChild(lblLabel);
+            panel.appendChild(inpLabel);
+
+            var lblId = document.createElement('span');
+            lblId.className = 'cmenu-label';
+            lblId.textContent = 'Script Identifier (ID)';
+            var inpId = document.createElement('input');
+            inpId.className = 'cmenu-input';
+            inpId.value = target.id;
+            inpId.addEventListener('change', function() {
+                var newId = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+                if (newId && newId !== target.id) {
+                    var oldId = target.id;
+                    SignalState.controlValues[newId] = SignalState.controlValues[oldId];
+                    delete SignalState.controlValues[oldId];
+                    target.id = newId;
+                    if (wrap) wrap.setAttribute('data-id', newId);
+                    SignalEvents.emit('state:persist');
+                    if (window.ConsoleUI) window.ConsoleUI.render();
+                }
+            });
+            panel.appendChild(lblId);
+            panel.appendChild(inpId);
 
             if (target.type === 'led') {
                 var cLbl = document.createElement('span');
@@ -210,40 +230,9 @@
                 panel.appendChild(cLbl);
                 panel.appendChild(cRow);
             } else if (target.type === 'knob') {
-                var modeLbl = document.createElement('span');
-                modeLbl.className = 'cmenu-label';
-                modeLbl.textContent = 'Dial Arc Mode';
-                var mRow = document.createElement('div');
-                mRow.className = 'cmenu-row';
-
-                var btnHalf = document.createElement('button');
-                btnHalf.className = 'cmenu-btn' + (target.mode === 'half' ? ' active' : '');
-                btnHalf.textContent = 'Top Half';
-                btnHalf.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    target.mode = 'half';
-                    SignalEvents.emit('state:persist');
-                    if (window.ConsoleUI) window.ConsoleUI.render();
-                });
-
-                var btnFull = document.createElement('button');
-                btnFull.className = 'cmenu-btn' + (target.mode !== 'half' ? ' active' : '');
-                btnFull.textContent = 'Full 270 deg';
-                btnFull.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    target.mode = 'full';
-                    SignalEvents.emit('state:persist');
-                    if (window.ConsoleUI) window.ConsoleUI.render();
-                });
-
-                mRow.appendChild(btnHalf);
-                mRow.appendChild(btnFull);
-                panel.appendChild(modeLbl);
-                panel.appendChild(mRow);
-
                 var stLbl = document.createElement('span');
                 stLbl.className = 'cmenu-label';
-                stLbl.textContent = 'Positions (comma separated)';
+                stLbl.textContent = 'Dial Positions (comma separated)';
                 var stInp = document.createElement('input');
                 stInp.className = 'cmenu-input';
                 stInp.value = (target.states || ['0', '1', '2']).join(', ');
@@ -254,23 +243,6 @@
                 });
                 panel.appendChild(stLbl);
                 panel.appendChild(stInp);
-            } else if (target.type === 'lever') {
-                var posLbl = document.createElement('span');
-                posLbl.className = 'cmenu-label';
-                posLbl.textContent = 'Positions (2-5)';
-                var posInp = document.createElement('input');
-                posInp.type = 'number';
-                posInp.min = '2';
-                posInp.max = '5';
-                posInp.className = 'cmenu-input';
-                posInp.value = target.positions || 2;
-                posInp.addEventListener('change', function() {
-                    target.positions = Math.max(2, Math.min(5, parseInt(this.value, 10) || 2));
-                    SignalEvents.emit('state:persist');
-                    if (window.ConsoleUI) window.ConsoleUI.render();
-                });
-                panel.appendChild(posLbl);
-                panel.appendChild(posInp);
             }
         },
 

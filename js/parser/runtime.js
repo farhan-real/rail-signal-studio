@@ -91,28 +91,35 @@
         },
 
         checkIs: function(leftId, rightVal) {
-            var ctrl = SignalState.controls.filter(function(c) { return c.id.toUpperCase() === String(leftId).toUpperCase(); })[0];
+            var cleanLeft = String(leftId).replace(/[\s_]/g, '').toUpperCase();
+            var ctrl = SignalState.controls.filter(function(c) {
+                var cIdClean = String(c.id).replace(/[\s_]/g, '').toUpperCase();
+                var cLblClean = c.label ? String(c.label).replace(/[\s_]/g, '').toUpperCase() : '';
+                return cIdClean === cleanLeft || cLblClean === cleanLeft;
+            })[0];
+
             if (ctrl) {
                 var curIdx = SignalState.getControlValue(ctrl.id);
                 if (curIdx === undefined) curIdx = 0;
-                var rawClean = String(rightVal).replace(/[\s"']/g, '').toUpperCase();
+                var rawClean = String(rightVal).replace(/[\s_"'`]/g, '').toUpperCase();
                 if (String(curIdx) === String(rightVal) || String(curIdx) === rawClean) return true;
                 var states = (ctrl.enumType && SignalState.enums[ctrl.enumType]) || ctrl.states;
                 if (states && states[curIdx]) {
-                    var sClean = String(states[curIdx]).replace(/[\s"']/g, '').toUpperCase();
+                    var sClean = String(states[curIdx]).replace(/[\s_"'`]/g, '').toUpperCase();
                     if (sClean === rawClean) return true;
                 }
                 for (var en in SignalState.enums) {
                     var list = SignalState.enums[en];
                     for (var m = 0; m < list.length; m++) {
-                        var eClean = String(list[m]).replace(/[\s"']/g, '').toUpperCase();
+                        var eClean = String(list[m]).replace(/[\s_"'`]/g, '').toUpperCase();
                         if (eClean === rawClean && curIdx === m) return true;
                     }
                 }
                 return false;
             }
-            var lVal = String(this.resolveValue(leftId)).replace(/[\s"']/g, '').toUpperCase();
-            var rVal = String(this.resolveValue(rightVal)).replace(/[\s"']/g, '').toUpperCase();
+
+            var lVal = String(this.resolveValue(leftId)).replace(/[\s_"'`]/g, '').toUpperCase();
+            var rVal = String(this.resolveValue(rightVal)).replace(/[\s_"'`]/g, '').toUpperCase();
             if (rVal === 'ON' || rVal === 'SET') return lVal === '1' || lVal === 'ON' || lVal === 'SET';
             if (rVal === 'OFF') return lVal === '0' || lVal === 'OFF';
             return lVal === rVal;
@@ -290,7 +297,13 @@
         },
 
         executeAssign: function(target, value) {
-            var ctrl = SignalState.controls.filter(function(c) { return c.id.toUpperCase() === String(target).toUpperCase(); })[0];
+            var cleanT = String(target).replace(/[\s_]/g, '').toUpperCase();
+            var ctrl = SignalState.controls.filter(function(c) {
+                var cIdClean = String(c.id).replace(/[\s_]/g, '').toUpperCase();
+                var cLblClean = c.label ? String(c.label).replace(/[\s_]/g, '').toUpperCase() : '';
+                return cIdClean === cleanT || cLblClean === cleanT;
+            })[0];
+
             if (ctrl) {
                 var targetIdx = -1;
                 for (var en in SignalState.enums) {
