@@ -17,29 +17,53 @@
             pos6: { angle: 45, facetIndex: 3 }
         },
 
-        getHubCenter: function() {
+        getHubCenter: function(fb) {
+            if (fb && fb.x !== undefined && fb.y !== undefined) return { x: fb.x, y: fb.y };
+            if (window.SignalState && window.SignalState.featherBase) {
+                var s = window.SignalState.featherBase;
+                return { x: s.x !== undefined ? s.x : 0, y: s.y !== undefined ? s.y : -196 };
+            }
             return { x: 0, y: -196 };
         },
 
-        getHeadTopY: function() {
-            if (window.SignalState && window.SignalState.shapes && window.SignalState.shapes.length > 0) {
-                var shapes = window.SignalState.shapes;
-                var minY = null;
-                for (var i = 0; i < shapes.length; i++) {
-                    var s = shapes[i];
-                    var sx = s.x || 0, sw = s.width || (s.radius ? s.radius * 2 : 60);
-                    if (sx <= 20 && (sx + sw) >= -20) {
-                        var sy = s.y || 0;
-                        if (sy > -190) {
-                            if (minY === null || sy < minY) {
-                                minY = sy;
-                            }
+        detectShapeTopSurface: function(targetX, minAboveY) {
+            var shapes = (window.SignalState && window.SignalState.shapes) || [];
+            var closestY = null;
+
+            for (var i = 0; i < shapes.length; i++) {
+                var s = shapes[i];
+                var yAtX = null;
+
+                if (s.type === 'rect' || s.type === 'rounded-rect' || !s.type) {
+                    var sx = s.x || 0, sw = s.width || 60, sy = s.y || 0;
+                    if (targetX >= sx - 4 && targetX <= (sx + sw + 4)) {
+                        yAtX = sy;
+                    }
+                } else if (s.type === 'triangle') {
+                    var tx = s.x || 0, tw = s.width || 40, ty = s.y || 0, th = s.height || 40;
+                    var dir = (s.direction || 'up').toLowerCase();
+                    if (targetX >= tx && targetX <= (tx + tw)) {
+                        if (dir === 'up') {
+                            var apexX = tx + tw / 2;
+                            var dist = Math.abs(targetX - apexX);
+                            yAtX = ty + (dist / (tw / 2)) * th;
+                        } else {
+                            yAtX = ty;
                         }
                     }
+                } else if (s.type === 'circle-sector') {
+                    var cx = s.x || 0, cy = s.y || 0, r = s.radius || 30;
+                    if (Math.abs(targetX - cx) <= r) {
+                        var dy = Math.sqrt(Math.max(0, r * r - Math.pow(targetX - cx, 2)));
+                        yAtX = cy - dy;
+                    }
                 }
-                if (minY !== null) return minY;
+
+                if (yAtX !== null && yAtX > (minAboveY - 10)) {
+                    if (closestY === null || yAtX < closestY) closestY = yAtX;
+                }
             }
-            return -160;
+            return closestY !== null ? closestY : -160;
         },
 
         getOctagonVertices: function(cx, cy) {
@@ -55,18 +79,29 @@
             ];
         },
 
-        renderTrunnionMount: function(hub) {
+        renderTrunnionMount: function(hub, fb) {
             var hx = hub.x;
-            var headTopY = this.getHeadTopY();
             var octBottomY = hub.y + 35.5;
-            var collarHeight = Math.max(1, headTopY - octBottomY);
+            var colW = (fb && fb.collarWidth) ? fb.collarWidth : 32;
+            var halfW = colW / 2;
+
+            var headTopY;
+            if (fb && fb.collarHeight !== null && fb.collarHeight !== undefined && !fb.autoConnect) {
+                headTopY = octBottomY + Math.max(4, fb.collarHeight);
+            } else {
+                headTopY = this.detectShapeTopSurface(hx, octBottomY);
+            }
+
+            var collarHeight = Math.max(4, headTopY - octBottomY);
+            var leftContactY = this.detectShapeTopSurface(hx - halfW, octBottomY);
+            var rightContactY = this.detectShapeTopSurface(hx + halfW, octBottomY);
 
             var svg = '<g class="feather-trunnion-group">';
-            svg += '<rect x="' + (hx - 16) + '" y="' + octBottomY.toFixed(1) + '" width="32" height="' + collarHeight.toFixed(1) + '" class="feather-trunnion-collar" />';
-            svg += '<line x1="' + (hx - 18) + '" y1="' + headTopY.toFixed(1) + '" x2="' + (hx + 18) + '" y2="' + headTopY.toFixed(1) + '" class="feather-trunnion-flange" />';
-            svg += '<line x1="' + (hx - 16) + '" y1="' + octBottomY.toFixed(1) + '" x2="' + (hx + 16) + '" y2="' + octBottomY.toFixed(1) + '" class="feather-trunnion-flange" />';
-            svg += '<circle cx="' + (hx - 7) + '" cy="' + (octBottomY + 2.5).toFixed(1) + '" r="1.3" class="feather-trunnion-bolt" />';
-            svg += '<circle cx="' + (hx + 7) + '" cy="' + (octBottomY + 2.5).toFixed(1) + '" r="1.3" class="feather-trunnion-bolt" />';
+            svg += '<rect x="' + (hx - halfW) + '" y="' + octBottomY.toFixed(1) + '" width="' + colW + '" height="' + collarHeight.toFixed(1) + '" class="feather-trunnion-collar" />';
+            svg += '<line x1="' + (hx - halfW - 2) + '" y1="' + octBottomY.toFixed(1) + '" x2="' + (hx + halfW + 2) + '" y2="' + octBottomY.toFixed(1) + '" class="feather-trunnion-flange" />';
+            svg += '<line x1="' + (hx - halfW - 3) + '" y1="' + leftContactY.toFixed(1) + '" x2="' + (hx + halfW + 3) + '" y2="' + rightContactY.toFixed(1) + '" class="feather-trunnion-flange" />';
+            svg += '<circle cx="' + (hx - 7) + '" cy="' + (octBottomY + 3.0).toFixed(1) + '" r="1.4" class="feather-trunnion-bolt" />';
+            svg += '<circle cx="' + (hx + 7) + '" cy="' + (octBottomY + 3.0).toFixed(1) + '" r="1.4" class="feather-trunnion-bolt" />';
             svg += '</g>';
             return svg;
         },
@@ -75,21 +110,19 @@
             var verts = this.getOctagonVertices(hub.x, hub.y);
             var attached = {};
 
-            for (var i = 0; i < feathers.length; i++) {
-                var pKey = (feathers[i].position || 'left1').toLowerCase();
-                var conf = this.positions[pKey];
-                if (conf) attached[conf.facetIndex] = conf;
+            if (feathers && feathers.length > 0) {
+                for (var i = 0; i < feathers.length; i++) {
+                    var pKey = (feathers[i].position || 'left1').toLowerCase();
+                    var conf = this.positions[pKey];
+                    if (conf) attached[conf.facetIndex] = conf;
+                }
             }
 
             var path = 'M ' + verts[0].x.toFixed(1) + ' ' + verts[0].y.toFixed(1);
-            var hw = 14.0;
-            var hwBottom = 10.5;
-            var tDist = 9.0;
-            var straightLen = 98.0;
+            var hw = 14.0, hwBottom = 10.5, tDist = 9.0, straightLen = 98.0;
 
             for (var f = 0; f < 8; f++) {
-                var vStart = verts[f];
-                var vEnd = verts[(f + 1) % 8];
+                var vStart = verts[f], vEnd = verts[(f + 1) % 8];
                 var arm = attached[f];
 
                 if (!arm) {
@@ -98,21 +131,13 @@
                     var rad = arm.angle * Math.PI / 180;
                     var ux = Math.cos(rad), uy = Math.sin(rad);
                     var tx = -uy, ty = ux;
-
-                    var mx = (vStart.x + vEnd.x) / 2;
-                    var my = (vStart.y + vEnd.y) / 2;
+                    var mx = (vStart.x + vEnd.x) / 2, my = (vStart.y + vEnd.y) / 2;
 
                     var bLeftX = (mx - tx * hwBottom).toFixed(1), bLeftY = (my - ty * hwBottom).toFixed(1);
                     var bRightX = (mx + tx * hwBottom).toFixed(1), bRightY = (my + ty * hwBottom).toFixed(1);
-
-                    var transLeftX = (mx + ux * tDist - tx * hw).toFixed(1);
-                    var transLeftY = (my + uy * tDist - ty * hw).toFixed(1);
-                    var transRightX = (mx + ux * tDist + tx * hw).toFixed(1);
-                    var transRightY = (my + uy * tDist + ty * hw).toFixed(1);
-
-                    var tCenterX = hub.x + ux * straightLen;
-                    var tCenterY = hub.y + uy * straightLen;
-
+                    var transLeftX = (mx + ux * tDist - tx * hw).toFixed(1), transLeftY = (my + uy * tDist - ty * hw).toFixed(1);
+                    var transRightX = (mx + ux * tDist + tx * hw).toFixed(1), transRightY = (my + uy * tDist + ty * hw).toFixed(1);
+                    var tCenterX = hub.x + ux * straightLen, tCenterY = hub.y + uy * straightLen;
                     var tLeftX = (tCenterX - tx * hw).toFixed(1), tLeftY = (tCenterY - ty * hw).toFixed(1);
                     var tRightX = (tCenterX + tx * hw).toFixed(1), tRightY = (tCenterY + ty * hw).toFixed(1);
 
@@ -156,7 +181,6 @@
         renderArmLamps: function(feather, isLit, hub) {
             var pKey = (feather.position || 'left1').toLowerCase();
             var conf = this.positions[pKey] || this.positions.left1;
-
             var rad = conf.angle * Math.PI / 180;
             var ux = Math.cos(rad), uy = Math.sin(rad);
 
@@ -183,56 +207,45 @@
         },
 
         renderCommonLamp: function(hub, isAnyLit) {
-            var hx = hub.x, hy = hub.y;
-            var optic = this.renderLampOptic(hx, hy, 7.4);
-
+            var optic = this.renderLampOptic(hub.x, hub.y, 7.4);
             var svg = '<g class="feather-common-lamp-group">';
             svg += optic.off;
-
-            var litStyle = isAnyLit ? 'display: inline;' : 'display: none;';
-            svg += '<g class="feather-common-lit-layer" style="' + litStyle + '">';
+            svg += '<g class="feather-common-lit-layer" style="' + (isAnyLit ? 'display: inline;' : 'display: none;') + '">';
             svg += optic.lit;
             svg += '</g>';
-
             svg += optic.visor;
             svg += '</g>';
             return svg;
         },
 
         renderAll: function(feathers, getLampFn) {
-            if (!feathers || feathers.length === 0) return '';
-            var hub = this.getHubCenter();
+            var fb = (window.SignalState && window.SignalState.featherBase) || { enabled: false };
+            var hasFeathers = feathers && feathers.length > 0;
+            var isBaseActive = fb.enabled || hasFeathers;
 
+            if (!isBaseActive) return '';
+
+            var hub = this.getHubCenter(fb);
             var isAnyLit = false;
-            for (var k = 0; k < feathers.length; k++) {
-                if (getLampFn && getLampFn(feathers[k].id)) {
-                    isAnyLit = true;
-                    break;
+            if (hasFeathers && getLampFn) {
+                for (var k = 0; k < feathers.length; k++) {
+                    if (getLampFn(feathers[k].id)) { isAnyLit = true; break; }
                 }
             }
 
             var svg = '<g class="feather-assembly">';
-            svg += this.renderTrunnionMount(hub);
-            svg += this.buildUnifiedHousing(hub, feathers);
+            svg += this.renderTrunnionMount(hub, fb);
+            svg += this.buildUnifiedHousing(hub, feathers || []);
 
-            for (var i = 0; i < feathers.length; i++) {
-                var fth = feathers[i];
-                var isLit = getLampFn ? !!getLampFn(fth.id) : false;
-                svg += this.renderArmLamps(fth, isLit, hub);
+            if (hasFeathers) {
+                for (var i = 0; i < feathers.length; i++) {
+                    var fth = feathers[i];
+                    var isLit = getLampFn ? !!getLampFn(fth.id) : false;
+                    svg += this.renderArmLamps(fth, isLit, hub);
+                }
             }
 
             svg += this.renderCommonLamp(hub, isAnyLit);
-            svg += '</g>';
-            return svg;
-        },
-
-        render: function(feather, isLit) {
-            var hub = this.getHubCenter();
-            var svg = '<g class="feather-assembly">';
-            svg += this.renderTrunnionMount(hub);
-            svg += this.buildUnifiedHousing(hub, [feather]);
-            svg += this.renderArmLamps(feather, isLit, hub);
-            svg += this.renderCommonLamp(hub, !!isLit);
             svg += '</g>';
             return svg;
         },

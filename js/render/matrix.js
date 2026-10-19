@@ -31,16 +31,10 @@
     var MatrixRenderer = {
         render: function(matrixConf, text) {
             var cx = matrixConf.x !== undefined ? matrixConf.x : 0;
-            var hasFeathers = window.SignalState && window.SignalState.feathers && window.SignalState.feathers.length > 0;
+            var hasFeathers = (window.SignalState && window.SignalState.feathers && window.SignalState.feathers.length > 0) ||
+                (window.SignalState && window.SignalState.featherBase && window.SignalState.featherBase.enabled);
 
             var cy = matrixConf.y !== undefined ? matrixConf.y : (hasFeathers ? -258 : -192);
-
-            if (hasFeathers) {
-                if (cy > -240 || cy === -202 || cy === -210) cy = -258;
-            } else {
-                if (cy < -205 || cy === -215 || cy === -202) cy = -192;
-            }
-
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
             var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).trim().toUpperCase();
             var txt = isLit ? rawTxt : '';
@@ -50,9 +44,17 @@
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
             var boxBottomY = by + boxHeight;
 
-            var mountTargetY = hasFeathers ? -231.5 : -160;
-            var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
+            var mountTargetY;
+            if (hasFeathers && window.FeatherRenderer) {
+                var hub = window.FeatherRenderer.getHubCenter(window.SignalState.featherBase);
+                mountTargetY = hub.y - 35.5;
+            } else if (window.FeatherRenderer) {
+                mountTargetY = window.FeatherRenderer.detectShapeTopSurface(cx, boxBottomY);
+            } else {
+                mountTargetY = -160;
+            }
 
+            var bracketHeight = Math.max(4, mountTargetY - boxBottomY);
             var svg = '<g class="theatre-matrix-unit" data-matrix-id="' + (matrixConf.id || 'ROUTE_BOX') + '">';
 
             svg += '<rect x="' + (cx - 10) + '" y="' + boxBottomY.toFixed(1) + '" width="20" height="' + bracketHeight.toFixed(1) + '" rx="1" fill="#121620" stroke="#283042" stroke-width="1.5" />';

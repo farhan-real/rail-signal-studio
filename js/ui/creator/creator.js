@@ -114,9 +114,9 @@
             } else if (this.activeTab === 'lamps') {
                 if (window.CreatorLamps) window.CreatorLamps.render(body);
             } else if (this.activeTab === 'routes') {
-                if (window.CreatorExtras) window.CreatorExtras.renderRoutes(body);
+                if (window.CreatorRoutes) window.CreatorRoutes.render(body);
             } else if (this.activeTab === 'structure') {
-                if (window.CreatorExtras) window.CreatorExtras.renderStructure(body);
+                if (window.CreatorStructure) window.CreatorStructure.render(body);
             }
         }
     };

@@ -4,14 +4,15 @@
     var CreatorShapes = {
         render: function(container) {
             var html = '';
-            html += '<div style="display:flex; gap:6px; margin-bottom:12px;">';
+            html += '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">';
+            html += '  <button id="btnAddRectPlate" class="tool-btn" style="flex:1;">+ Rectangle / Plate</button>';
             html += '  <button id="btnAddRoundedRect" class="tool-btn" style="flex:1;">+ Rounded Box</button>';
             html += '  <button id="btnAddCircleSector" class="tool-btn" style="flex:1;">+ Sector / Cap</button>';
             html += '  <button id="btnAddTriangle" class="tool-btn" style="flex:1;">+ Triangle</button>';
             html += '</div>';
 
             if (!SignalState.shapes || SignalState.shapes.length === 0) {
-                html += '<div style="color:var(--text-secondary); font-size:11px; text-align:center; padding:18px;">No target plates yet. Add one above.</div>';
+                html += '<div style="color:var(--text-secondary); font-size:11px; text-align:center; padding:18px;">No target plates or sub-rectangles yet. Add one above.</div>';
                 container.innerHTML = html;
                 this.bindAddButtons(container);
                 return;
@@ -22,10 +23,11 @@
                 var sFill = s.fill || '#0a0d16';
                 var sStroke = s.stroke || '#262d3e';
                 var sSw = s.strokeWidth !== undefined ? s.strokeWidth : 2;
+                var displayName = s.name || (s.text ? ('Label: ' + s.text.replace(/\n/g, ' ')) : ('Plate ' + (i + 1)));
 
                 html += '<div class="builder-card" data-shape-index="' + i + '">';
                 html += '  <div class="builder-card-header">';
-                html += '    <span class="card-badge">Plate ' + (i + 1) + ' <small style="color:var(--text-secondary)">(' + s.type + ')</small></span>';
+                html += '    <span class="card-badge">' + displayName + ' <small style="color:var(--text-secondary)">(' + (s.type || 'rect') + ')</small></span>';
                 html += '    <div class="card-actions">';
                 if (i > 0) html += '      <button class="tool-btn btn-move-shape" data-dir="-1" data-index="' + i + '" title="Send Backward">&uarr;</button>';
                 if (i < SignalState.shapes.length - 1) html += '      <button class="tool-btn btn-move-shape" data-dir="1" data-index="' + i + '" title="Bring Forward">&darr;</button>';
@@ -33,8 +35,10 @@
                 html += '    </div>';
                 html += '  </div>';
 
-                if (s.type === 'rounded-rect') {
-                    var corners = s.corners || [8, 8, 8, 8];
+                html += '  <div><label class="form-label">Plate Name / Description</label><input type="text" class="form-input sh-prop" data-prop="name" placeholder="e.g. ID Plate, Spacer Box" value="' + (s.name || '') + '"/></div>';
+
+                if (s.type === 'rounded-rect' || s.type === 'rect' || !s.type) {
+                    var corners = s.corners || (s.type === 'rect' ? [0, 0, 0, 0] : [8, 8, 8, 8]);
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">X Pos</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x || 0) + '"/></div>';
                     html += '    <div><label class="form-label">Y Pos</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y || 0) + '"/></div>';
@@ -50,7 +54,7 @@
                     html += '    <div class="corner-cell"><span style="font-size:9px; color:var(--text-secondary);">Bottom Left</span><input type="number" min="0" class="form-input corner-input" data-c-idx="3" value="' + (corners[3] || 0) + '"/></div>';
                     html += '    <div class="corner-cell"><span style="font-size:9px; color:var(--text-secondary);">Bottom Right</span><input type="number" min="0" class="form-input corner-input" data-c-idx="2" value="' + (corners[2] || 0) + '"/></div>';
                     html += '  </div>';
-                    html += '  <div><label class="form-label">Text Label (Optional)</label><input type="text" class="form-input sh-prop" data-prop="text" placeholder="e.g. S-12" value="' + (s.text || '') + '"/></div>';
+                    html += '  <div><label class="form-label">Text Stencil (e.g. PWS S-8)</label><input type="text" class="form-input sh-prop" data-prop="text" placeholder="e.g. S-12" value="' + (s.text || '') + '"/></div>';
                 } else if (s.type === 'circle-sector') {
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Center X</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x || 0) + '"/></div>';
@@ -91,9 +95,18 @@
         },
 
         bindAddButtons: function(container) {
+            document.getElementById('btnAddRectPlate').addEventListener('click', function() {
+                SignalState.shapes.push({
+                    name: 'Spacer Rectangle', type: 'rect', x: -16, y: 45, width: 32, height: 24,
+                    corners: [0, 0, 0, 0], fill: '#121622', stroke: '#262d3e', strokeWidth: 1.8
+                });
+                SignalEvents.emit('state:changed');
+                SignalEvents.emit('state:persist');
+            });
+
             document.getElementById('btnAddRoundedRect').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    type: 'rounded-rect', x: -28, y: -160, width: 56, height: 160,
+                    name: 'Rounded Target Plate', type: 'rounded-rect', x: -28, y: -160, width: 56, height: 160,
                     corners: [28, 28, 28, 28], fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
                 SignalEvents.emit('state:changed');
@@ -102,7 +115,7 @@
 
             document.getElementById('btnAddCircleSector').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    type: 'circle-sector', x: 0, y: -50, radius: 36, percent: 50,
+                    name: 'Semicircle Cap', type: 'circle-sector', x: 0, y: -50, radius: 36, percent: 50,
                     startAngle: 180, fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
                 SignalEvents.emit('state:changed');
@@ -111,7 +124,7 @@
 
             document.getElementById('btnAddTriangle').addEventListener('click', function() {
                 SignalState.shapes.push({
-                    type: 'triangle', x: -25, y: -180, width: 50, height: 35,
+                    name: 'Triangle Bracket', type: 'triangle', x: -25, y: -180, width: 50, height: 35,
                     direction: 'up', fill: '#0a0d16', stroke: '#262d3e', strokeWidth: 2.5
                 });
                 SignalEvents.emit('state:changed');
@@ -142,7 +155,7 @@
                     for (var ci = 0; ci < corners.length; ci++) {
                         corners[ci].addEventListener('change', function() {
                             var cPos = parseInt(this.getAttribute('data-c-idx'), 10);
-                            if (!shape.corners) shape.corners = [8, 8, 8, 8];
+                            if (!shape.corners) shape.corners = [0, 0, 0, 0];
                             shape.corners[cPos] = Math.max(0, parseFloat(this.value) || 0);
                             SignalEvents.emit('state:changed');
                             SignalEvents.emit('state:persist');
@@ -152,7 +165,7 @@
                     var btnSync = card.querySelector('.btn-sync-corners');
                     if (btnSync) {
                         btnSync.addEventListener('click', function() {
-                            var first = (shape.corners && shape.corners[0] !== undefined) ? shape.corners[0] : 16;
+                            var first = (shape.corners && shape.corners[0] !== undefined) ? shape.corners[0] : 0;
                             var promptVal = prompt('Enter radius for all 4 corners (px):', first);
                             if (promptVal !== null) {
                                 var parsed = Math.max(0, parseFloat(promptVal) || 0);
@@ -206,5 +219,4 @@
     };
 
     window.CreatorShapes = CreatorShapes;
-    window.InspectorShapes = CreatorShapes;
 })(window);

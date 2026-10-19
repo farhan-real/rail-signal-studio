@@ -4,20 +4,21 @@
     var ShapeRenderer = {
         render: function(shape) {
             switch (shape.type) {
+                case 'rect':
                 case 'rounded-rect': return this.renderRoundedRect(shape);
                 case 'circle-sector': return this.renderCircleSector(shape);
                 case 'triangle': return this.renderTriangle(shape);
-                default: return '';
+                default: return this.renderRoundedRect(shape);
             }
         },
 
         renderRoundedRect: function(s) {
             var x = s.x || 0, y = s.y || 0, w = s.width || 60, h = s.height || 100;
-            var r = s.corners || [8, 8, 8, 8];
-            var tl = r[0] !== undefined ? r[0] : 8;
-            var tr = r[1] !== undefined ? r[1] : 8;
-            var br = r[2] !== undefined ? r[2] : 8;
-            var bl = r[3] !== undefined ? r[3] : 8;
+            var r = s.corners || (s.type === 'rect' ? [0, 0, 0, 0] : [8, 8, 8, 8]);
+            var tl = r[0] !== undefined ? r[0] : 0;
+            var tr = r[1] !== undefined ? r[1] : 0;
+            var br = r[2] !== undefined ? r[2] : 0;
+            var bl = r[3] !== undefined ? r[3] : 0;
             var fill = s.fill || '#0a0d16', stroke = s.stroke || '#262d3e', sw = s.strokeWidth || 2;
 
             var d = [
