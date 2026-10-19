@@ -33,7 +33,7 @@
                 '    <div class="lever-pivot-bolt"></div>',
                 '  </div>',
                 '  <div class="lever-meta">',
-                '    <span class="lever-label" data-edit-label="' + id + '">' + label + '</span>',
+                '    <span class="lever-label">' + label + '</span>',
                 '    <span class="lever-val">POS ' + currentVal + '</span>',
                 '  </div>',
                 '</div>'
@@ -48,66 +48,95 @@
                 (function(item) {
                     var id = item.getAttribute('data-control-id');
                     var frame = item.querySelector('.lever-frame');
-                    if (frame) {
-                        var isDraggingHandle = false;
-                        var hasMoved = false;
-                        var startX = 0, startY = 0;
+                    if (!frame) return;
 
-                        var handleMove = function(e) {
-                            var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
-                            if (!ctrl) return;
-                            var positions = Math.max(2, ctrl.positions || 2);
-                            var minAngle = -22, maxAngle = 22;
-                            var stepAngle = (maxAngle - minAngle) / (positions - 1);
+                    var isPointerDown = false;
+                    var hasDragged = false;
+                    var startX = 0, startY = 0;
 
-                            var rect = frame.getBoundingClientRect();
-                            var pivotX = rect.left + rect.width / 2;
-                            var pivotY = rect.top + rect.height * 0.86;
-                            var dx = e.clientX - pivotX;
-                            var dy = pivotY - e.clientY;
-                            var angleDeg = Math.atan2(dx, dy) * 180 / Math.PI;
+                    var advanceNext = function() {
+                        var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                        if (!ctrl) return;
+                        var positions = Math.max(2, ctrl.positions || 2);
+                        var cur = SignalState.getControlValue(id) || 0;
+                        var nextVal = (cur + 1) % positions;
+                        SignalState.setControlValue(id, nextVal);
+                    };
 
-                            var clamped = Math.max(minAngle, Math.min(maxAngle, angleDeg));
-                            var closest = Math.round((clamped - minAngle) / stepAngle);
-                            closest = Math.max(0, Math.min(positions - 1, closest));
-                            SignalState.setControlValue(id, closest);
-                        };
+                    var selectNotchPosition = function(e) {
+                        var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                        if (!ctrl) return;
+                        var positions = Math.max(2, ctrl.positions || 2);
+                        var minAngle = -22, maxAngle = 22;
+                        var stepAngle = (maxAngle - minAngle) / (positions - 1);
 
-                        frame.addEventListener('pointerdown', function(e) {
-                            e.stopPropagation();
-                            isDraggingHandle = true;
-                            hasMoved = false;
-                            startX = e.clientX;
-                            startY = e.clientY;
-                            frame.setPointerCapture(e.pointerId);
-                        });
+                        var rect = frame.getBoundingClientRect();
+                        var pivotX = rect.left + rect.width / 2;
+                        var pivotY = rect.top + 78;
+                        var dx = e.clientX - pivotX;
+                        var dy = pivotY - e.clientY;
 
-                        frame.addEventListener('pointermove', function(e) {
-                            if (!isDraggingHandle) return;
-                            if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) {
-                                hasMoved = true;
-                                handleMove(e);
+                        var angleDeg = Math.atan2(dx, dy) * 180 / Math.PI;
+                        var clamped = Math.max(minAngle, Math.min(maxAngle, angleDeg));
+                        var closest = Math.round((clamped - minAngle) / stepAngle);
+                        closest = Math.max(0, Math.min(positions - 1, closest));
+                        SignalState.setControlValue(id, closest);
+                    };
+
+                    var onPointerDown = function(e) {
+                        if (e.target.closest('.control-dot') || e.target.closest('.control-dot-menu')) return;
+                        e.stopPropagation();
+                        isPointerDown = true;
+                        hasDragged = false;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        try { item.setPointerCapture(e.pointerId); } catch (err) {}
+                    };
+
+                    var onPointerMove = function(e) {
+                        if (!isPointerDown) return;
+                        var dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+                        if (dist > 8) {
+                            hasDragged = true;
+                            selectNotchPosition(e);
+                        }
+                    };
+
+                    var onPointerUp = function(e) {
+                        if (!isPointerDown) return;
+                        isPointerDown = false;
+                        try { item.releasePointerCapture(e.pointerId); } catch (err) {}
+
+                        if (hasDragged) return;
+
+                        if (e.target.closest('.lever-notch')) {
+                            var pVal = parseInt(e.target.closest('.lever-notch').getAttribute('data-pos-val'), 10);
+                            if (!isNaN(pVal)) {
+                                SignalState.setControlValue(id, pVal);
+                                return;
                             }
-                        });
+                        }
 
-                        var stopDrag = function(e) {
-                            if (!isDraggingHandle) return;
-                            isDraggingHandle = false;
-                            try { frame.releasePointerCapture(e.pointerId); } catch (err) {}
+                        if (e.target.closest('.lever-meta')) {
+                            advanceNext();
+                            return;
+                        }
 
-                            if (!hasMoved) {
-                                var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
-                                if (!ctrl) return;
-                                var positions = Math.max(2, ctrl.positions || 2);
-                                var cur = SignalState.getControlValue(id) || 0;
-                                var nextVal = (cur + 1) % positions;
-                                SignalState.setControlValue(id, nextVal);
-                            }
-                        };
+                        var rect = frame.getBoundingClientRect();
+                        var pivotY = rect.top + 78;
+                        var dy = pivotY - e.clientY;
 
-                        frame.addEventListener('pointerup', stopDrag);
-                        frame.addEventListener('pointercancel', stopDrag);
-                    }
+                        if (dy > 18) {
+                            selectNotchPosition(e);
+                        } else {
+                            advanceNext();
+                        }
+                    };
+
+                    item.addEventListener('pointerdown', onPointerDown);
+                    item.addEventListener('pointermove', onPointerMove);
+                    item.addEventListener('pointerup', onPointerUp);
+                    item.addEventListener('pointercancel', onPointerUp);
                 })(items[i]);
             }
         }

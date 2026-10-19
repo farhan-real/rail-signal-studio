@@ -153,28 +153,28 @@
     width: 58px;
     height: 94px;
     position: relative;
-    display: flex;
-    justify-content: center;
     cursor: pointer;
     touch-action: none;
 }
 .lever-quadrant {
     position: absolute;
     top: 36px;
+    left: 3px;
     width: 52px;
-    height: 38px;
+    height: 42px;
     border: 2px solid #384259;
     border-bottom: none;
     border-radius: 26px 26px 0 0;
     background: linear-gradient(180deg, #1d2230 0%, #10131a 100%);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+    box-sizing: border-box;
 }
 .lever-notch {
     position: absolute;
-    bottom: 2px;
-    left: 24px;
+    top: 2px;
+    left: 23px;
     width: 2px;
-    height: 36px;
+    height: 40px;
     transform-origin: 50% 100%;
     pointer-events: none;
 }
@@ -191,10 +191,11 @@
 .lever-notch.active::before { background: var(--accent); }
 .lever-handle {
     position: absolute;
-    bottom: 12px;
+    top: 3px;
+    left: 22px;
     width: 14px;
-    height: 82px;
-    transform-origin: 50% 86%;
+    height: 80px;
+    transform-origin: 7px 75px;
     transition: transform 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     display: flex;
     flex-direction: column;
@@ -203,11 +204,11 @@
     cursor: grab;
 }
 .lever-handle:active { cursor: grabbing; transition: none; }
-.lever-rod { width: 5px; height: 50px; background: linear-gradient(90deg, #b0b8c8 0%, #687285 50%, #444c5c 100%); border-radius: 2px; box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6); }
+.lever-rod { width: 4px; height: 48px; background: linear-gradient(90deg, #b0b8c8 0%, #687285 50%, #444c5c 100%); border-radius: 2px; box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6); }
 .lever-grip { width: 14px; height: 32px; border-radius: 7px 7px 3px 3px; box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.6); }
 .lever-latch-trigger { position: absolute; top: 22px; right: 11px; width: 4px; height: 20px; background: #8893a6; border-radius: 2px; border: 1px solid #2b313d; }
-.lever-pivot-bolt { position: absolute; bottom: 8px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fa9bb 0%, #303746 80%); border: 1px solid #141720; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); z-index: 3; }
-.lever-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.lever-pivot-bolt { position: absolute; top: 71px; left: 22px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fa9bb 0%, #303746 80%); border: 1px solid #141720; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); z-index: 3; }
+.lever-meta { margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
 .lever-label { font-size: 11px; font-weight: 700; color: #d0d7e5; letter-spacing: 0.3px; }
 .lever-val { font-size: 9px; font-weight: 600; color: #8893a6; }
 
@@ -315,7 +316,7 @@
     font-weight: 700;
     text-shadow: 0 0 8px var(--accent);
 }
-.knob-meta { margin-top: 4px; display: flex; flex-direction: column; align-items: center; }
+.knob-meta { margin-top: 4px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
 .knob-label { font-size: 11px; font-weight: 700; color: #d0d7e5; }
 
 /* 3D Push Button */

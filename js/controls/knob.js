@@ -88,7 +88,7 @@
                 '    </div>',
                 '  </div>',
                 '  <div class="knob-meta">',
-                '    <span class="knob-label" data-edit-label="' + id + '">' + label + '</span>',
+                '    <span class="knob-label">' + label + '</span>',
                 '  </div>',
                 '</div>'
             ].join('');
@@ -103,76 +103,107 @@
                 (function(item) {
                     var id = item.getAttribute('data-control-id');
                     var bezel = item.querySelector('.knob-bezel');
-                    if (bezel) {
-                        var isRotating = false;
-                        var hasMoved = false;
-                        var startX = 0, startY = 0;
+                    if (!bezel) return;
 
-                        var handleTurn = function(e) {
+                    var isPointerDown = false;
+                    var hasDragged = false;
+                    var startX = 0, startY = 0;
+
+                    var advanceNext = function() {
+                        var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                        if (!ctrl) return;
+                        var states = self.getStates(ctrl);
+                        if (states.length <= 1) return;
+                        var cur = SignalState.getControlValue(id) || 0;
+                        var nextVal = (cur + 1) % states.length;
+                        SignalState.setControlValue(id, nextVal);
+                    };
+
+                    var selectAnglePosition = function(e) {
+                        var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                        if (!ctrl) return;
+                        var states = self.getStates(ctrl);
+                        if (states.length <= 1) return;
+                        var cfg = self.getAngles(ctrl, states);
+
+                        var rect = bezel.getBoundingClientRect();
+                        var bcx = rect.left + rect.width / 2;
+                        var bcy = rect.top + rect.height / 2;
+                        var dx = e.clientX - bcx;
+                        var dy = bcy - e.clientY;
+
+                        var angleDeg = Math.atan2(dx, dy) * 180 / Math.PI;
+                        var clamped = Math.max(cfg.minAngle, Math.min(cfg.maxAngle, angleDeg));
+                        var closestIdx = Math.round((clamped - cfg.minAngle) / cfg.stepAngle);
+                        closestIdx = Math.max(0, Math.min(states.length - 1, closestIdx));
+                        SignalState.setControlValue(id, closestIdx);
+                    };
+
+                    var onPointerDown = function(e) {
+                        if (e.target.closest('.control-dot') || e.target.closest('.control-dot-menu')) return;
+                        e.stopPropagation();
+                        isPointerDown = true;
+                        hasDragged = false;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        try { item.setPointerCapture(e.pointerId); } catch (err) {}
+                    };
+
+                    var onPointerMove = function(e) {
+                        if (!isPointerDown) return;
+                        var dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+                        if (dist > 8) {
+                            hasDragged = true;
+                            selectAnglePosition(e);
+                        }
+                    };
+
+                    var onPointerUp = function(e) {
+                        if (!isPointerDown) return;
+                        isPointerDown = false;
+                        try { item.releasePointerCapture(e.pointerId); } catch (err) {}
+
+                        if (hasDragged) return;
+
+                        if (e.target.closest('.knob-dial-label')) {
+                            var posIdx = parseInt(e.target.closest('.knob-dial-label').getAttribute('data-pos-idx'), 10);
+                            if (!isNaN(posIdx)) {
+                                SignalState.setControlValue(id, posIdx);
+                                return;
+                            }
+                        }
+
+                        if (e.target.closest('.knob-meta')) {
+                            advanceNext();
+                            return;
+                        }
+
+                        var rect = bezel.getBoundingClientRect();
+                        var bcx = rect.left + rect.width / 2;
+                        var bcy = rect.top + rect.height / 2;
+                        var dx = e.clientX - bcx;
+                        var dy = bcy - e.clientY;
+                        var distFromCenter = Math.hypot(dx, dy);
+
+                        if (distFromCenter <= (rect.width / 2 + 4) || dy < -16) {
+                            advanceNext();
+                        } else {
                             var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
                             if (!ctrl) return;
                             var states = self.getStates(ctrl);
-                            if (states.length <= 1) return;
                             var cfg = self.getAngles(ctrl, states);
-                            var rect = bezel.getBoundingClientRect();
-                            var bcx = rect.left + rect.width / 2;
-                            var bcy = rect.top + rect.height / 2;
-                            var dx = e.clientX - bcx;
-                            var dy = bcy - e.clientY;
-                            var angleDeg = Math.atan2(dx, dy) * 180 / Math.PI;
-
-                            var clamped = Math.max(cfg.minAngle, Math.min(cfg.maxAngle, angleDeg));
-                            var closestIdx = Math.round((clamped - cfg.minAngle) / cfg.stepAngle);
-                            closestIdx = Math.max(0, Math.min(states.length - 1, closestIdx));
-                            SignalState.setControlValue(id, closestIdx);
-                        };
-
-                        var onPointerDown = function(e) {
-                            e.stopPropagation();
-                            isRotating = true;
-                            hasMoved = false;
-                            startX = e.clientX;
-                            startY = e.clientY;
-                            bezel.setPointerCapture(e.pointerId);
-                        };
-
-                        var onPointerMove = function(e) {
-                            if (!isRotating) return;
-                            if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) {
-                                hasMoved = true;
-                                handleTurn(e);
+                            if (cfg.isHalf && dy < -12) {
+                                advanceNext();
+                            } else {
+                                selectAnglePosition(e);
                             }
-                        };
+                        }
+                    };
 
-                        var onPointerUp = function(e) {
-                            if (!isRotating) return;
-                            isRotating = false;
-                            try { bezel.releasePointerCapture(e.pointerId); } catch (err) {}
-
-                            if (!hasMoved) {
-                                var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
-                                if (!ctrl) return;
-                                var states = self.getStates(ctrl);
-                                var cur = SignalState.getControlValue(id) || 0;
-                                var nextVal = (cur + 1) % states.length;
-                                SignalState.setControlValue(id, nextVal);
-                            }
-                        };
-
-                        bezel.addEventListener('pointerdown', onPointerDown);
-                        bezel.addEventListener('pointermove', onPointerMove);
-                        bezel.addEventListener('pointerup', onPointerUp);
-                        bezel.addEventListener('pointercancel', onPointerUp);
-                    }
-
-                    var dialLabels = item.querySelectorAll('.knob-dial-label');
-                    for (var d = 0; d < dialLabels.length; d++) {
-                        dialLabels[d].addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            var posIdx = parseInt(this.getAttribute('data-pos-idx'), 10);
-                            SignalState.setControlValue(id, posIdx);
-                        });
-                    }
+                    item.addEventListener('pointerdown', onPointerDown);
+                    item.addEventListener('pointermove', onPointerMove);
+                    item.addEventListener('pointerup', onPointerUp);
+                    item.addEventListener('pointercancel', onPointerUp);
                 })(items[i]);
             }
         }
