@@ -64,6 +64,12 @@
 
         stopMainClock: function() { if (this.clockId) { clearInterval(this.clockId); this.clockId = null; } },
 
+        checkAspectIs: function(targetName) {
+            var cur = String(SignalState.currentAspect || '').replace(/[\s_"'`]/g, '').toUpperCase();
+            var req = String(this.resolveValue(targetName) || '').replace(/[\s_"'`]/g, '').toUpperCase();
+            return cur !== '' && cur === req;
+        },
+
         evalExpr: function(node) {
             if (!node) return false;
             switch (node.type) {
@@ -73,6 +79,7 @@
                 case 'GT': return Number(this.resolveValue(node.left)) > Number(node.right);
                 case 'LT': return Number(this.resolveValue(node.left)) < Number(node.right);
                 case 'IS': return this.checkIs(node.left, node.right);
+                case 'ASPECT_IS': return this.checkAspectIs(node.target);
                 case 'LAMP_SET': return this.isItemOrGroupSet(node.lamp);
                 default: return false;
             }
@@ -92,6 +99,8 @@
 
         checkIs: function(leftId, rightVal) {
             var cleanLeft = String(leftId).replace(/[\s_]/g, '').toUpperCase();
+            if (cleanLeft === 'ASPECT') return this.checkAspectIs(rightVal);
+
             var ctrl = SignalState.controls.filter(function(c) {
                 var cIdClean = String(c.id).replace(/[\s_]/g, '').toUpperCase();
                 var cLblClean = c.label ? String(c.label).replace(/[\s_]/g, '').toUpperCase() : '';
@@ -126,11 +135,13 @@
         },
 
         resolveValue: function(name) {
+            if (!name) return '';
+            var uName = String(name).toUpperCase();
+            if (uName === 'ASPECT') return SignalState.currentAspect || '';
             var v = SignalState.getVar(name);
             if (v !== undefined) return v;
             var ctrlVal = SignalState.getControlValue(name);
             if (ctrlVal !== undefined) return ctrlVal;
-            var uName = String(name).toUpperCase();
             for (var i = 0; i < SignalState.lamps.length; i++) {
                 if (SignalState.lamps[i].id.toUpperCase() === uName) return SignalState.getLamp(SignalState.lamps[i].id) ? 1 : 0;
             }

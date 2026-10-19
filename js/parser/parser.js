@@ -13,13 +13,34 @@
             function parsePrimary() {
                 if (peek().type === 'LPAREN') { next(); var expr = parseOr(); match('RPAREN'); return expr; }
                 if (peek().type === 'NOT') { next(); return { type: 'NOT', expr: parsePrimary() }; }
+
+                if (peek().type === 'ASPECT') {
+                    next();
+                    if (peek().type === 'IS') {
+                        next();
+                        var isNegated = false;
+                        if (peek().type === 'NOT') { next(); isNegated = true; }
+                        var aspTok = next();
+                        var node = { type: 'ASPECT_IS', target: (aspTok || {}).value || '' };
+                        return isNegated ? { type: 'NOT', expr: node } : node;
+                    }
+                    return { type: 'LAMP_SET', lamp: 'ASPECT' };
+                }
+
                 var leftVal = (next() || {}).value || '';
                 if (peek().type === 'GT') { next(); return { type: 'GT', left: leftVal, right: (next() || {}).value || '0' }; }
                 if (peek().type === 'LT') { next(); return { type: 'LT', left: leftVal, right: (next() || {}).value || '0' }; }
                 if (peek().type === 'IS') {
-                    next(); var t = next();
-                    if (t && t.type === 'SET') return { type: 'LAMP_SET', lamp: leftVal };
-                    return { type: 'IS', left: leftVal, right: (t || {}).value || '' };
+                    next();
+                    var isNeg = false;
+                    if (peek().type === 'NOT') { next(); isNeg = true; }
+                    var t = next();
+                    if (t && t.type === 'SET') {
+                        var lNode = { type: 'LAMP_SET', lamp: leftVal };
+                        return isNeg ? { type: 'NOT', expr: lNode } : lNode;
+                    }
+                    var node2 = { type: 'IS', left: leftVal, right: (t || {}).value || '' };
+                    return isNeg ? { type: 'NOT', expr: node2 } : node2;
                 }
                 if (peek().type === 'SET') { next(); return { type: 'LAMP_SET', lamp: leftVal }; }
                 return { type: 'LAMP_SET', lamp: leftVal };
