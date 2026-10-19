@@ -98,13 +98,13 @@
         },
 
         checkIs: function(leftId, rightVal) {
-            var cleanLeft = String(leftId).replace(/[\s_]/g, '').toUpperCase();
+            var cleanLeft = String(leftId).replace(/[\s_\-]/g, '').toUpperCase();
             if (cleanLeft === 'ASPECT') return this.checkAspectIs(rightVal);
 
             var ctrl = SignalState.controls.filter(function(c) {
-                var cIdClean = String(c.id).replace(/[\s_]/g, '').toUpperCase();
-                var cLblClean = c.label ? String(c.label).replace(/[\s_]/g, '').toUpperCase() : '';
-                return cIdClean === cleanLeft || cLblClean === cleanLeft;
+                var cIdClean = String(c.id).replace(/[\s_\-]/g, '').toUpperCase();
+                var cLblClean = c.label ? String(c.label).replace(/[\s_\-]/g, '').toUpperCase() : '';
+                return cIdClean === cleanLeft || cLblClean === cleanLeft || cIdClean === cleanLeft + 'BTN' || cleanLeft === cIdClean + 'BTN';
             })[0];
 
             if (ctrl) {
@@ -205,7 +205,11 @@
             }
             if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
-                for (var a = 0; a < all.length; a++) SignalState.setLamp(all[a].id, isLit);
+                for (var a = 0; a < all.length; a++) {
+                    SignalState.setLamp(all[a].id, isLit);
+                    if (!isLit) delete this.activeBlinks[all[a].id];
+                }
+                if (!isLit) this.activeBlinks = {};
                 if (!isLit && SignalState.matrix && SignalState.matrix.lit) {
                     SignalState.matrix.lit = false;
                     SignalEvents.emit('matrix:updated', '');
@@ -213,7 +217,10 @@
                 return;
             }
             if (tUpper === 'FEATHERS' || tUpper === 'FEATHER') {
-                for (var k = 0; k < SignalState.feathers.length; k++) SignalState.setLamp(SignalState.feathers[k].id, isLit);
+                for (var k = 0; k < SignalState.feathers.length; k++) {
+                    SignalState.setLamp(SignalState.feathers[k].id, isLit);
+                    if (!isLit) delete this.activeBlinks[SignalState.feathers[k].id];
+                }
                 return;
             }
 
@@ -229,18 +236,27 @@
                     for (var f2 = 0; f2 < SignalState.feathers.length; f2++) {
                         if (SignalState.feathers[f2].id !== matchedFeather.id) {
                             SignalState.setLamp(SignalState.feathers[f2].id, false);
+                            delete this.activeBlinks[SignalState.feathers[f2].id];
                         }
                     }
                 }
                 SignalState.setLamp(matchedFeather.id, isLit);
+                if (!isLit) delete this.activeBlinks[matchedFeather.id];
                 return;
             }
 
             var group = this.getGroup(target);
             if (group) {
-                for (var i = 0; i < group.length; i++) SignalState.setLamp(group[i], isLit);
+                for (var i = 0; i < group.length; i++) {
+                    SignalState.setLamp(group[i], isLit);
+                    if (!isLit) delete this.activeBlinks[group[i]];
+                }
             } else {
                 SignalState.setLamp(target, isLit);
+                if (!isLit) {
+                    delete this.activeBlinks[target];
+                    delete this.activeBlinks[String(target).toUpperCase()];
+                }
             }
         },
 
@@ -249,23 +265,41 @@
             var tUpper = String(target).toUpperCase();
             if (tUpper === 'ALL') {
                 var all = this.getAllUnits();
-                for (var a = 0; a < all.length; a++) this.activeBlinks[all[a].id] = rate;
+                for (var a = 0; a < all.length; a++) {
+                    this.activeBlinks[all[a].id] = rate;
+                    SignalState.setLamp(all[a].id, true);
+                }
                 return;
             }
             if (tUpper === 'FEATHERS' || tUpper === 'FEATHER') {
-                for (var f = 0; f < SignalState.feathers.length; f++) this.activeBlinks[SignalState.feathers[f].id] = rate;
+                for (var f = 0; f < SignalState.feathers.length; f++) {
+                    this.activeBlinks[SignalState.feathers[f].id] = rate;
+                    SignalState.setLamp(SignalState.feathers[f].id, true);
+                }
                 return;
             }
             var group = this.getGroup(target);
             if (group) {
-                for (var i = 0; i < group.length; i++) this.activeBlinks[group[i]] = rate;
-            } else {
-                this.activeBlinks[target] = rate;
+                for (var i = 0; i < group.length; i++) {
+                    this.activeBlinks[group[i]] = rate;
+                    SignalState.setLamp(group[i], true);
+                }
+                return;
             }
+
+            var allUnits = this.getAllUnits(), matchId = target, prefix = null;
+            for (var u = 0; u < allUnits.length; u++) {
+                var uId = allUnits[u].id.toUpperCase();
+                if (uId === tUpper) { matchId = allUnits[u].id; prefix = null; break; }
+                if (!prefix && (uId.indexOf(tUpper) === 0 || tUpper.indexOf(uId) === 0)) prefix = allUnits[u].id;
+            }
+            matchId = prefix || matchId;
+            this.activeBlinks[matchId] = rate;
+            SignalState.setLamp(matchId, true);
         },
 
         executeAction: function(act) {
-            if (!act) return;
+            if (!act) return null;
             if (act.op === 'aspect') {
                 if (SignalState.currentAspect !== act.target) this.setAspect(act.target);
             } else if (act.op === 'set') {
@@ -298,12 +332,15 @@
             } else if (act.op === 'resume_after') {
                 this.holdUntil = Math.max(this.holdUntil || 0, Date.now() + act.duration);
                 this.holdBlinks = Object.assign({}, this.activeBlinks);
+                return 'end';
             } else if (act.op === 'resume_onnextaction') {
                 this.holdOnNext = true;
                 this.holdBlinks = Object.assign({}, this.activeBlinks);
+                return 'end';
             } else if (act.op === 'assign') {
                 this.executeAssign(act.target, act.value);
             }
+            return null;
         },
 
         executeAssign: function(target, value) {
@@ -360,7 +397,8 @@
                     return 'delay';
                 }
                 if (act.op === 'end') return 'end';
-                this.executeAction(act);
+                var res = this.executeAction(act);
+                if (res === 'end') return 'end';
             }
             if (this.delayedQueues[ruleKey]) this.delayedQueues[ruleKey] = { completed: true };
             return 'done';
@@ -369,16 +407,22 @@
         processLamps: function(now) {
             var allUnits = this.getAllUnits();
             for (var i = 0; i < allUnits.length; i++) {
-                var lampId = allUnits[i].id;
-                var isLit = SignalState.getLamp(lampId);
+                var lampId = allUnits[i].id, uId = lampId.toUpperCase();
                 var rate = this.activeBlinks[lampId];
-                if (rate && isLit) {
+                if (!rate) {
+                    for (var k in this.activeBlinks) {
+                        if (k.toUpperCase() === uId) { rate = this.activeBlinks[k]; break; }
+                    }
+                }
+
+                if (rate) {
                     var vis = (now % (rate * 2)) < rate;
                     if (this.blinkState[lampId] !== vis) {
                         this.blinkState[lampId] = vis;
                         SignalEvents.emit('lamp:blink', { id: lampId, visible: vis });
                     }
                 } else {
+                    var isLit = SignalState.getLamp(lampId);
                     if (this.blinkState[lampId] !== isLit) {
                         this.blinkState[lampId] = isLit;
                         SignalEvents.emit('lamp:blink', { id: lampId, visible: isLit });
@@ -453,10 +497,12 @@
                         }
                     } else {
                         if (stmt.line) this.highlightLine(stmt.line);
-                        this.executeAction(stmt);
+                        var sRes = this.executeAction(stmt);
+                        if (sRes === 'end') break;
                     }
                     idx++;
                 }
+                if (this.holdUntil || this.holdOnNext) break;
             }
 
             this.processLamps(now);

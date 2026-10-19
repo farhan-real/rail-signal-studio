@@ -21,8 +21,7 @@
 
         getNextPos: function(type) {
             var w = (type === 'knob') ? 160 : ((type === 'led') ? 80 : 100);
-            var rightmost = 20;
-            var rowY = 20;
+            var rightmost = 20, rowY = 20;
             for (var i = 0; i < SignalState.controls.length; i++) {
                 var c = SignalState.controls[i];
                 var cy = c.y !== undefined ? c.y : 20;
@@ -40,66 +39,53 @@
         bindButtons: function() {
             var self = this;
             document.getElementById('btnAddLever').addEventListener('click', function() {
-                var id = 'Lever' + (SignalState.controls.length + 1);
-                var pos = self.getNextPos('lever');
+                var id = 'Lever' + (SignalState.controls.length + 1), pos = self.getNextPos('lever');
                 SignalState.controls.push({
                     id: id, type: 'lever', label: id, color: '#d92525', positions: 3, defaultValue: 0,
                     x: pos.x, y: pos.y, scale: 1.0
                 });
-                SignalState.setControlValue(id, 0);
-                self.render();
+                SignalState.setControlValue(id, 0); self.render();
             });
 
             document.getElementById('btnAddKnob').addEventListener('click', function() {
-                var id = 'Knob' + (SignalState.controls.length + 1);
-                var pos = self.getNextPos('knob');
+                var id = 'Knob' + (SignalState.controls.length + 1), pos = self.getNextPos('knob');
                 SignalState.controls.push({
                     id: id, type: 'knob', label: id, states: ['0', '1', '2'], mode: 'half', defaultValue: 0,
                     x: pos.x, y: pos.y, scale: 1.0
                 });
-                SignalState.setControlValue(id, 0);
-                self.render();
+                SignalState.setControlValue(id, 0); self.render();
             });
 
             document.getElementById('btnAddButton').addEventListener('click', function() {
-                var id = 'Btn' + (SignalState.controls.length + 1);
-                var pos = self.getNextPos('button');
+                var id = 'Btn' + (SignalState.controls.length + 1), pos = self.getNextPos('button');
                 SignalState.controls.push({
                     id: id, type: 'button', label: id, color: '#2e68f8', isToggle: false, defaultValue: 0,
                     x: pos.x, y: pos.y, scale: 1.0
                 });
-                SignalState.setControlValue(id, 0);
-                self.render();
+                SignalState.setControlValue(id, 0); self.render();
             });
 
             document.getElementById('btnAddSwitch').addEventListener('click', function() {
-                var id = 'Switch' + (SignalState.controls.length + 1);
-                var pos = self.getNextPos('switch');
+                var id = 'Switch' + (SignalState.controls.length + 1), pos = self.getNextPos('switch');
                 SignalState.controls.push({
                     id: id, type: 'switch', label: id, defaultValue: 0,
                     x: pos.x, y: pos.y, scale: 1.0
                 });
-                SignalState.setControlValue(id, 0);
-                self.render();
+                SignalState.setControlValue(id, 0); self.render();
             });
 
             document.getElementById('btnAddLed').addEventListener('click', function() {
-                var id = 'LED' + (SignalState.controls.length + 1);
-                var pos = self.getNextPos('led');
+                var id = 'LED' + (SignalState.controls.length + 1), pos = self.getNextPos('led');
                 SignalState.controls.push({
                     id: id, type: 'led', label: id, colorKey: 'red',
                     x: pos.x, y: pos.y, scale: 1.0
                 });
-                SignalState.setLamp(id, false);
-                self.render();
+                SignalState.setLamp(id, false); self.render();
             });
 
             document.getElementById('btnAddText').addEventListener('click', function() {
-                var id = 'text_' + Date.now();
-                var pos = self.getNextPos('text');
-                SignalState.texts.push({
-                    id: id, text: 'Track Marker', x: pos.x, y: 140, scale: 1.0
-                });
+                var id = 'text_' + Date.now(), pos = self.getNextPos('text');
+                SignalState.texts.push({ id: id, text: 'Track Marker', x: pos.x, y: 140, scale: 1.0 });
                 self.render();
             });
         },
@@ -126,8 +112,7 @@
                 handle.addEventListener('dblclick', doToggle);
                 handle.addEventListener('pointerdown', function(e) {
                     if (e.pointerType === 'touch' && !e.isPrimary) return;
-                    isDragging = true;
-                    startY = e.clientY;
+                    isDragging = true; startY = e.clientY;
                     startH = container.getBoundingClientRect().height;
                     container.classList.add('is-resizing');
                     try { handle.setPointerCapture(e.pointerId); } catch (err) {}
@@ -143,7 +128,7 @@
                     lastExpandedHeight = newH;
                 });
 
-                var endDrag = function(e) {
+                var endDrag = function() {
                     if (!isDragging) return;
                     isDragging = false;
                     container.classList.remove('is-resizing');
@@ -258,7 +243,14 @@
         },
 
         updateLeds: function(payload) {
+            var uId = String(payload.id).toUpperCase();
             var item = this.desk.querySelector('[data-control-id="' + payload.id + '"]');
+            if (!item) {
+                var all = this.desk.querySelectorAll('[data-control-id]');
+                for (var k = 0; k < all.length; k++) {
+                    if (all[k].getAttribute('data-control-id').toUpperCase() === uId) { item = all[k]; break; }
+                }
+            }
             if (item) {
                 var lens = item.querySelector('.led-lens');
                 if (lens) {
@@ -267,14 +259,21 @@
                 }
                 var txt = item.querySelector('.led-state-text');
                 if (txt) {
-                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!window.SignalRuntime.activeBlinks[payload.id];
+                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!(window.SignalRuntime.activeBlinks[payload.id] || window.SignalRuntime.activeBlinks[uId]);
                     txt.textContent = isBlinking ? 'BLINK' : (payload.lit ? 'ON' : 'OFF');
                 }
             }
         },
 
         updateLedBlink: function(payload) {
+            var uId = String(payload.id).toUpperCase();
             var item = this.desk.querySelector('[data-control-id="' + payload.id + '"]');
+            if (!item) {
+                var all = this.desk.querySelectorAll('[data-control-id]');
+                for (var k = 0; k < all.length; k++) {
+                    if (all[k].getAttribute('data-control-id').toUpperCase() === uId) { item = all[k]; break; }
+                }
+            }
             if (item) {
                 var lens = item.querySelector('.led-lens');
                 if (lens) {
@@ -283,7 +282,7 @@
                 }
                 var txt = item.querySelector('.led-state-text');
                 if (txt) {
-                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!window.SignalRuntime.activeBlinks[payload.id];
+                    var isBlinking = window.SignalRuntime && window.SignalRuntime.activeBlinks && !!(window.SignalRuntime.activeBlinks[payload.id] || window.SignalRuntime.activeBlinks[uId]);
                     txt.textContent = isBlinking ? 'BLINK' : (payload.visible ? 'ON' : 'OFF');
                 }
             }

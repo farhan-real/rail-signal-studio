@@ -161,6 +161,15 @@
                     }
                 }
             }
+            if (!el) {
+                var allLamps = this.sceneRoot.querySelectorAll('[data-lamp-id]');
+                for (var l = 0; l < allLamps.length; l++) {
+                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) {
+                        el = allLamps[l];
+                        break;
+                    }
+                }
+            }
             if (el) {
                 el.classList.toggle('lit', !!payload.lit);
                 var litLayer = el.querySelector('.lamp-lit-layer, .feather-lit-layer');
@@ -179,6 +188,15 @@
                 for (var f = 0; f < allFeathers.length; f++) {
                     if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) {
                         el = allFeathers[f];
+                        break;
+                    }
+                }
+            }
+            if (!el) {
+                var allLamps = this.sceneRoot.querySelectorAll('[data-lamp-id]');
+                for (var l = 0; l < allLamps.length; l++) {
+                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) {
+                        el = allLamps[l];
                         break;
                     }
                 }
