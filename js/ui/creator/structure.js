@@ -33,7 +33,7 @@
 
             if (mast.platform) {
                 var headBottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
-                var defPy = mast.platformY !== undefined ? mast.platformY : (headBottom !== null ? (headBottom + 12) : 60);
+                var defPy = mast.platformY !== undefined ? mast.platformY : Math.round(headBottom + 4);
 
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">X Pos (px)</label><input type="number" id="platformXInp" class="form-input" placeholder="Centered" value="' + (mast.platformX !== null && mast.platformX !== undefined ? mast.platformX : '') + '"/></div>';
@@ -53,9 +53,9 @@
             container.innerHTML = html;
 
             document.getElementById('mastTypeSel').addEventListener('change', function() { SignalState.mast.type = this.value; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
-            document.getElementById('mastHeightInp').addEventListener('change', function() { SignalState.mast.height = parseFloat(this.value) || 300; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
-            document.getElementById('mastXInp').addEventListener('change', function() { SignalState.mast.x = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
-            document.getElementById('mastYInp').addEventListener('change', function() { SignalState.mast.y = parseFloat(this.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
+            document.getElementById('mastHeightInp').addEventListener('input', function() { var r = this.value.trim(); if (r && r !== '-') { SignalState.mast.height = parseFloat(r) || 300; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); } });
+            document.getElementById('mastXInp').addEventListener('input', function() { var r = this.value.trim(); if (r && r !== '-') { SignalState.mast.x = parseFloat(r) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); } });
+            document.getElementById('mastYInp').addEventListener('input', function() { var r = this.value.trim(); if (r && r !== '-') { SignalState.mast.y = parseFloat(r) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); } });
             document.getElementById('chkMastLadder').addEventListener('change', function() { SignalState.mast.ladder = this.checked; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); });
 
             var chkPlat = document.getElementById('chkMastPlatform');
@@ -64,6 +64,7 @@
                     SignalState.mast.platform = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -71,7 +72,7 @@
             if (pxInp) {
                 var onPx = function() {
                     var v = pxInp.value.trim();
-                    SignalState.mast.platformX = (v === '' ? null : parseFloat(v));
+                    SignalState.mast.platformX = (v === '' || v === '-' ? null : parseFloat(v));
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
@@ -82,7 +83,9 @@
             var pyInp = document.getElementById('platformYInp');
             if (pyInp) {
                 var onPy = function() {
-                    SignalState.mast.platformY = parseFloat(pyInp.value) || 0;
+                    var v = pyInp.value.trim();
+                    if (v === '' || v === '-') return;
+                    SignalState.mast.platformY = parseFloat(v) || 0;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
@@ -93,7 +96,9 @@
             var pwInp = document.getElementById('platformWidthInp');
             if (pwInp) {
                 var onPw = function() {
-                    SignalState.mast.platformWidth = Math.max(10, parseFloat(pwInp.value) || 52);
+                    var v = pwInp.value.trim();
+                    if (v === '' || v === '-') return;
+                    SignalState.mast.platformWidth = Math.max(10, parseFloat(v) || 52);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
@@ -104,7 +109,9 @@
             var phInp = document.getElementById('platformHeightInp');
             if (phInp) {
                 var onPh = function() {
-                    SignalState.mast.platformHeight = Math.max(2, parseFloat(phInp.value) || 6);
+                    var v = phInp.value.trim();
+                    if (v === '' || v === '-') return;
+                    SignalState.mast.platformHeight = Math.max(2, parseFloat(v) || 6);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 };
@@ -126,7 +133,9 @@
             if (btnSnap) {
                 btnSnap.addEventListener('click', function() {
                     var bottom = window.MastRenderer ? window.MastRenderer.getHeadBottomY() : 45;
-                    SignalState.mast.platformY = (bottom !== null ? bottom + 12 : 60);
+                    var targetY = Math.round(bottom + 4);
+                    SignalState.mast.platformY = targetY;
+                    if (pyInp) pyInp.value = targetY;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
                 });

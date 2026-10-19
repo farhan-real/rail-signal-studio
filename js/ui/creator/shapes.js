@@ -40,8 +40,8 @@
                 if (s.type === 'rounded-rect' || s.type === 'rect' || !s.type) {
                     var corners = s.corners || (s.type === 'rect' ? [0, 0, 0, 0] : [8, 8, 8, 8]);
                     html += '  <div class="form-row-2">';
-                    html += '    <div><label class="form-label">X Pos</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x || 0) + '"/></div>';
-                    html += '    <div><label class="form-label">Y Pos</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y || 0) + '"/></div>';
+                    html += '    <div><label class="form-label">X Pos</label><input type="number" class="form-input sh-prop" data-prop="x" value="' + (s.x !== undefined ? s.x : 0) + '"/></div>';
+                    html += '    <div><label class="form-label">Y Pos</label><input type="number" class="form-input sh-prop" data-prop="y" value="' + (s.y !== undefined ? s.y : 0) + '"/></div>';
                     html += '  </div>';
                     html += '  <div class="form-row-2">';
                     html += '    <div><label class="form-label">Width</label><input type="number" class="form-input sh-prop" data-prop="width" value="' + (s.width || 60) + '"/></div>';
@@ -105,6 +105,7 @@
                 });
                 SignalEvents.emit('state:changed');
                 SignalEvents.emit('state:persist');
+                if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddRoundedRect').addEventListener('click', function() {
@@ -114,6 +115,7 @@
                 });
                 SignalEvents.emit('state:changed');
                 SignalEvents.emit('state:persist');
+                if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddCircleSector').addEventListener('click', function() {
@@ -123,6 +125,7 @@
                 });
                 SignalEvents.emit('state:changed');
                 SignalEvents.emit('state:persist');
+                if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
 
             document.getElementById('btnAddTriangle').addEventListener('click', function() {
@@ -132,6 +135,7 @@
                 });
                 SignalEvents.emit('state:changed');
                 SignalEvents.emit('state:persist');
+                if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             });
         },
 
@@ -148,8 +152,14 @@
                         (function(inp) {
                             var updateVal = function() {
                                 var pr = inp.getAttribute('data-prop');
-                                var val = (inp.type === 'number') ? parseFloat(inp.value) : inp.value;
-                                shape[pr] = val;
+                                var raw = inp.value.trim();
+                                if (inp.type === 'number') {
+                                    if (raw === '' || raw === '-' || raw === '+') return;
+                                    var num = parseFloat(raw);
+                                    if (!isNaN(num)) shape[pr] = num;
+                                } else {
+                                    shape[pr] = inp.value;
+                                }
                                 SignalEvents.emit('state:changed');
                                 SignalEvents.emit('state:persist');
                             };
@@ -162,9 +172,12 @@
                     for (var ci = 0; ci < corners.length; ci++) {
                         (function(cinp) {
                             var updateCorner = function() {
+                                var raw = cinp.value.trim();
+                                if (raw === '' || raw === '-') return;
                                 var cPos = parseInt(cinp.getAttribute('data-c-idx'), 10);
                                 if (!shape.corners) shape.corners = [0, 0, 0, 0];
-                                shape.corners[cPos] = Math.max(0, parseFloat(cinp.value) || 0);
+                                var cVal = Math.max(0, parseFloat(raw) || 0);
+                                shape.corners[cPos] = cVal;
                                 SignalEvents.emit('state:changed');
                                 SignalEvents.emit('state:persist');
                             };
@@ -178,6 +191,8 @@
                         btnCenter.addEventListener('click', function() {
                             var w = shape.width || 60;
                             shape.x = -Math.round(w / 2);
+                            var xInp = card.querySelector('.sh-prop[data-prop="x"]');
+                            if (xInp) xInp.value = shape.x;
                             SignalEvents.emit('state:changed');
                             SignalEvents.emit('state:persist');
                         });
@@ -191,6 +206,8 @@
                             if (promptVal !== null) {
                                 var parsed = Math.max(0, parseFloat(promptVal) || 0);
                                 shape.corners = [parsed, parsed, parsed, parsed];
+                                var cinps = card.querySelectorAll('.corner-input');
+                                for (var k = 0; k < cinps.length; k++) cinps[k].value = parsed;
                                 SignalEvents.emit('state:changed');
                                 SignalEvents.emit('state:persist');
                             }
@@ -218,6 +235,7 @@
                     SignalState.shapes.splice(idx, 1);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -233,6 +251,7 @@
                         SignalState.shapes[target] = temp;
                         SignalEvents.emit('state:changed');
                         SignalEvents.emit('state:persist');
+                        if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                     }
                 });
             }

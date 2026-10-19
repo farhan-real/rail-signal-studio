@@ -7,6 +7,7 @@
         activeTab: 'plates',
 
         init: function() {
+            var self = this;
             this.container = document.getElementById('creatorContent');
             this.drawer = document.getElementById('creatorDrawer');
 
@@ -14,7 +15,10 @@
             document.getElementById('btnCloseCreator').addEventListener('click', this.close.bind(this));
 
             SignalEvents.on('state:loaded', this.render.bind(this));
-            SignalEvents.on('state:changed', this.renderCurrentTab.bind(this));
+            SignalEvents.on('state:changed', function() {
+                if (self.drawer && self.drawer.contains(document.activeElement)) return;
+                self.renderCurrentTab();
+            });
         },
 
         toggle: function() {

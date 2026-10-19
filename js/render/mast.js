@@ -12,7 +12,13 @@
                 var bottomY = sy + sh;
                 if (maxY === null || bottomY > maxY) maxY = bottomY;
             }
-            return maxY;
+            var lamps = (window.SignalState && window.SignalState.lamps) || [];
+            for (var j = 0; j < lamps.length; j++) {
+                var l = lamps[j];
+                var lBottom = (l.y || 0) + (l.diameter || 34) / 2;
+                if (maxY === null || lBottom > maxY) maxY = lBottom;
+            }
+            return maxY !== null ? maxY : 45;
         },
 
         render: function(mast) {
@@ -53,7 +59,7 @@
 
             if (mast.platform) {
                 var headBottom = this.getHeadBottomY();
-                var py = mast.platformY !== undefined ? mast.platformY : (headBottom !== null ? (headBottom + 12) : ((mast.y || 0) + 60));
+                var py = mast.platformY !== undefined ? mast.platformY : (headBottom + 4);
                 var pw = mast.platformWidth !== undefined ? mast.platformWidth : (type === 'tubular' ? 52 : 110);
                 var ph = mast.platformHeight !== undefined ? mast.platformHeight : 6;
                 var px = (mast.platformX !== null && mast.platformX !== undefined) ? mast.platformX : (cx - pw / 2);

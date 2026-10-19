@@ -104,24 +104,43 @@
                     SignalState.featherBase.enabled = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
             var fbX = document.getElementById('fbX');
             if (fbX) {
-                var onFbX = function() { SignalState.featherBase.x = parseFloat(fbX.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                var onFbX = function() {
+                    var raw = fbX.value.trim();
+                    if (raw === '' || raw === '-') return;
+                    SignalState.featherBase.x = parseFloat(raw) || 0;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
                 fbX.addEventListener('input', onFbX); fbX.addEventListener('change', onFbX);
             }
 
             var fbY = document.getElementById('fbY');
             if (fbY) {
-                var onFbY = function() { SignalState.featherBase.y = parseFloat(fbY.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                var onFbY = function() {
+                    var raw = fbY.value.trim();
+                    if (raw === '' || raw === '-') return;
+                    SignalState.featherBase.y = parseFloat(raw) || 0;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
                 fbY.addEventListener('input', onFbY); fbY.addEventListener('change', onFbY);
             }
 
             var fbCW = document.getElementById('fbCollarWidth');
             if (fbCW) {
-                var onFbCW = function() { SignalState.featherBase.collarWidth = Math.max(10, parseFloat(fbCW.value) || 32); SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                var onFbCW = function() {
+                    var raw = fbCW.value.trim();
+                    if (raw === '' || raw === '-') return;
+                    SignalState.featherBase.collarWidth = Math.max(10, parseFloat(raw) || 32);
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
                 fbCW.addEventListener('input', onFbCW); fbCW.addEventListener('change', onFbCW);
             }
 
@@ -152,6 +171,7 @@
                     SignalState.lampStates[id] = false;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -191,6 +211,7 @@
                     SignalState.feathers.splice(idx, 1);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -201,6 +222,7 @@
                     SignalState.matrix.enabled = this.checked;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -218,14 +240,22 @@
 
             var mX = document.getElementById('matX');
             if (mX) {
-                var onMx = function() { SignalState.matrix.x = parseFloat(mX.value) || 0; SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist'); };
+                var onMx = function() {
+                    var raw = mX.value.trim();
+                    if (raw === '' || raw === '-') return;
+                    SignalState.matrix.x = parseFloat(raw) || 0;
+                    SignalEvents.emit('state:changed');
+                    SignalEvents.emit('state:persist');
+                };
                 mX.addEventListener('input', onMx); mX.addEventListener('change', onMx);
             }
 
             var mYOff = document.getElementById('matYOffset');
             if (mYOff) {
                 var onMy = function() {
-                    SignalState.matrix.yOffset = parseFloat(mYOff.value) || 0;
+                    var raw = mYOff.value.trim();
+                    if (raw === '' || raw === '-') return;
+                    SignalState.matrix.yOffset = parseFloat(raw) || 0;
                     delete SignalState.matrix.y;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');

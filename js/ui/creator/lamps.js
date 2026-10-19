@@ -82,6 +82,7 @@
                 SignalState.lampStates[id] = false;
                 SignalEvents.emit('state:changed');
                 SignalEvents.emit('state:persist');
+                if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
             };
 
             document.getElementById('btnAddLampStandard').addEventListener('click', function() { createLamp('red'); });
@@ -100,13 +101,23 @@
 
                     var props = card.querySelectorAll('.lp-prop');
                     for (var p = 0; p < props.length; p++) {
-                        props[p].addEventListener('change', function() {
-                            var pr = this.getAttribute('data-prop');
-                            var val = (this.type === 'number' || this.type === 'range') ? parseFloat(this.value) : this.value;
-                            lamp[pr] = val;
-                            SignalEvents.emit('state:changed');
-                            SignalEvents.emit('state:persist');
-                        });
+                        (function(inp) {
+                            var updateVal = function() {
+                                var pr = inp.getAttribute('data-prop');
+                                var raw = inp.value.trim();
+                                if (inp.type === 'number' || inp.type === 'range') {
+                                    if (raw === '' || raw === '-') return;
+                                    var num = parseFloat(raw);
+                                    if (!isNaN(num)) lamp[pr] = num;
+                                } else {
+                                    lamp[pr] = inp.value;
+                                }
+                                SignalEvents.emit('state:changed');
+                                SignalEvents.emit('state:persist');
+                            };
+                            inp.addEventListener('input', updateVal);
+                            inp.addEventListener('change', updateVal);
+                        })(props[p]);
                     }
 
                     var btnLit = card.querySelector('.btn-preview-lit');
@@ -130,6 +141,7 @@
                     SignalState.lamps.splice(idx, 1);
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
 
@@ -146,11 +158,11 @@
                     SignalState.lampStates[copy.id] = false;
                     SignalEvents.emit('state:changed');
                     SignalEvents.emit('state:persist');
+                    if (window.CreatorUI) window.CreatorUI.renderCurrentTab();
                 });
             }
         }
     };
 
     window.CreatorLamps = CreatorLamps;
-    window.InspectorLamps = CreatorLamps;
 })(window);
