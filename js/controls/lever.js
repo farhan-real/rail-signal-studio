@@ -49,15 +49,48 @@
                     var id = item.getAttribute('data-control-id');
                     var frame = item.querySelector('.lever-frame');
                     if (frame) {
-                        frame.addEventListener('click', function(e) {
-                            e.stopPropagation();
+                        var isDraggingHandle = false;
+
+                        var handleMove = function(e) {
                             var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
                             if (!ctrl) return;
-                            var maxPos = Math.max(2, ctrl.positions || 2) - 1;
-                            var cur = SignalState.getControlValue(id) || 0;
-                            var nextVal = cur >= maxPos ? 0 : cur + 1;
-                            SignalState.setControlValue(id, nextVal);
+                            var positions = Math.max(2, ctrl.positions || 2);
+                            var minAngle = -22, maxAngle = 22;
+                            var stepAngle = (maxAngle - minAngle) / (positions - 1);
+
+                            var rect = frame.getBoundingClientRect();
+                            var pivotX = rect.left + rect.width / 2;
+                            var pivotY = rect.top + rect.height * 0.86;
+                            var dx = e.clientX - pivotX;
+                            var dy = pivotY - e.clientY;
+                            var angleDeg = Math.atan2(dx, dy) * 180 / Math.PI;
+
+                            var clamped = Math.max(minAngle, Math.min(maxAngle, angleDeg));
+                            var closest = Math.round((clamped - minAngle) / stepAngle);
+                            closest = Math.max(0, Math.min(positions - 1, closest));
+                            SignalState.setControlValue(id, closest);
+                        };
+
+                        frame.addEventListener('pointerdown', function(e) {
+                            e.stopPropagation();
+                            isDraggingHandle = true;
+                            frame.setPointerCapture(e.pointerId);
+                            handleMove(e);
                         });
+
+                        frame.addEventListener('pointermove', function(e) {
+                            if (!isDraggingHandle) return;
+                            handleMove(e);
+                        });
+
+                        var stopDrag = function(e) {
+                            if (!isDraggingHandle) return;
+                            isDraggingHandle = false;
+                            try { frame.releasePointerCapture(e.pointerId); } catch (err) {}
+                        };
+
+                        frame.addEventListener('pointerup', stopDrag);
+                        frame.addEventListener('pointercancel', stopDrag);
                     }
                 })(items[i]);
             }
