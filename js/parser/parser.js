@@ -37,6 +37,52 @@
                 return left;
             }
 
+            function parseBlockOrSingle() {
+                var acts = [];
+                if (peek().type === 'COMMA') {
+                    next();
+                    var sAct = parseStatement();
+                    if (sAct) acts.push(sAct);
+                } else if (peek().type === 'LBRACE') {
+                    match('LBRACE');
+                    while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
+                        if (peek().type === 'SEMI') { next(); continue; }
+                        var bAct = parseStatement();
+                        if (bAct) acts.push(bAct);
+                    }
+                    match('RBRACE');
+                } else {
+                    var sAct2 = parseStatement();
+                    if (sAct2) acts.push(sAct2);
+                }
+                return acts;
+            }
+
+            function isElif() {
+                if (peek().type === 'ELIF') return true;
+                if (peek().type === 'ELSE' && tokens[pos + 1] && tokens[pos + 1].type === 'IF') return true;
+                return false;
+            }
+
+            function consumeElif() {
+                if (peek().type === 'ELIF') return next();
+                if (peek().type === 'ELSE') {
+                    var elTok = next();
+                    next();
+                    return elTok;
+                }
+                return null;
+            }
+
+            function skipSemiBeforeBranch() {
+                if (peek().type === 'SEMI') {
+                    var nextTok = tokens[pos + 1];
+                    if (nextTok && (nextTok.type === 'ELIF' || nextTok.type === 'ELSE')) {
+                        next();
+                    }
+                }
+            }
+
             function parseStatement() {
                 var tok = peek();
                 if (!tok || tok.type === 'EOF' || tok.type === 'RBRACE') return null;
@@ -50,21 +96,27 @@
                     return { op: 'end', line: tok.line };
                 }
                 if (tok.type === 'IF') {
-                    var ifTok = next(), expr = parseOr(), actions = [];
-                    if (peek().type === 'COMMA') {
-                        next(); var sAct = parseStatement();
-                        if (sAct) actions.push(sAct);
-                    } else if (peek().type === 'LBRACE') {
-                        match('LBRACE');
-                        while (peek().type !== 'RBRACE' && peek().type !== 'EOF') {
-                            if (peek().type === 'SEMI') { next(); continue; }
-                            var bAct = parseStatement();
-                            if (bAct) actions.push(bAct);
-                        }
-                        match('RBRACE');
+                    var ifTok = next(), expr = parseOr();
+                    var actions = parseBlockOrSingle();
+                    var elifs = [];
+                    var elseActions = null;
+
+                    skipSemiBeforeBranch();
+                    while (isElif()) {
+                        var elifTok = consumeElif();
+                        var elifExpr = parseOr();
+                        var elifActions = parseBlockOrSingle();
+                        elifs.push({ expr: elifExpr, actions: elifActions, line: elifTok.line });
+                        skipSemiBeforeBranch();
                     }
-                    match('SEMI');
-                    return { op: 'if', expr: expr, actions: actions, line: ifTok.line };
+
+                    if (peek().type === 'ELSE') {
+                        next();
+                        elseActions = parseBlockOrSingle();
+                    }
+
+                    if (peek().type === 'SEMI') match('SEMI');
+                    return { op: 'if', expr: expr, actions: actions, elifs: elifs, elseActions: elseActions, line: ifTok.line };
                 }
                 if (tok.type === 'DELAY') {
                     next(); var dTok = next();

@@ -53,10 +53,10 @@
                         var upper = val.toUpperCase();
                         var keywords = [
                             'ASPECT', 'SET', 'UNSET', 'MATRIX', 'MAINLOOP',
-                            'LOOP', 'IF', 'IS', 'BLINK', 'TIMER', 'NEXT',
-                            'PREV', 'JUMP', 'GOTO', 'LABEL', 'INT', 'ENUM',
-                            'GROUP', 'END', 'SECTION', 'RESUME', 'AFTER',
-                            'ONNEXTACTION', 'DELAY', 'AND', 'OR', 'NOT'
+                            'LOOP', 'IF', 'ELIF', 'ELSE', 'IS', 'BLINK', 'TIMER',
+                            'NEXT', 'PREV', 'JUMP', 'GOTO', 'LABEL', 'INT',
+                            'ENUM', 'GROUP', 'END', 'SECTION', 'RESUME',
+                            'AFTER', 'ONNEXTACTION', 'DELAY', 'AND', 'OR', 'NOT'
                         ];
                         if (keywords.indexOf(upper) !== -1) {
                             type = upper;
