@@ -18,6 +18,9 @@
             { id: 'SHUNT_WHITE1', color: 'white', diameter: 14, x: -11, y: 136, hood: 'round', brightness: 0.95 },
             { id: 'SHUNT_WHITE2', color: 'white', diameter: 14, x: 11, y: 136, hood: 'round', brightness: 0.95 }
         ],
+        groups: {
+            Shunt: ['SHUNT_WHITE1', 'SHUNT_WHITE2']
+        },
         feathers: [
             { id: 'FEATHER_L1', position: 'left3', lamps: 5 },
             { id: 'FEATHER_L2', position: 'left2', lamps: 5 },
@@ -44,6 +47,9 @@
             { id: 'ShuntSwitch', type: 'switch', label: 'Shunt', defaultValue: 0, x: 320, y: 20 }
         ],
         script: [
+            '%% Component Groups',
+            'group Shunt { SHUNT_WHITE1, SHUNT_WHITE2 };',
+            '',
             '%% Aspect Definitions',
             'aspect DANGER {',
             '    unset ALL;',
@@ -89,11 +95,9 @@
             '    }',
             '',
             '    if ShuntSwitch is 1 {',
-            '        set SHUNT_WHITE1;',
-            '        set SHUNT_WHITE2;',
+            '        set Shunt;',
             '    } else {',
-            '        unset SHUNT_WHITE1;',
-            '        unset SHUNT_WHITE2;',
+            '        unset Shunt;',
             '    }',
             '}'
         ].join('\n')
