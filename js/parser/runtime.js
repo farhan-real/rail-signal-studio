@@ -22,6 +22,7 @@
                 if (self.holdOnNext && payload.value !== 0) {
                     self.holdOnNext = false;
                     self.holdBlinks = {};
+                    SignalState.currentAspect = '';
                 }
                 if (!self.isPaused) self.onTick();
             });
@@ -209,10 +210,13 @@
                     SignalState.setLamp(all[a].id, isLit);
                     if (!isLit) delete this.activeBlinks[all[a].id];
                 }
-                if (!isLit) this.activeBlinks = {};
-                if (!isLit && SignalState.matrix && SignalState.matrix.lit) {
-                    SignalState.matrix.lit = false;
-                    SignalEvents.emit('matrix:updated', '');
+                if (!isLit) {
+                    this.activeBlinks = {};
+                    SignalState.currentAspect = '';
+                    if (SignalState.matrix && SignalState.matrix.lit) {
+                        SignalState.matrix.lit = false;
+                        SignalEvents.emit('matrix:updated', '');
+                    }
                 }
                 return;
             }
@@ -298,10 +302,31 @@
             SignalState.setLamp(matchId, true);
         },
 
+        isAspectApplied: function(name) {
+            if (!this.ast || !this.ast.aspects || !this.ast.aspects[name]) return false;
+            if (SignalState.currentAspect !== name) return false;
+            var asp = this.ast.aspects[name], sMap = {}, unsetsAll = false;
+            for (var s = 0; s < asp.sets.length; s++) {
+                var sid = asp.sets[s];
+                if (!SignalState.getLamp(sid) || this.activeBlinks[sid]) return false;
+                sMap[String(sid).toUpperCase()] = true;
+            }
+            for (var u = 0; u < asp.unsets.length; u++) {
+                if (String(asp.unsets[u]).toUpperCase() === 'ALL') { unsetsAll = true; break; }
+            }
+            if (unsetsAll) {
+                var units = this.getAllUnits();
+                for (var i = 0; i < units.length; i++) {
+                    if (!sMap[units[i].id.toUpperCase()] && SignalState.getLamp(units[i].id)) return false;
+                }
+            }
+            return true;
+        },
+
         executeAction: function(act) {
             if (!act) return null;
             if (act.op === 'aspect') {
-                if (SignalState.currentAspect !== act.target) this.setAspect(act.target);
+                if (SignalState.currentAspect !== act.target || !this.isAspectApplied(act.target)) this.setAspect(act.target);
             } else if (act.op === 'set') {
                 this.applySetAction(act.target, true);
             } else if (act.op === 'unset') {
@@ -442,6 +467,7 @@
                     return;
                 }
                 this.holdUntil = 0; this.holdBlinks = {};
+                SignalState.currentAspect = '';
             }
 
             if (this.holdOnNext) {
@@ -525,6 +551,7 @@
                 SignalState.matrix.lit = aspect.matrixLit;
                 SignalEvents.emit('matrix:updated', aspect.matrixLit ? SignalState.matrix.text : '');
             }
+            SignalState.currentAspect = aspectName;
             SignalEvents.emit('aspect:changed', aspectName);
         },
 
