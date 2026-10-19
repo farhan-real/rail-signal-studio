@@ -101,24 +101,23 @@
             if (ctrl) {
                 var curIdx = SignalState.getControlValue(ctrl.id);
                 if (curIdx === undefined) curIdx = 0;
-                if (String(curIdx) === String(rightVal)) return true;
+                var rawClean = String(rightVal).replace(/[\s"']/g, '').toUpperCase();
+                if (String(curIdx) === String(rightVal) || String(curIdx) === rawClean) return true;
                 var states = (ctrl.enumType && SignalState.enums[ctrl.enumType]) || ctrl.states;
                 if (states && states[curIdx]) {
-                    var sClean = String(states[curIdx]).replace(/\s+/g, '').toUpperCase();
-                    var rClean = String(rightVal).replace(/\s+/g, '').toUpperCase();
-                    if (sClean === rClean) return true;
+                    var sClean = String(states[curIdx]).replace(/[\s"']/g, '').toUpperCase();
+                    if (sClean === rawClean) return true;
                 }
                 for (var en in SignalState.enums) {
                     var list = SignalState.enums[en];
                     for (var m = 0; m < list.length; m++) {
-                        var eClean = String(list[m]).replace(/\s+/g, '').toUpperCase();
-                        var rClean2 = String(rightVal).replace(/\s+/g, '').toUpperCase();
-                        if (eClean === rClean2 && curIdx === m) return true;
+                        var eClean = String(list[m]).replace(/[\s"']/g, '').toUpperCase();
+                        if (eClean === rawClean && curIdx === m) return true;
                     }
                 }
                 return false;
             }
-            return String(this.resolveValue(leftId)).toUpperCase() === String(this.resolveValue(rightVal)).toUpperCase();
+            return String(this.resolveValue(leftId)).replace(/[\s"']/g, '').toUpperCase() === String(this.resolveValue(rightVal)).replace(/[\s"']/g, '').toUpperCase();
         },
 
         resolveValue: function(name) {
@@ -182,17 +181,13 @@
                 return;
             }
             if (tUpper === 'FEATHERS') {
-                for (var k = 0; k < SignalState.feathers.length; k++) {
-                    SignalState.setLamp(SignalState.feathers[k].id, isLit);
-                }
+                for (var k = 0; k < SignalState.feathers.length; k++) SignalState.setLamp(SignalState.feathers[k].id, isLit);
                 return;
             }
             var isTargetFeather = SignalState.feathers.some(function(f) { return f.id === target; });
             if (isTargetFeather && isLit) {
                 for (var f = 0; f < SignalState.feathers.length; f++) {
-                    if (SignalState.feathers[f].id !== target) {
-                        SignalState.setLamp(SignalState.feathers[f].id, false);
-                    }
+                    if (SignalState.feathers[f].id !== target) SignalState.setLamp(SignalState.feathers[f].id, false);
                 }
             }
             var group = this.getGroup(target);
@@ -279,7 +274,9 @@
                 if (act.op === 'end') return 'end';
                 this.executeAction(act);
             }
-            this.delayedQueues[ruleKey] = { completed: true };
+            if (this.delayedQueues[ruleKey]) {
+                this.delayedQueues[ruleKey] = { completed: true };
+            }
             return 'done';
         },
 
