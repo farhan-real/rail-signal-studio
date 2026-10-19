@@ -37,13 +37,48 @@
             SignalEvents.on('matrix:updated', this.updateMatrixFast.bind(this));
         },
 
+        getSignalBounds: function() {
+            var minY = -160, maxY = 380;
+            if (SignalState.mast) {
+                var mh = SignalState.mast.height || 380;
+                var my = SignalState.mast.y || 0;
+                maxY = Math.max(maxY, my + mh + 15);
+                minY = Math.min(minY, my);
+            }
+            if (SignalState.shapes && SignalState.shapes.length) {
+                for (var i = 0; i < SignalState.shapes.length; i++) {
+                    var s = SignalState.shapes[i];
+                    var sy = s.y !== undefined ? s.y : 0;
+                    var sh = s.height || (s.radius ? s.radius * 2 : 40);
+                    minY = Math.min(minY, sy);
+                    maxY = Math.max(maxY, sy + sh);
+                }
+            }
+            if (SignalState.matrix && SignalState.matrix.enabled) {
+                var matTopY = (window.MatrixRenderer && window.MatrixRenderer.getSignalAssemblyTopY) ?
+                    window.MatrixRenderer.getSignalAssemblyTopY() - 65 : -320;
+                minY = Math.min(minY, matTopY);
+            } else if (SignalState.feathers && SignalState.feathers.length) {
+                minY = Math.min(minY, -280);
+            }
+            return { minY: minY, maxY: maxY, height: Math.max(160, maxY - minY), centerY: (minY + maxY) / 2 };
+        },
+
         centerView: function() {
             var container = document.getElementById('canvasContainer');
             var w = (container && container.clientWidth) ? container.clientWidth : (window.innerWidth / 2);
             var h = (container && container.clientHeight) ? container.clientHeight : (window.innerHeight / 2);
-            this.panX = Math.max(100, w / 2);
-            this.panY = Math.max(100, h / 2 + 30);
-            this.scale = 1.0;
+            var bounds = this.getSignalBounds();
+            var availH = Math.max(100, h - 30);
+            var availW = Math.max(100, w - 30);
+
+            var fitScaleY = availH / bounds.height;
+            var fitScaleX = availW / 260;
+            var targetScale = Math.min(fitScaleY, fitScaleX);
+            this.scale = Math.min(1.0, Math.max(0.28, Math.round(targetScale * 100) / 100));
+
+            this.panX = Math.round(w / 2);
+            this.panY = Math.round(h / 2 - bounds.centerY * this.scale);
             this.applyTransform();
         },
 
@@ -96,7 +131,7 @@
             container.addEventListener('touchmove', function(e) {
                 if (e.touches.length === 2 && self.initialDistance > 0) {
                     var dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                    self.scale = Math.min(3.5, Math.max(0.3, self.baseScale * (dist / self.initialDistance)));
+                    self.scale = Math.min(3.5, Math.max(0.2, self.baseScale * (dist / self.initialDistance)));
                     self.scheduleTransform();
                 }
             }, { passive: true });
@@ -104,7 +139,7 @@
             container.addEventListener('wheel', function(e) {
                 e.preventDefault();
                 var delta = e.deltaY > 0 ? 0.9 : 1.1;
-                self.scale = Math.min(3.5, Math.max(0.3, self.scale * delta));
+                self.scale = Math.min(3.5, Math.max(0.2, self.scale * delta));
                 self.scheduleTransform();
             }, { passive: false });
 
@@ -114,7 +149,7 @@
             });
 
             document.getElementById('btnZoomOut').addEventListener('click', function() {
-                self.scale = Math.max(0.3, self.scale / 1.2);
+                self.scale = Math.max(0.2, self.scale / 1.2);
                 self.scheduleTransform();
             });
 
@@ -155,19 +190,13 @@
             if (!el) {
                 var allFeathers = this.sceneRoot.querySelectorAll('[data-feather-id]');
                 for (var f = 0; f < allFeathers.length; f++) {
-                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) {
-                        el = allFeathers[f];
-                        break;
-                    }
+                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) { el = allFeathers[f]; break; }
                 }
             }
             if (!el) {
                 var allLamps = this.sceneRoot.querySelectorAll('[data-lamp-id]');
                 for (var l = 0; l < allLamps.length; l++) {
-                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) {
-                        el = allLamps[l];
-                        break;
-                    }
+                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) { el = allLamps[l]; break; }
                 }
             }
             if (el) {
@@ -186,19 +215,13 @@
             if (!el) {
                 var allFeathers = this.sceneRoot.querySelectorAll('[data-feather-id]');
                 for (var f = 0; f < allFeathers.length; f++) {
-                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) {
-                        el = allFeathers[f];
-                        break;
-                    }
+                    if (allFeathers[f].getAttribute('data-feather-id').toUpperCase() === targetId) { el = allFeathers[f]; break; }
                 }
             }
             if (!el) {
                 var allLamps = this.sceneRoot.querySelectorAll('[data-lamp-id]');
                 for (var l = 0; l < allLamps.length; l++) {
-                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) {
-                        el = allLamps[l];
-                        break;
-                    }
+                    if (allLamps[l].getAttribute('data-lamp-id').toUpperCase() === targetId) { el = allLamps[l]; break; }
                 }
             }
             if (el) {

@@ -22,6 +22,7 @@
         getNextPos: function(type) {
             var w = (type === 'knob') ? 160 : ((type === 'led') ? 80 : 100);
             var rightmost = 20, rowY = 20;
+            var maxW = (this.desk && this.desk.clientWidth > 300) ? (this.desk.clientWidth - w - 10) : 700;
             for (var i = 0; i < SignalState.controls.length; i++) {
                 var c = SignalState.controls[i];
                 var cy = c.y !== undefined ? c.y : 20;
@@ -32,7 +33,7 @@
                 }
             }
             var nextX = Math.ceil(rightmost / GRID) * GRID;
-            if (nextX + w > 860) return { x: 20, y: rowY + 140 };
+            if (nextX + w > maxW) return { x: 20, y: rowY + 110 };
             return { x: nextX, y: rowY };
         },
 
@@ -94,7 +95,7 @@
             var container = document.getElementById('controlConsole');
             var handle = document.getElementById('consoleResizeHandle');
             var toggleBtn = document.getElementById('btnToggleCollapseConsole');
-            var isDragging = false, startY = 0, startH = 0, lastExpandedHeight = 210;
+            var isDragging = false, startY = 0, startH = 0, lastExpandedHeight = 195;
 
             var doToggle = function() {
                 var isCollapsed = container.classList.contains('is-collapsed');
@@ -102,7 +103,7 @@
                     container.classList.remove('is-collapsed');
                     container.style.height = lastExpandedHeight + 'px';
                 } else {
-                    lastExpandedHeight = Math.max(100, container.getBoundingClientRect().height);
+                    lastExpandedHeight = Math.max(90, container.getBoundingClientRect().height);
                     container.classList.add('is-collapsed');
                 }
             };
@@ -121,8 +122,8 @@
                 handle.addEventListener('pointermove', function(e) {
                     if (!isDragging) return;
                     var deltaY = startY - e.clientY;
-                    var maxH = Math.max(200, window.innerHeight * 0.75);
-                    var newH = Math.max(80, Math.min(maxH, startH + deltaY));
+                    var maxH = Math.max(160, window.innerHeight * 0.75);
+                    var newH = Math.max(70, Math.min(maxH, startH + deltaY));
                     container.classList.remove('is-collapsed');
                     container.style.height = newH + 'px';
                     lastExpandedHeight = newH;

@@ -42,6 +42,7 @@ html, body {
     flex-direction: column;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -54,18 +55,22 @@ html, body {
     justify-content: space-between;
     padding: 0 14px;
     z-index: 20;
+    flex-shrink: 0;
+    gap: 8px;
 }
 
 .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .brand-title {
     font-weight: 700;
     letter-spacing: 0.5px;
     font-size: 15px;
+    white-space: nowrap;
 }
 
 .signal-title-badge {
@@ -77,7 +82,7 @@ html, body {
     font-weight: 600;
     color: #a0aec0;
     letter-spacing: 0.3px;
-    max-width: 220px;
+    max-width: 180px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -92,6 +97,7 @@ html, body {
     font-weight: 600;
     color: var(--text-secondary);
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .aspect-badge.active {
@@ -102,7 +108,15 @@ html, body {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-shrink: 1;
+}
+.header-actions::-webkit-scrollbar {
+    display: none;
 }
 
 .header-select {
@@ -110,10 +124,11 @@ html, body {
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: 4px;
-    padding: 6px 10px;
+    padding: 5px 8px;
     font-size: 12px;
     outline: none;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .header-btn, .tool-btn, .console-btn, .btn-primary {
@@ -121,13 +136,15 @@ html, body {
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: 4px;
-    padding: 6px 10px;
+    padding: 5px 9px;
     cursor: pointer;
     font-size: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .header-btn:hover, .tool-btn:hover, .console-btn:hover {
@@ -156,6 +173,31 @@ html, body {
     display: flex;
     position: relative;
     overflow: hidden;
+    min-height: 0;
+}
+
+@media (max-width: 680px) {
+    .app-header {
+        height: 42px;
+        padding: 0 8px;
+    }
+    .brand-title {
+        font-size: 13px;
+    }
+    .signal-title-badge {
+        max-width: 100px;
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+    .header-btn {
+        padding: 4px 7px;
+        font-size: 11px;
+    }
+    .header-select {
+        max-width: 115px;
+        font-size: 11px;
+        padding: 4px 6px;
+    }
 }
 
 @media (orientation: portrait) {
