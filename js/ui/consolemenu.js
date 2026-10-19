@@ -83,6 +83,7 @@
         openMenu: function(wrap, targetId, isCtrl) {
             this.closeMenu();
             this.activeWrap = wrap;
+            wrap.classList.add('menu-open');
 
             var ctrl = isCtrl ? SignalState.controls.filter(function(c) { return c.id === targetId; })[0] : null;
             var textObj = !isCtrl ? SignalState.texts.filter(function(t) { return t.id === targetId; })[0] : null;
@@ -132,6 +133,9 @@
         closeMenu: function() {
             if (this.activeMenu && this.activeMenu.parentNode) {
                 this.activeMenu.parentNode.removeChild(this.activeMenu);
+            }
+            if (this.activeWrap) {
+                this.activeWrap.classList.remove('menu-open');
             }
             this.activeMenu = null;
             this.activeWrap = null;

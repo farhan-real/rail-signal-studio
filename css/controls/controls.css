@@ -29,14 +29,17 @@
     cursor: grab;
     z-index: 50;
 }
-.draggable-wrapper.move-active .console-item {
-    border-color: var(--accent);
-    box-shadow: 0 0 14px rgba(46, 104, 248, 0.55), inset 0 0 6px rgba(46, 104, 248, 0.25);
-}
 .draggable-wrapper.dragging {
     cursor: grabbing;
     z-index: 100;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+}
+.draggable-wrapper.menu-open {
+    z-index: 500 !important;
+}
+.draggable-wrapper.move-active .console-item {
+    border-color: var(--accent);
+    box-shadow: 0 0 14px rgba(46, 104, 248, 0.55), inset 0 0 6px rgba(46, 104, 248, 0.25);
 }
 
 /* 2D Live Grid Snap Coordinates Badge */
