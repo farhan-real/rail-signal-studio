@@ -105,23 +105,8 @@
                     var bezel = item.querySelector('.knob-bezel');
                     if (bezel) {
                         var isRotating = false;
-                        var onPointerDown = function(e) {
-                            e.stopPropagation();
-                            isRotating = true;
-                            bezel.setPointerCapture(e.pointerId);
-                            handleTurn(e);
-                        };
-
-                        var onPointerMove = function(e) {
-                            if (!isRotating) return;
-                            handleTurn(e);
-                        };
-
-                        var onPointerUp = function(e) {
-                            if (!isRotating) return;
-                            isRotating = false;
-                            try { bezel.releasePointerCapture(e.pointerId); } catch (err) {}
-                        };
+                        var hasMoved = false;
+                        var startX = 0, startY = 0;
 
                         var handleTurn = function(e) {
                             var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
@@ -140,6 +125,38 @@
                             var closestIdx = Math.round((clamped - cfg.minAngle) / cfg.stepAngle);
                             closestIdx = Math.max(0, Math.min(states.length - 1, closestIdx));
                             SignalState.setControlValue(id, closestIdx);
+                        };
+
+                        var onPointerDown = function(e) {
+                            e.stopPropagation();
+                            isRotating = true;
+                            hasMoved = false;
+                            startX = e.clientX;
+                            startY = e.clientY;
+                            bezel.setPointerCapture(e.pointerId);
+                        };
+
+                        var onPointerMove = function(e) {
+                            if (!isRotating) return;
+                            if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) {
+                                hasMoved = true;
+                                handleTurn(e);
+                            }
+                        };
+
+                        var onPointerUp = function(e) {
+                            if (!isRotating) return;
+                            isRotating = false;
+                            try { bezel.releasePointerCapture(e.pointerId); } catch (err) {}
+
+                            if (!hasMoved) {
+                                var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                                if (!ctrl) return;
+                                var states = self.getStates(ctrl);
+                                var cur = SignalState.getControlValue(id) || 0;
+                                var nextVal = (cur + 1) % states.length;
+                                SignalState.setControlValue(id, nextVal);
+                            }
                         };
 
                         bezel.addEventListener('pointerdown', onPointerDown);

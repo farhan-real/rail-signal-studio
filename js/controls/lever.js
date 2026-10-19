@@ -50,6 +50,8 @@
                     var frame = item.querySelector('.lever-frame');
                     if (frame) {
                         var isDraggingHandle = false;
+                        var hasMoved = false;
+                        var startX = 0, startY = 0;
 
                         var handleMove = function(e) {
                             var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
@@ -74,19 +76,33 @@
                         frame.addEventListener('pointerdown', function(e) {
                             e.stopPropagation();
                             isDraggingHandle = true;
+                            hasMoved = false;
+                            startX = e.clientX;
+                            startY = e.clientY;
                             frame.setPointerCapture(e.pointerId);
-                            handleMove(e);
                         });
 
                         frame.addEventListener('pointermove', function(e) {
                             if (!isDraggingHandle) return;
-                            handleMove(e);
+                            if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) {
+                                hasMoved = true;
+                                handleMove(e);
+                            }
                         });
 
                         var stopDrag = function(e) {
                             if (!isDraggingHandle) return;
                             isDraggingHandle = false;
                             try { frame.releasePointerCapture(e.pointerId); } catch (err) {}
+
+                            if (!hasMoved) {
+                                var ctrl = SignalState.controls.filter(function(c) { return c.id === id; })[0];
+                                if (!ctrl) return;
+                                var positions = Math.max(2, ctrl.positions || 2);
+                                var cur = SignalState.getControlValue(id) || 0;
+                                var nextVal = (cur + 1) % positions;
+                                SignalState.setControlValue(id, nextVal);
+                            }
                         };
 
                         frame.addEventListener('pointerup', stopDrag);
