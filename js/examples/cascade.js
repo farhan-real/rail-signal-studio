@@ -18,14 +18,14 @@
         controls: [
             { id: 'AheadKnob', type: 'knob', label: 'Ahead Aspect', states: ['RED', 'YELLOW', 'DOUBLE_YELLOW', 'GREEN'], mode: 'half', defaultValue: 0, x: 20, y: 20 },
             { id: 'TrackSwitch', type: 'switch', label: 'Block Track', states: ['OCCUPIED', 'CLEAR'], defaultValue: 1, x: 20, y: 130 },
-            { id: 'AheadRed', type: 'led', label: 'Ahead R', colorKey: 'red', x: 200, y: 20 },
-            { id: 'AheadYellow', type: 'led', label: 'Ahead Y', colorKey: 'yellow', x: 280, y: 20 },
-            { id: 'AheadDblYellow', type: 'led', label: 'Ahead 2Y', colorKey: 'yellow', x: 360, y: 20 },
-            { id: 'AheadGreen', type: 'led', label: 'Ahead G', colorKey: 'green', x: 440, y: 20 },
-            { id: 'CurrRed', type: 'led', label: 'Curr R', colorKey: 'red', x: 200, y: 120 },
-            { id: 'CurrYellow', type: 'led', label: 'Curr Y', colorKey: 'yellow', x: 280, y: 120 },
-            { id: 'CurrDblYellow', type: 'led', label: 'Curr 2Y', colorKey: 'yellow', x: 360, y: 120 },
-            { id: 'CurrGreen', type: 'led', label: 'Curr G', colorKey: 'green', x: 440, y: 120 }
+            { id: 'AheadRed', type: 'led', label: 'Ahead R', colorKey: 'red', x: 260, y: 20 },
+            { id: 'AheadYellow', type: 'led', label: 'Ahead Y', colorKey: 'yellow', x: 340, y: 20 },
+            { id: 'AheadDblYellow', type: 'led', label: 'Ahead 2Y', colorKey: 'yellow', x: 420, y: 20 },
+            { id: 'AheadGreen', type: 'led', label: 'Ahead G', colorKey: 'green', x: 500, y: 20 },
+            { id: 'CurrRed', type: 'led', label: 'Curr R', colorKey: 'red', x: 260, y: 120 },
+            { id: 'CurrYellow', type: 'led', label: 'Curr Y', colorKey: 'yellow', x: 340, y: 120 },
+            { id: 'CurrDblYellow', type: 'led', label: 'Curr 2Y', colorKey: 'yellow', x: 420, y: 120 },
+            { id: 'CurrGreen', type: 'led', label: 'Curr G', colorKey: 'green', x: 500, y: 120 }
         ],
         script: [
             '%% Automatic Block Cascade',

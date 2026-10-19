@@ -80,7 +80,7 @@
 .lever-val { font-size: 9px; font-weight: 600; color: #8893a6; }
 
 /* Rotary Selector Dial with Radial Position Labels */
-.knob-item { min-width: 144px; }
+.knob-item { min-width: 150px; }
 .knob-assembly {
     position: relative;
     width: 140px;
@@ -178,7 +178,7 @@
     pointer-events: auto;
     z-index: 10;
     letter-spacing: 0.2px;
-    padding: 3px 5px;
+    padding: 2px 4px;
     border-radius: 3px;
 }
 .knob-dial-label:hover { color: #d0d7e5; background: rgba(255, 255, 255, 0.05); }

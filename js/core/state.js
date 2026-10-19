@@ -110,7 +110,14 @@
 
         getControlWidth: function(c) {
             if (!c) return 100;
-            if (c.type === 'knob') return 160;
+            if (c.type === 'knob') {
+                var states = (c.enumType && this.enums[c.enumType]) || c.states || [];
+                var maxLen = 0;
+                for (var m = 0; m < states.length; m++) {
+                    if (states[m] && states[m].length > maxLen) maxLen = states[m].length;
+                }
+                return (maxLen >= 9 || states.length >= 4) ? 220 : 160;
+            }
             if (c.type === 'led') return 80;
             return 100;
         },

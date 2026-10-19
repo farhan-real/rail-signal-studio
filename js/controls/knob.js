@@ -43,7 +43,15 @@
             var angle = this.getShortestAngle(ctrl._currentAngle, baseAngle);
             ctrl._currentAngle = angle;
 
-            var cx = 70, cy = cfg.isHalf ? 48 : 48;
+            var maxLen = 0;
+            for (var m = 0; m < states.length; m++) {
+                if (states[m] && states[m].length > maxLen) maxLen = states[m].length;
+            }
+            var asmWidth = (maxLen >= 9 || states.length >= 4) ? 190 : 140;
+            var cx = Math.round(asmWidth / 2);
+            var cy = cfg.isHalf ? 48 : 48;
+            var bezelLeft = cx - 22;
+
             var labelsHtml = '', ticksHtml = '';
 
             for (var i = 0; i < states.length; i++) {
@@ -51,13 +59,28 @@
                 var rad = itemAngle * Math.PI / 180;
                 var isActive = (i === currentVal) ? 'active' : '';
 
-                var dist = (itemAngle > -45 && itemAngle < 45) ? 32 : 28;
+                var dist = 30;
+                var transform = 'translate(-50%, -100%)';
+
+                if (itemAngle <= -65) {
+                    transform = 'translate(-100%, -50%)';
+                    dist = 28;
+                } else if (itemAngle >= 65) {
+                    transform = 'translate(0%, -50%)';
+                    dist = 28;
+                } else if (itemAngle < -15) {
+                    transform = 'translate(-100%, -75%)';
+                    dist = 30;
+                } else if (itemAngle > 15) {
+                    transform = 'translate(0%, -75%)';
+                    dist = 30;
+                } else {
+                    transform = 'translate(-50%, -100%)';
+                    dist = 32;
+                }
+
                 var lx = cx + Math.sin(rad) * dist;
                 var ly = cy - Math.cos(rad) * dist;
-
-                var transform = 'translate(-50%, -100%)';
-                if (itemAngle <= -45) transform = 'translate(-100%, -50%)';
-                else if (itemAngle >= 45) transform = 'translate(0%, -50%)';
 
                 var stateText = states[i];
                 labelsHtml += '<span class="knob-dial-label ' + isActive + '" style="left:' + lx.toFixed(1) + 'px; top:' + ly.toFixed(1) + 'px; transform:' + transform + ';" data-knob-id="' + id + '" data-pos-idx="' + i + '">' + stateText + '</span>';
@@ -65,12 +88,16 @@
             }
 
             var assemblyClass = 'knob-assembly' + (cfg.isHalf ? ' mode-half' : '');
+            var itemStyle = 'min-width: ' + (asmWidth + 14) + 'px;';
+            var asmStyle = 'width: ' + asmWidth + 'px;';
+            var bezelStyle = 'left: ' + bezelLeft + 'px;';
+
             return [
-                '<div class="console-item knob-item" data-control-id="' + id + '">',
-                '  <div class="' + assemblyClass + '">',
+                '<div class="console-item knob-item" data-control-id="' + id + '" style="' + itemStyle + '">',
+                '  <div class="' + assemblyClass + '" style="' + asmStyle + '">',
                 labelsHtml,
-                '    <div class="knob-ticks-layer">' + ticksHtml + '</div>',
-                '    <div class="knob-bezel">',
+                '    <div class="knob-ticks-layer" style="' + bezelStyle + '">' + ticksHtml + '</div>',
+                '    <div class="knob-bezel" style="' + bezelStyle + '">',
                 '      <div class="knob-body" style="transform: rotate(' + angle.toFixed(1) + 'deg)">',
                 '        <div class="knob-pointer"></div>',
                 '        <div class="knob-cap"></div>',
