@@ -92,9 +92,8 @@
 
             var isLit = matrixConf && matrixConf.lit !== undefined ? !!matrixConf.lit : true;
             var rawTxt = (text !== undefined ? text : (matrixConf.text || '')).toString().trim().replace(/["']/g, '').toUpperCase();
-            var txt = isLit ? rawTxt : '';
-            var isMultiChar = txt.length > 1;
-            var boxWidth = isMultiChar ? 62 : 44;
+            var is2x = (matrixConf && matrixConf.size === '2x') || rawTxt.length > 1;
+            var boxWidth = is2x ? 80 : 44;
             var bx = cx - boxWidth / 2, by = cy - boxHeight / 2;
             var boxBottomY = by + boxHeight;
 
@@ -110,10 +109,14 @@
             svg += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + boxWidth + '" height="' + boxHeight + '" rx="4" class="theatre-box" fill="#090a0e" stroke="#2c3345" stroke-width="2.2" />';
             svg += '<rect x="' + (bx - 1).toFixed(1) + '" y="' + (by - 2).toFixed(1) + '" width="' + (boxWidth + 2) + '" height="3.5" rx="1" fill="#050608" stroke="#1d222e" stroke-width="0.8" />';
 
-            var spacing = 5.4;
+            if (is2x) {
+                svg += '<line x1="' + cx + '" y1="' + (by + 4).toFixed(1) + '" x2="' + cx + '" y2="' + (by + boxHeight - 4).toFixed(1) + '" stroke="#1c2230" stroke-width="1.2" />';
+            }
 
-            if (!isMultiChar) {
-                var charKey = txt.length > 0 ? txt.charAt(0) : ' ';
+            var spacing = 5.2;
+
+            if (!is2x) {
+                var charKey = isLit && rawTxt.length > 0 ? rawTxt.charAt(0) : ' ';
                 var pattern = this.getPattern(charKey);
                 var startX = cx - (2 * spacing), startY = cy - (3 * spacing);
 
@@ -128,20 +131,24 @@
                     }
                 }
             } else {
-                for (var ch = 0; ch < 2; ch++) {
-                    var chKey = txt.charAt(ch) || ' ';
-                    var ptn = this.getPattern(chKey);
-                    var chCenterX = cx + (ch === 0 ? -14 : 14);
-                    var sX = chCenterX - (2 * (spacing * 0.8)), sY = cy - (3 * (spacing * 0.95));
+                var cellCenters = [cx - 19, cx + 19];
+                var ch0 = isLit && rawTxt.length > 0 ? rawTxt.charAt(0) : ' ';
+                var ch1 = isLit && rawTxt.length > 1 ? rawTxt.charAt(1) : ' ';
+                var chars = [ch0, ch1];
+
+                for (var cell = 0; cell < 2; cell++) {
+                    var cPattern = this.getPattern(chars[cell]);
+                    var cStartX = cellCenters[cell] - (2 * spacing);
+                    var cStartY = cy - (3 * spacing);
 
                     for (var r2 = 0; r2 < 7; r2++) {
-                        var msk = ptn[r2] || 0;
+                        var msk = cPattern[r2] || 0;
                         for (var c2 = 0; c2 < 5; c2++) {
                             var b2 = (msk >> (4 - c2)) & 1;
-                            var pX = sX + c2 * (spacing * 0.8), pY = sY + r2 * (spacing * 0.95);
+                            var pX = cStartX + c2 * spacing, pY = cStartY + r2 * spacing;
                             svg += (b2 === 1 && isLit) ?
-                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.8" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
-                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.3" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="2.1" fill="#ffffff" stroke="#e0f0ff" stroke-width="0.5" class="theatre-pixel-on" />' :
+                                '<circle cx="' + pX.toFixed(1) + '" cy="' + pY.toFixed(1) + '" r="1.5" fill="#12151d" stroke="#080a0f" stroke-width="0.4" class="theatre-pixel-off" />';
                         }
                     }
                 }

@@ -104,9 +104,10 @@
             }
             html += '</div>';
 
-            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
+            var mat = SignalState.matrix || { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             var matIsDirect = (mat.posMode === 'direct');
             var matYVal = matIsDirect ? Math.round(-(mat.y !== undefined ? mat.y : -240)) : (mat.yOffset !== undefined ? mat.yOffset : 0);
+            var isMat2x = (mat.size === '2x');
 
             html += '<div class="builder-card">';
             html += '  <div class="builder-card-header">';
@@ -117,20 +118,26 @@
             if (mat.enabled) {
                 html += '  <div class="form-row-2">';
                 html += '    <div><label class="form-label">Box ID</label><input type="text" id="matId" class="form-input" value="' + (mat.id || 'ROUTE_BOX') + '"/></div>';
-                html += '    <div><label class="form-label">Stencil Text (0-9, A-Z)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M, 1" value="' + (mat.text || '') + '"/></div>';
+                html += '    <div><label class="form-label">Matrix Size</label><select id="matSize" class="form-select">';
+                html += '      <option value="1x"' + (!isMat2x ? ' selected' : '') + '>1x Matrix (Single Character)</option>';
+                html += '      <option value="2x"' + (isMat2x ? ' selected' : '') + '>2x Matrix (Dual Character - e.g. L2)</option>';
+                html += '    </select></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Stencil Text (e.g. M, L2)</label><input type="text" id="matText" class="form-input" maxlength="2" placeholder="e.g. M or L2" value="' + (mat.text || '') + '"/></div>';
                 html += '    <div><label class="form-label">Placement Mode</label><select id="matPosMode" class="form-select">';
                 html += '      <option value="relative"' + (!matIsDirect ? ' selected' : '') + '>1: Offset Above Assembly</option>';
                 html += '      <option value="direct"' + (matIsDirect ? ' selected' : '') + '>2: Direct Coordinates (+Y Up)</option>';
                 html += '    </select></div>';
-                html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
                 html += '  </div>';
                 html += '  <div class="form-row-2">';
+                html += '    <div><label class="form-label">Matrix X (0 = Center)</label><input type="number" id="matX" class="form-input" value="' + (mat.x !== undefined ? mat.x : 0) + '"/></div>';
                 html += '    <div><label class="form-label">' + (matIsDirect ? 'Direct Y (px, +Y Up)' : 'Y Offset (px above top)') + '</label><input type="number" id="matYInput" class="form-input" value="' + matYVal + '"/></div>';
-                html += '    <div style="display:flex; align-items:flex-end; padding-bottom:1px;"><button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="width:100%; height:26px;">Preview Lit</button></div>';
                 html += '  </div>';
-                html += '  <div style="margin-top:4px;"><label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label></div>';
+                html += '  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">';
+                html += '    <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;"><input type="checkbox" id="chkMatrixShowBase" ' + (mat.showBase !== false ? 'checked' : '') + '/><span>Show base mount bracket</span></label>';
+                html += '    <button class="btn-preview-lit ' + (mat.lit ? 'active' : '') + '" id="btnPreviewMatrix" style="height:26px;">Preview Lit</button>';
+                html += '  </div>';
             }
             html += '</div>';
 
@@ -254,10 +261,22 @@
                 });
             }
 
+            var matSizeSel = document.getElementById('matSize');
+            if (matSizeSel) {
+                matSizeSel.addEventListener('change', function() {
+                    SignalState.matrix.size = this.value;
+                    SignalEvents.emit('state:changed'); SignalEvents.emit('state:persist');
+                });
+            }
+
             var mText = document.getElementById('matText');
             if (mText) {
                 mText.addEventListener('input', function() {
                     SignalState.matrix.enabled = true; SignalState.matrix.text = this.value.toUpperCase(); SignalState.matrix.lit = true;
+                    if (this.value.trim().length > 1 && SignalState.matrix.size !== '2x') {
+                        SignalState.matrix.size = '2x';
+                        if (matSizeSel) matSizeSel.value = '2x';
+                    }
                     var btn = document.getElementById('btnPreviewMatrix'); if (btn) btn.classList.add('active');
                     SignalEvents.emit('matrix:updated', SignalState.matrix.text); SignalEvents.emit('state:persist');
                 });

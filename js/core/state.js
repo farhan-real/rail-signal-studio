@@ -18,7 +18,7 @@
             enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: null,
             sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
         },
-        matrix: { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false },
+        matrix: { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false },
         controls: [],
         texts: [],
         groups: {},
@@ -39,7 +39,7 @@
                 enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: null,
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
-            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             this.controls = [];
             this.texts = [];
             this.groups = {};
@@ -73,7 +73,7 @@
                 enabled: false, x: 0, y: undefined, yOffset: 0, posMode: 'relative', anchorShapeId: 'plate_main',
                 sides: 8, baseAngle: 0, radius: 35.5, showConnector: true, collarWidth: 32, collarHeight: null, autoConnect: true
             };
-            this.matrix = { enabled: false, id: 'ROUTE_BOX', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
+            this.matrix = { enabled: false, id: 'ROUTE_BOX', size: '1x', x: 0, y: undefined, yOffset: 0, posMode: 'relative', showBase: true, text: '', lit: false };
             this.controls = [
                 { id: 'SignalLever', type: 'lever', label: 'Signal', color: '#d92525', positions: 2, defaultValue: 0, x: 20, y: 20 }
             ];
@@ -155,6 +155,7 @@
             this.matrix = {
                 enabled: mat.enabled !== undefined ? mat.enabled : false,
                 id: mat.id || 'ROUTE_BOX',
+                size: (mat.size === '2x' || mat.mode === '2x' || (mat.text && mat.text.trim().length > 1)) ? '2x' : '1x',
                 x: mat.x !== undefined ? mat.x : 0,
                 y: mat.y !== undefined ? mat.y : undefined,
                 yOffset: mat.yOffset !== undefined ? mat.yOffset : 0,
