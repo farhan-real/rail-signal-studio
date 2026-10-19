@@ -180,6 +180,7 @@ mainloop {
 - **British Rail 4-Aspect with Matrix:** UK 4-aspect signal head with 5x7 LED stencil route box.
 - **French SNCF Combined Target Panel:** Combined panel featuring Carré, Sémaphore, Avertissement, and Voie Libre.
 - **Ground Dwarf Position-Light Shunt:** Compact ground-mounted position-light shunting disc signal.
+- **Example: Automatic Signal Cascade:** Demonstrates multi-aspect automatic block signaling (ABS) progression by simulating a downstream signal with a rotary selector and visualizing it with LEDs.
 - **Example: Visual Code Sections:** Demonstrates organizing interlocking routines into visual cards with shared scope.
 - **Example: Groups and Enum Variables:** Demonstrates batch component groups and typed enum variables.
 - **Example: Delay and Sequencing:** Non-blocking aspect transition stepping via `delay 2s;`.
